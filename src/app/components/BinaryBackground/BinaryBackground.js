@@ -25,7 +25,7 @@ const BinaryBackground = () => {
             ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = "#6f967b"; // green color
+            ctx.fillStyle = "#0088ff46"; // green color
             ctx.font = `${fontSize}px monospace`;
 
             drops.forEach((y, i) => {
