@@ -1,90 +1,112 @@
-'use client';
+"use client";
+
 import { useState } from "react";
 
-const TechBanner = () => {
+function TechBanner() {
     const [isHovered, setIsHovered] = useState(false);
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+    // Tech terms to display instead of boolean terms
+    const techTerms = ["React", "Next.js", "Tailwind", "API", "Cloud", "DevOps", "Frontend", "Backend", "Fullstack"];
+
+    // Track mouse position for interactive effects
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setMousePosition({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+        });
+    };
 
     return (
         <div
-            className="relative w-full h-screen overflow-hidden"
+            className="relative overflow-hidden py-16 px-8 md:px-16 lg:px-24 h-screen flex items-center justify-center"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onMouseMove={handleMouseMove}
         >
-            {/* Animated Glowing Background Effects */}
-            <div className="absolute inset-0">
-                {/* Animated gradient orbs */}
-                <div className="absolute inset-0">
-                    <div className="gradient-orb orb-1"></div>
-                    <div className="gradient-orb orb-2"></div>
-                    <div className="gradient-orb orb-3"></div>
-                    <div className="gradient-orb orb-4"></div>
-                </div>
+            {/* Animated Background Layers */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                {/* Gradient overlay that responds to hover */}
+                <div className={`absolute inset-0 bg-gradient-to-br from-blue-900/10 via-transparent to-purple-900/10 transition-opacity duration-700 ${isHovered ? 'opacity-100' : 'opacity-0'}`}></div>
 
-                {/* Animated light rays */}
-                <div className="absolute inset-0">
-                    {[...Array(8)].map((_, i) => (
-                        <div
-                            key={`ray-${i}`}
-                            className="light-ray"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                transform: `rotate(${Math.random() * 360}deg)`,
-                                animationDelay: `${Math.random() * 5}s`,
-                                width: `${Math.random() * 300 + 100}px`,
-                                height: '2px'
-                            }}
-                        ></div>
-                    ))}
-                </div>
+                {/* Interactive light effect following mouse */}
+                {isHovered && (
+                    <div
+                        className="absolute w-96 h-96 rounded-full bg-blue-500/10 blur-3xl pointer-events-none"
+                        style={{
+                            left: `${mousePosition.x - 192}px`,
+                            top: `${mousePosition.y - 192}px`,
+                            transition: 'all 0.3s ease-out'
+                        }}
+                    ></div>
+                )}
 
-                {/* Animated particles */}
-                <div className="absolute inset-0">
-                    {[...Array(40)].map((_, i) => (
-                        <div
-                            key={`particle-${i}`}
-                            className="glowing-particle"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                animationDelay: `${Math.random() * 5}s`,
-                                width: `${Math.random() * 6 + 2}px`,
-                                height: `${Math.random() * 6 + 2}px`
-                            }}
-                        ></div>
-                    ))}
-                </div>
+                {/* Animated tech terms */}
+                {techTerms.map((term, index) => (
+                    <div
+                        key={index}
+                        className={`absolute text-blue-400/20 font-mono text-lg md:text-xl transition-all duration-300 ${isHovered ? 'text-blue-400/40' : ''}`}
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animation: `float ${10 + Math.random() * 20}s linear infinite`,
+                            animationDelay: `${Math.random() * 10}s`,
+                            opacity: 0.2 + Math.random() * 0.3
+                        }}
+                    >
+                        {term}
+                    </div>
+                ))}
 
-                {/* Animated grid lines */}
-                <div className="absolute inset-0 grid-lines"></div>
+                {/* Additional floating elements for more depth */}
+                {[...Array(15)].map((_, i) => (
+                    <div
+                        key={`float-${i}`}
+                        className={`absolute w-1 h-1 bg-blue-500/30 rounded-full transition-all duration-300 ${isHovered ? 'bg-blue-400/50' : ''}`}
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animation: `float ${8 + Math.random() * 15}s linear infinite`,
+                            animationDelay: `${Math.random() * 8}s`
+                        }}
+                    />
+                ))}
 
-                {/* Growing circles */}
-                <div className="absolute inset-0">
-                    {[...Array(6)].map((_, i) => (
-                        <div
-                            key={`circle-${i}`}
-                            className="growing-circle"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                animationDelay: `${Math.random() * 4}s`,
-                                width: `${Math.random() * 100 + 50}px`,
-                                height: `${Math.random() * 100 + 50}px`
-                            }}
-                        ></div>
-                    ))}
-                </div>
+                {/* Grid pattern overlay */}
+                <div className={`absolute inset-0 bg-grid-pattern transition-opacity duration-500 ${isHovered ? 'opacity-10' : 'opacity-5'}`}></div>
 
-                {/* Pulse effect overlay */}
-                <div className={`pulse-overlay ${isHovered ? 'pulse-active' : ''}`}></div>
+                {/* Particles that appear on hover */}
+                {isHovered && [...Array(20)].map((_, i) => (
+                    <div
+                        key={`particle-${i}`}
+                        className="absolute w-2 h-2 bg-blue-400/30 rounded-full"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animation: `pulse ${2 + Math.random() * 3}s ease-in-out infinite`,
+                            animationDelay: `${Math.random() * 2}s`
+                        }}
+                    />
+                ))}
+
+                {/* Glowing lines that appear on hover */}
+                {isHovered && (
+                    <>
+                        <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent animate-pulse"></div>
+                        <div className="absolute top-2/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400/30 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                        <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-pink-400/30 to-transparent animate-pulse" style={{ animationDelay: '1s' }}></div>
+                    </>
+                )}
             </div>
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-white">
-                <h1 className="text-4xl md:text-6xl font-bold text-center mb-12 max-w-4xl">
+            {/* TechBanner Content */}
+            <div className="relative z-10 text-center text-white max-w-6xl mx-auto">
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-12">
                     Effective web solutions for business of any scale
                 </h1>
 
+                {/* Tech buttons */}
                 <div className="flex flex-wrap justify-center gap-4 mb-12">
                     <button className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -116,172 +138,29 @@ const TechBanner = () => {
                     </button>
                 </div>
 
+                {/* CTA Button */}
                 <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105">
                     Start your project today
                 </button>
             </div>
 
+            {/* Custom styles for animation */}
             <style jsx>{`
-                .gradient-orb {
-                    position: absolute;
-                    border-radius: 50%;
-                    filter: blur(40px);
-                    opacity: 0.7;
-                }
-                
-                .orb-1 {
-                    width: 600px;
-                    height: 600px;
-                    background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(147, 51, 234, 0.4) 40%, transparent 70%);
-                    top: -200px;
-                    left: -200px;
-                    animation: float-orb 20s infinite ease-in-out;
-                }
-                
-                .orb-2 {
-                    width: 500px;
-                    height: 500px;
-                    background: radial-gradient(circle, rgba(236, 72, 153, 0.8) 0%, rgba(59, 130, 246, 0.4) 40%, transparent 70%);
-                    bottom: -150px;
-                    right: -150px;
-                    animation: float-orb 25s infinite ease-in-out reverse;
-                }
-                
-                .orb-3 {
-                    width: 400px;
-                    height: 400px;
-                    background: radial-gradient(circle, rgba(34, 197, 94, 0.8) 0%, rgba(59, 130, 246, 0.4) 40%, transparent 70%);
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    animation: float-orb 30s infinite ease-in-out;
-                }
-                
-                .orb-4 {
-                    width: 350px;
-                    height: 350px;
-                    background: radial-gradient(circle, rgba(251, 146, 60, 0.8) 0%, rgba(236, 72, 153, 0.4) 40%, transparent 70%);
-                    top: 20%;
-                    right: 10%;
-                    animation: float-orb 22s infinite ease-in-out reverse;
-                }
-                
-                @keyframes float-orb {
-                    0%, 100% {
-                        transform: translate(0, 0) scale(1);
-                    }
-                    25% {
-                        transform: translate(30px, -50px) scale(1.1);
-                    }
-                    50% {
-                        transform: translate(-20px, 30px) scale(0.9);
-                    }
-                    75% {
-                        transform: translate(40px, 20px) scale(1.05);
-                    }
-                }
-                
-                .light-ray {
-                    position: absolute;
-                    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
-                    transform-origin: center;
-                    animation: ray-sweep 10s infinite linear;
-                }
-                
-                @keyframes ray-sweep {
+                @keyframes float {
                     0% {
-                        transform: translateX(-100%) rotate(var(--rotation));
+                        transform: translateY(100vh) rotate(0deg);
                         opacity: 0;
                     }
                     10% {
-                        opacity: 0.7;
+                        opacity: 0.4;
                     }
                     90% {
-                        opacity: 0.7;
+                        opacity: 0.4;
                     }
                     100% {
-                        transform: translateX(100%) rotate(var(--rotation));
+                        transform: translateY(-100vh) rotate(360deg);
                         opacity: 0;
                     }
-                }
-                
-                .glowing-particle {
-                    position: absolute;
-                    background-color: rgba(255, 255, 255, 0.8);
-                    border-radius: 50%;
-                    box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.5);
-                    animation: particle-float 15s infinite ease-in-out;
-                }
-                
-                @keyframes particle-float {
-                    0%, 100% {
-                        transform: translateY(0) translateX(0) scale(1);
-                        opacity: 0;
-                    }
-                    10% {
-                        opacity: 1;
-                    }
-                    90% {
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: translateY(-100px) translateX(50px) scale(1.5);
-                        opacity: 0;
-                    }
-                }
-                
-                .grid-lines {
-                    position: absolute;
-                    inset: 0;
-                    background-image: 
-                        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-                    background-size: 40px 40px;
-                    animation: grid-move 30s linear infinite;
-                }
-                
-                @keyframes grid-move {
-                    0% {
-                        background-position: 0 0;
-                    }
-                    100% {
-                        background-position: 40px 40px;
-                    }
-                }
-                
-                .growing-circle {
-                    position: absolute;
-                    border: 2px solid rgba(255, 255, 255, 0.2);
-                    border-radius: 50%;
-                    transform: translate(-50%, -50%);
-                    animation: grow-circle 8s infinite ease-out;
-                }
-                
-                @keyframes grow-circle {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0);
-                        opacity: 0;
-                    }
-                    50% {
-                        opacity: 0.5;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) scale(3);
-                        opacity: 0;
-                    }
-                }
-                
-                .pulse-overlay {
-                    position: absolute;
-                    inset: 0;
-                    background: radial-gradient(circle at center, transparent 0%, rgba(59, 130, 246, 0.1) 50%, rgba(147, 51, 234, 0.1) 100%);
-                    opacity: 0.3;
-                    animation: pulse 4s infinite ease-in-out;
-                }
-                
-                .pulse-overlay.pulse-active {
-                    opacity: 0.5;
-                    animation: pulse-active 2s infinite ease-in-out;
                 }
                 
                 @keyframes pulse {
@@ -290,24 +169,20 @@ const TechBanner = () => {
                         opacity: 0.3;
                     }
                     50% {
-                        transform: scale(1.05);
-                        opacity: 0.5;
+                        transform: scale(1.5);
+                        opacity: 0.6;
                     }
                 }
                 
-                @keyframes pulse-active {
-                    0%, 100% {
-                        transform: scale(1);
-                        opacity: 0.5;
-                    }
-                    50% {
-                        transform: scale(1.1);
-                        opacity: 0.7;
-                    }
+                .bg-grid-pattern {
+                    background-image: 
+                        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+                    background-size: 50px 50px;
                 }
             `}</style>
         </div>
     );
-};
+}
 
 export default TechBanner;
