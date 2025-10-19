@@ -1,7 +1,13 @@
+// "use client"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
 import Navbar from "./components/Navbar/Navbar";
+import Navbar1 from "./components/Navbar1/Navbar1";
+import VerticalNavbar from "./components/VerticalNavbar/VerticalNavbar";
+import VerticalNavbar1 from "./components/VerticalNavbar1/VerticalNavbar1";
+import VerticalNavbar3 from "./components/VerticalNavbar3/VerticalNavbar3";
+import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,7 +31,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <BinaryBackground />
-        {/* <Navbar /> */}
+        {/* <Navbar1 /> */}
+        {/* <VerticalNavbar /> */}
+        {/* <VerticalNavbar1 /> */}
+        {/* <VerticalNavbar3 /> */}
+        <VerticalNavbar4 />
         {children}
       </body>
     </html>

@@ -1,4 +1,4 @@
-"use client"; // required in Next.js 13+ app directory
+"use client";
 
 import { useEffect, useRef } from "react";
 
@@ -14,7 +14,7 @@ const BinaryBackground = () => {
         canvas.height = window.innerHeight;
 
         const binaryChars = "01";
-        const booleanTerms = ["TRUE", "FALSE", "XOR", "NOR", "AND", "OR", "NOT", "NAND", "XNOR"];
+        const booleanTerms = [];
         const fontSize = 16;
         const columns = Math.floor(canvas.width / fontSize);
 
@@ -26,7 +26,7 @@ const BinaryBackground = () => {
         const maxBouncingTerms = 15;
 
         // Define darker colors
-        const steelColor = "#172746ab"; // Steel color
+        const steelColor = "#172746da"; // Steel color
         const zinc600Color = "#52525B"; // Zinc-600 color
         const darkGrayColors = [
             "#434955", // Steel
