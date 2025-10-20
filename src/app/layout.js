@@ -8,6 +8,7 @@ import VerticalNavbar from "./components/VerticalNavbar/VerticalNavbar";
 import VerticalNavbar1 from "./components/VerticalNavbar1/VerticalNavbar1";
 import VerticalNavbar3 from "./components/VerticalNavbar3/VerticalNavbar3";
 import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
+import BinaryBack from "./components/BinarayBack/BinaryBack";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,11 +27,12 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" data-arp="" data-theme="dark">
+    <html lang="en" data-arp="" data-theme="dark" className="scroll-smooth">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <BinaryBackground />
+        {/* <BinaryBackground /> */}
+        <BinaryBack />
         {/* <Navbar1 /> */}
         {/* <VerticalNavbar /> */}
         {/* <VerticalNavbar1 /> */}
