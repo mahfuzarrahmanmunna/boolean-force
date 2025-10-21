@@ -158,7 +158,7 @@ function BooleanForceBanner() {
             {/* Banner content with semi-transparent background for readability */}
             <div className={`relative z-10 text-center text-white max-w-6xl mx-auto transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 {/* Enhanced heading with gradient text and better spacing */}
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
+                <h1 className="text-5xl  md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
                     Transform Your Business with BooleanForce
                 </h1>
 

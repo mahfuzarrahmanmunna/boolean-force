@@ -1,5 +1,5 @@
 // "use client"
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
 import Navbar from "./components/Navbar/Navbar";
@@ -10,14 +10,16 @@ import VerticalNavbar3 from "./components/VerticalNavbar3/VerticalNavbar3";
 import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
 import BinaryBack from "./components/BinarayBack/BinaryBack";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata = {
@@ -29,7 +31,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" data-arp="" data-theme="dark" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${poppins.variable} antialiased`}
       >
         {/* <BinaryBackground /> */}
         <BinaryBack />

@@ -15,7 +15,7 @@ const VerticalNavbar4 = () => {
         setMounted(true);
 
         // Create sparkles
-        const colors = ['#edabd2', '#ffae57', '#fcf577', '#bae67e', '#5ccfe6', '#9cc6f4', '#aa72c5', '#ffffff'];
+        const colors = [];
         const newSparkles = [];
 
         for (let i = 0; i < 100; i++) {

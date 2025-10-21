@@ -18,11 +18,11 @@ export default function Home() {
       {/* <TechBanner /> */}
       <BooleanForceBanner />
       <BooleanLogicDemo />
-      <BooleanLogicSplit />
-      <OurServices />
+      {/* <BooleanLogicSplit /> */}
+      {/* <OurServices />
       <OurServices2 />
-      <OurServices3 />
-      <OurServicesSlider />
+      <OurServices3 /> */}
+      {/* <OurServicesSlider /> */}
       <OurServicesOnlySlider />
       <PricingCard />
       <Partnership />
