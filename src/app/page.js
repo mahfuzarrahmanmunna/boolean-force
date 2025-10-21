@@ -8,6 +8,8 @@ import OurServices2 from "./components/OurServices2/OurServices2";
 import OurServices3 from "./components/OurServices3/OurServices3";
 import OurServicesOnlySlider from "./components/OurServicesOnlySlider/OurServicesOnlySlider";
 import OurServicesSlider from "./components/OurServicesSlider/OurServicesSlider";
+import Partnership from "./components/Partnership/Partnership";
+import PricingCard from "./components/PricingCard/PricingCard";
 import TechBanner from "./components/TechBanner/TechBanner";
 
 export default function Home() {
@@ -22,6 +24,8 @@ export default function Home() {
       <OurServices3 />
       <OurServicesSlider />
       <OurServicesOnlySlider />
+      <PricingCard />
+      <Partnership />
     </>
   );
 }

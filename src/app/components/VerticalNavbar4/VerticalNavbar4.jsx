@@ -8,6 +8,7 @@ const VerticalNavbar4 = () => {
     const [mounted, setMounted] = useState(false);
     const [sparkles, setSparkles] = useState([]);
     const [isTooltipVisible, setIsTooltipVisible] = useState('');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -52,7 +53,7 @@ const VerticalNavbar4 = () => {
         },
         {
             name: 'Partnership',
-            href: '/partnership',
+            href: '#partnership',
             icon: (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
@@ -109,6 +110,14 @@ const VerticalNavbar4 = () => {
         },
     ];
 
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const closeMobileMenu = () => {
+        setIsMobileMenuOpen(false);
+    };
+
     return (
         <>
             {/* Sparkle Background */}
@@ -131,11 +140,31 @@ const VerticalNavbar4 = () => {
                 ))}
             </div>
 
-            {/* Vertical Navbar */}
-            <nav className="fixed top-0 right-0 h-screen w-20 flex flex-col justify-start items-center bg-transparent z-50 p-4">
+            {/* Mobile menu button - only visible on small devices */}
+            <div className="md:hidden fixed top-4 right-4 z-50">
+                <button
+                    onClick={toggleMobileMenu}
+                    className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300 bg-black/30 backdrop-blur-sm"
+                    aria-expanded={isMobileMenuOpen}
+                >
+                    <span className="sr-only">Open main menu</span>
+                    {!isMobileMenuOpen ? (
+                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    ) : (
+                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    )}
+                </button>
+            </div>
+
+            {/* Vertical Navbar - only visible on medium+ devices */}
+            <nav className="hidden md:flex fixed top-0 right-0 h-screen w-20 flex-col justify-start items-center bg-transparent z-50 p-4">
                 {/* Logo at top */}
                 <div className="flex w-12 h-12 justify-center items-center flex-shrink-0 mb-4 transition-transform duration-300 cursor-pointer hover:scale-110">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12  rounded-lg flex items-center justify-center shadow-lg">
                         <span className="text-white font-bold text-xl">BF</span>
                     </div>
                 </div>
@@ -198,67 +227,71 @@ const VerticalNavbar4 = () => {
                 <div className="w-px bg-gray-300 h-8 mt-4"></div>
             </nav>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden fixed top-4 right-4 z-50">
-                <button
-                    className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300"
-                    aria-expanded="false"
-                >
-                    <span className="sr-only">Open main menu</span>
-                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
+            {/* Mobile menu - only visible on small devices when open */}
+            <div className={`fixed inset-0 z-40 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+                <div
+                    className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+                    onClick={closeMobileMenu}
+                ></div>
+                <div className={`absolute top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-xl transform transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="flex flex-col h-full p-6">
+                        {/* Close button */}
+                        <div className="flex justify-end mb-8">
+                            <button
+                                onClick={closeMobileMenu}
+                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none transition-all duration-300"
+                            >
+                                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
 
-            {/* Mobile menu */}
-            <div className="md:hidden fixed inset-0 z-40 bg-black/90 backdrop-blur-xl hidden">
-                <div className="h-full flex flex-col justify-center items-center">
-                    {/* Logo */}
-                    <div className="flex w-12 h-12 justify-center items-center mb-8">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                            <span className="text-white font-bold text-xl">BF</span>
+                        {/* Logo */}
+                        <div className="flex w-12 h-12 justify-center items-center mb-8">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                <span className="text-white font-bold text-xl">BF</span>
+                            </div>
+                        </div>
+
+                        {/* Navigation Links */}
+                        <ul className="flex flex-col gap-2 mb-8">
+                            {navLinks.map((link) => (
+                                <li key={link.name}>
+                                    <Link
+                                        href={link.href}
+                                        onClick={closeMobileMenu}
+                                        className={`flex items-center gap-3 text-gray-300 font-medium text-lg p-3 rounded-lg transition-all duration-300 hover:text-white hover:bg-white/10 ${mounted && pathname === link.href ? 'text-[#3B85FE] bg-white/5' : ''
+                                            }`}
+                                    >
+                                        <div className="p-2 rounded-lg transition-all duration-300">
+                                            {link.icon}
+                                        </div>
+                                        {link.name}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        {/* Social Links */}
+                        <div className="mt-auto">
+                            <p className="text-gray-400 text-sm mb-4">Connect with us</p>
+                            <ul className="flex gap-4">
+                                {socialLinks.map((social) => (
+                                    <li key={social.name}>
+                                        <a
+                                            href={social.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-gray-300 transition-colors duration-300 text-xl hover:text-[#3B85FE] p-2 rounded-lg hover:bg-white/10"
+                                        >
+                                            {social.icon}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
-
-                    {/* Navigation Links */}
-                    <ul className="flex flex-col items-center gap-6 list-none mb-8">
-                        {navLinks.map((link) => (
-                            <li key={link.name}>
-                                <Link
-                                    href={link.href}
-                                    className={`flex items-center gap-2 text-gray-300 font-medium text-lg transition-colors duration-300 hover:text-[#3B85FE] ${mounted && pathname === link.href ? 'text-[#3B85FE]' : ''
-                                        }`}
-                                >
-                                    <div className={`p-2 rounded-lg transition-all duration-300 ${mounted && pathname === link.href
-                                        ? 'bg-slate-800/50 shadow-lg'
-                                        : 'hover:bg-slate-800/30'
-                                        }`}>
-                                        {link.icon}
-                                    </div>
-                                    {link.name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-
-                    {/* Social Links */}
-                    <ul className="flex flex-row gap-6 list-none">
-                        {socialLinks.map((social) => (
-                            <li key={social.name}>
-                                <a
-                                    href={social.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-gray-300 transition-colors duration-300 text-xl hover:text-[#3B85FE]"
-                                >
-                                    <div className="p-2 rounded-lg transition-all duration-300 hover:bg-slate-800/30">
-                                        {social.icon}
-                                    </div>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
                 </div>
             </div>
 

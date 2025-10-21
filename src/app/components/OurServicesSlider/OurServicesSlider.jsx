@@ -300,13 +300,6 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 transition={{ duration: 0.5 }}
                 className="fixed top-8 right-8 z-30"
             >
-                <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-3 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 hover:bg-white/10"
-                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                >
-                    <Menu className="w-5 h-5 text-white" />
-                </button>
 
                 <AnimatePresence>
                     {showMenu && (
