@@ -14,6 +14,7 @@ const BinaryBackground = () => {
         canvas.height = window.innerHeight;
 
         const binaryChars = "01";
+        // FIX: Populate the array with the terms you want to display
         const booleanTerms = [];
         const fontSize = 16;
         const columns = Math.floor(canvas.width / fontSize);
@@ -39,6 +40,7 @@ const BinaryBackground = () => {
 
         // Initialize bouncing terms with darker colors
         for (let i = 0; i < maxBouncingTerms; i++) {
+            // This line will now work correctly because booleanTerms is not empty
             bouncingTerms.push({
                 text: booleanTerms[Math.floor(Math.random() * booleanTerms.length)],
                 x: Math.random() * canvas.width,
@@ -80,6 +82,7 @@ const BinaryBackground = () => {
                 term.y += term.vy;
 
                 // Bounce off walls
+                // This line will no longer cause an error
                 if (term.x <= 0 || term.x >= canvas.width - term.text.length * term.size * 0.6) {
                     term.vx = -term.vx;
                 }

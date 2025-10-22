@@ -146,38 +146,7 @@ const OurServicesOnlySlider = () => {
         <section
             ref={sliderRef}
             className="relative min-h-screen overflow-hidden flex items-center justify-center"
-        // style={{ backgroundColor: DARK_BG }}
         >
-            {/* Background gradient overlay */}
-            {/* <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-transparent to-purple-900/20 z-0"></div> */}
-
-            {/* Animated background elements */}
-            {/* <div className="absolute inset-0 overflow-hidden z-0">
-                {[...Array(6)].map((_, i) => (
-                    <motion.div
-                        key={`bg-element-${i}`}
-                        className="absolute rounded-full opacity-10"
-                        style={{
-                            width: `${Math.random() * 300 + 100}px`,
-                            height: `${Math.random() * 300 + 100}px`,
-                            background: `radial-gradient(circle, ${i % 2 === 0 ? PRIMARY_COLOR : ACCENT_COLOR} 0%, transparent 70%)`,
-                            left: `${Math.random() * 100}%`,
-                            top: `${Math.random() * 100}%`,
-                        }}
-                        animate={{
-                            x: [0, Math.random() * 100 - 50],
-                            y: [0, Math.random() * 100 - 50],
-                            scale: [1, 1.1, 1],
-                        }}
-                        transition={{
-                            duration: Math.random() * 20 + 20,
-                            repeat: Infinity,
-                            repeatType: "reverse",
-                            ease: "easeInOut",
-                        }}
-                    />
-                ))}
-            </div> */}
 
             {/* Main content */}
             <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12">

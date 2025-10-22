@@ -2,13 +2,9 @@
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
-import Navbar from "./components/Navbar/Navbar";
 import Navbar1 from "./components/Navbar1/Navbar1";
-import VerticalNavbar from "./components/VerticalNavbar/VerticalNavbar";
-import VerticalNavbar1 from "./components/VerticalNavbar1/VerticalNavbar1";
-import VerticalNavbar3 from "./components/VerticalNavbar3/VerticalNavbar3";
+import Footer from "./components/Footer/Footer";
 import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
-import BinaryBack from "./components/BinarayBack/BinaryBack";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,14 +29,22 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} ${poppins.variable} antialiased`}
       >
-        {/* <BinaryBackground /> */}
-        <BinaryBack />
-        {/* <Navbar1 /> */}
-        {/* <VerticalNavbar /> */}
-        {/* <VerticalNavbar1 /> */}
-        {/* <VerticalNavbar3 /> */}
-        <VerticalNavbar4 />
-        {children}
+        {/* The background is a fixed layer behind everything */}
+        <BinaryBackground />
+
+        {/* This container holds the actual page layout */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {/* <Navbar1 /> */}
+          <VerticalNavbar4 />
+
+
+          <main className="flex-grow pt-20">
+            {children}
+          </main>
+
+          {/* Footer is always at the bottom of the flex container */}
+          <Footer />
+        </div>
       </body>
     </html>
   );

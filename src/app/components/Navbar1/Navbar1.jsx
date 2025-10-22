@@ -39,7 +39,7 @@ const Navbar = () => {
 
     return (
         <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-            ? 'bg-slate-900/20 backdrop-blur-xl shadow-2xl border-b border-slate-700/30'
+            ? 'bg-slate-900/70 bg-gray-700 backdrop-blur-xl shadow-2xl border-b border-slate-700/30'
             : 'bg-transparent'}`}>
             {/* Subtle gradient overlay for depth */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none"></div>
