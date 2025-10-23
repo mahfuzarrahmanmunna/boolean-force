@@ -5,6 +5,8 @@ import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
 import Navbar1 from "./components/Navbar1/Navbar1";
 import Footer from "./components/Footer/Footer";
 import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
+import ClientLayout from "@/components/ui/ClientLayout/ClientLayout";
+// import { usePathname } from "next/navigation";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -24,6 +26,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // const pathname = usePathname()
+  // const hideLayout = pathname.startsWith('/admin')
   return (
     <html lang="en" data-arp="" data-theme="dark" className="scroll-smooth">
       <body
@@ -34,16 +38,16 @@ export default function RootLayout({ children }) {
 
         {/* This container holds the actual page layout */}
         <div className="relative z-10 flex flex-col min-h-screen">
-          <Navbar1 />
-          <VerticalNavbar4 />
+          {/* {!hideLayout && <Navbar1 />}
+          <VerticalNavbar4 /> */}
 
 
-          <main className="flex-grow pt-20">
-            {children}
+          <main className="flex-grow">
+            <ClientLayout> {children}</ClientLayout>
           </main>
 
           {/* Footer is always at the bottom of the flex container */}
-          <Footer />
+          {/* {!hideLayout && <Footer />} */}
         </div>
       </body>
     </html>

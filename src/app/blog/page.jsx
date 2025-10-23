@@ -2,15 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { FaCalendarAlt, FaUser, FaTag, FaSearch, FaArrowRight, FaClock, FaComments } from "react-icons/fa";
-import { useState } from "react";
+import { FaCalendarAlt, FaUser, FaTag, FaSearch, FaArrowRight, FaClock, FaComments, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import { blogCategories, blogPosts, featuredPost } from "./blogData";
+// Import Swiper React components
+import { Swiper, SwiperSlide } from 'swiper/react';
+// Import required modules
+import { Autoplay, Pagination, Navigation, EffectFade, Parallax } from 'swiper/modules';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import 'swiper/css/effect-fade';
+import 'swiper/css/parallax';
 // import BinaryBackground from "@/components/BinaryBackground";
 // import Header from "@/components/Header";
 
 export default function BlogPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [mounted, setMounted] = useState(false);
+
+    // Fix for hydration issues with Swiper
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const filteredPosts = blogPosts.filter(post => {
         const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -20,35 +36,148 @@ export default function BlogPage() {
         return matchesSearch && matchesCategory;
     });
 
+    // Hero carousel slides with working images
+    const heroSlides = [
+        {
+            id: 1,
+            image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
+            title: "Our Blog",
+            subtitle: "Insights, tutorials, and industry trends from our expert developers"
+        },
+        {
+            id: 2,
+            image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+            title: "Tech Innovations",
+            subtitle: "Exploring the latest advancements in technology and development"
+        },
+        {
+            id: 3,
+            image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
+            title: "Developer Resources",
+            subtitle: "Tools, tips, and tricks to enhance your development workflow"
+        },
+        {
+            id: 4,
+            image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+            title: "Industry Insights",
+            subtitle: "Stay ahead with expert analysis of tech trends and market shifts"
+        }
+    ];
+
+    // Custom navigation components
+    const CustomPrevButton = () => (
+        <div className="swiper-button-prev-custom absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white bg-opacity-20 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-opacity-30 transition-all duration-300 cursor-pointer">
+            <FaChevronLeft className="text-xl" />
+        </div>
+    );
+
+    const CustomNextButton = () => (
+        <div className="swiper-button-next-custom absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white bg-opacity-20 backdrop-blur-sm rounded-full w-12 h-12 flex items-center justify-center text-white hover:bg-opacity-30 transition-all duration-300 cursor-pointer">
+            <FaChevronRight className="text-xl" />
+        </div>
+    );
+
     return (
         <div className="min-h-screen text-white">
             {/* <BinaryBackground />
             <Header /> */}
 
-            {/* Hero Section */}
-            <section className="relative pt-32 pb-20">
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="max-w-3xl mx-auto text-center">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Our Blog</h1>
-                        <p className="text-xl mb-8 text-gray-300">
-                            Insights, tutorials, and industry trends from our expert developers
-                        </p>
+            {/* Hero Section with Enhanced Carousel */}
+            <section className="relative h-[600px] overflow-hidden">
+                {mounted && (
+                    <Swiper
+                        modules={[Autoplay, Pagination, Navigation, EffectFade, Parallax]}
+                        spaceBetween={0}
+                        slidesPerView={1}
+                        effect="fade"
+                        parallax={true}
+                        autoplay={{
+                            delay: 6000,
+                            disableOnInteraction: false,
+                        }}
+                        pagination={{
+                            clickable: true,
+                            dynamicBullets: true,
+                            renderBullet: (index, className) => {
+                                return `<span class="${className} custom-pagination-bullet"></span>`;
+                            },
+                        }}
+                        navigation={{
+                            prevEl: '.swiper-button-prev-custom',
+                            nextEl: '.swiper-button-next-custom',
+                        }}
+                        className="h-full w-full"
+                        loop={true}
+                    >
+                        {heroSlides.map((slide) => (
+                            <SwiperSlide key={slide.id} className="relative">
+                                {/* Fixed overlay with proper opacity */}
+                                <div className="absolute inset-0 bg-black bg-opacity-40 z-10"></div>
 
-                        {/* Search Bar */}
-                        <div className="relative max-w-xl mx-auto">
-                            <input
-                                type="text"
-                                placeholder="Search articles..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full py-3 px-5 pr-12 rounded-full text-gray-800 bg-white bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                            />
-                            <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
-                                <FaSearch />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                                {/* Fixed image container with proper parallax */}
+                                <div className="absolute inset-0 z-0" data-swiper-parallax="-23%">
+                                    <Image
+                                        src={slide.image}
+                                        alt={slide.title}
+                                        fill
+                                        className="object-cover"
+                                        priority
+                                        unoptimized={true}
+                                        onError={(e) => {
+                                            // Fallback to a placeholder image if the original fails to load
+                                            e.target.src = "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80";
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="container mx-auto px-6 relative z-20 h-full flex flex-col justify-center">
+                                    <div className="max-w-3xl mx-auto text-center">
+                                        <div className="overflow-hidden mb-4">
+                                            <h1
+                                                className="text-4xl md:text-5xl font-bold text-white swiper-parallax"
+                                                data-swiper-parallax="-300"
+                                                data-swiper-parallax-duration="1000"
+                                            >
+                                                {slide.title}
+                                            </h1>
+                                        </div>
+                                        <div className="overflow-hidden mb-8">
+                                            <p
+                                                className="text-xl text-gray-300 swiper-parallax"
+                                                data-swiper-parallax="-200"
+                                                data-swiper-parallax-duration="1200"
+                                            >
+                                                {slide.subtitle}
+                                            </p>
+                                        </div>
+
+                                        {/* Search Bar with animation */}
+                                        <div
+                                            className="relative max-w-xl mx-auto swiper-parallax"
+                                            data-swiper-parallax="-100"
+                                            data-swiper-parallax-duration="1400"
+                                        >
+                                            <input
+                                                type="text"
+                                                placeholder="Search articles..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="w-full py-3 px-5 pr-12 rounded-full text-gray-800 bg-white bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300"
+                                            />
+                                            <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-2 rounded-full hover:bg-blue-700 transition-colors">
+                                                <FaSearch />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                )}
+
+                {/* Custom Navigation Buttons */}
+                <CustomPrevButton />
+                <CustomNextButton />
             </section>
 
             {/* Categories */}
@@ -84,6 +213,10 @@ export default function BlogPage() {
                                         alt={featuredPost.title}
                                         fill
                                         className="object-cover"
+                                        unoptimized={true}
+                                        onError={(e) => {
+                                            e.target.src = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80";
+                                        }}
                                     />
                                 </div>
                             </div>
@@ -109,6 +242,10 @@ export default function BlogPage() {
                                                 alt={featuredPost.author.name}
                                                 fill
                                                 className="rounded-full object-cover"
+                                                unoptimized={true}
+                                                onError={(e) => {
+                                                    e.target.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
+                                                }}
                                             />
                                         </div>
                                         <div>
@@ -140,6 +277,10 @@ export default function BlogPage() {
                                         alt={post.title}
                                         fill
                                         className="object-cover"
+                                        unoptimized={true}
+                                        onError={(e) => {
+                                            e.target.src = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80";
+                                        }}
                                     />
                                 </div>
                                 <div className="p-6">
@@ -163,6 +304,10 @@ export default function BlogPage() {
                                                     alt={post.author.name}
                                                     fill
                                                     className="rounded-full object-cover"
+                                                    unoptimized={true}
+                                                    onError={(e) => {
+                                                        e.target.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80";
+                                                    }}
                                                 />
                                             </div>
                                             <span className="text-sm text-gray-300">{post.author.name}</span>
@@ -214,6 +359,54 @@ export default function BlogPage() {
                     </div>
                 </div>
             </section>
+
+            {/* Custom styles for the carousel */}
+            <style jsx>{`
+                .custom-pagination-bullet {
+                    width: 12px;
+                    height: 12px;
+                    background-color: rgba(255, 255, 255, 0.5);
+                    opacity: 1;
+                    transition: all 0.3s ease;
+                }
+                
+                .custom-pagination-bullet-active {
+                    background-color: white;
+                    transform: scale(1.2);
+                }
+                
+                :global(.swiper-pagination-bullet) {
+                    margin: 0 6px;
+                }
+                
+                :global(.swiper-pagination-fraction) {
+                    color: white;
+                }
+                
+                :global(.swiper-button-prev-custom),
+                :global(.swiper-button-next-custom) {
+                    position: absolute;
+                    top: 50%;
+                    width: 48px;
+                    height: 48px;
+                    margin-top: -24px;
+                    z-index: 10;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    background: rgba(255, 255, 255, 0.2);
+                    backdrop-filter: blur(4px);
+                    border-radius: 50%;
+                    transition: all 0.3s ease;
+                }
+                
+                :global(.swiper-button-prev-custom:hover),
+                :global(.swiper-button-next-custom:hover) {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+            `}</style>
         </div>
     );
 }

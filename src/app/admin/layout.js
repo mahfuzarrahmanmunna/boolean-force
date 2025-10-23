@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function AdminLayout({ children }) {
     return (
-        <div className="flex h-screen">
+        <div className="flex min-h-screen p-0 m-0">
             {/* Sidebar */}
             <aside className="w-64 bg-gray-900 text-white p-4 flex flex-col">
                 <h2 className="text-xl font-bold mb-6">Admin Panel</h2>
