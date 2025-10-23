@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,6 +9,8 @@ const VerticalNavbar4 = () => {
     const [sparkles, setSparkles] = useState([]);
     const [isTooltipVisible, setIsTooltipVisible] = useState('');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const timeoutRef = useRef(null);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -31,6 +33,29 @@ const VerticalNavbar4 = () => {
 
         setSparkles(newSparkles);
     }, []);
+
+    const handleExpand = () => {
+        setIsExpanded(true);
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+    };
+
+    const handleCollapse = () => {
+        // Set a timeout to collapse after a short delay
+        timeoutRef.current = setTimeout(() => {
+            setIsExpanded(false);
+        }, 300);
+    };
+
+    const toggleExpand = () => {
+        if (isExpanded) {
+            setIsExpanded(false);
+        } else {
+            setIsExpanded(true);
+        }
+    };
 
     const navLinks = [
         {
@@ -161,70 +186,96 @@ const VerticalNavbar4 = () => {
             </div>
 
             {/* Vertical Navbar - only visible on medium+ devices */}
-            <nav className="hidden md:flex fixed top-0 right-0 h-screen w-20 flex-col justify-start items-center bg-transparent z-50 p-4">
-                {/* Logo at top */}
-                <div className="flex w-12 h-12 justify-center items-center flex-shrink-0 mb-4 transition-transform duration-300 cursor-pointer hover:scale-110">
-                    <div className="w-12 h-12  rounded-lg flex items-center justify-center shadow-lg">
-                        <span className="text-white font-bold text-xl">BF</span>
+            <nav
+                className={`hidden md:flex fixed top-0 right-0 h-screen bg-black/70 backdrop-blur-lg z-50 transition-all duration-500 ease-in-out ${isExpanded ? 'w-64' : 'w-0'}`}
+                onMouseEnter={handleExpand}
+                onMouseLeave={handleCollapse}
+            >
+                {/* Collapsed state - small angled box in the middle */}
+                {!isExpanded && (
+                    <div
+                        className="absolute top-1/2 right-6 transform -translate-y-1/2 cursor-pointer"
+                        onClick={toggleExpand}
+                    >
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-2xl transform rotate-45 flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                            <div className="transform -rotate-45">
+                                <svg className="w-6 h-6 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-2xl transform rotate-45 opacity-30 blur-xl"></div>
                     </div>
-                </div>
+                )}
 
-                {/* Top decorative line */}
-                <div className="w-px bg-gray-300 flex-1 mb-4"></div>
+                {/* Expanded state - full navbar */}
+                {isExpanded && (
+                    <div className="flex flex-col h-full p-4 w-64">
+                        {/* Logo at top */}
+                        <div className="flex w-12 h-12 justify-center items-center flex-shrink-0 mb-4 transition-transform duration-300 cursor-pointer hover:scale-110">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
+                                <span className="text-white font-bold text-xl">BF</span>
+                            </div>
+                        </div>
 
-                {/* Navigation Links */}
-                <ul className="flex flex-col items-center gap-6 list-none mb-4">
-                    {navLinks.map((link) => (
-                        <li key={link.name} className="relative">
-                            <Link
-                                href={link.href}
-                                className={`text-gray-300 transition-all duration-300 cursor-pointer bg-transparent border-0 no-underline hover:text-[#3B85FE] group ${mounted && pathname === link.href ? 'text-[#3B85FE]' : ''
-                                    }`}
-                                onMouseEnter={() => setIsTooltipVisible(link.name)}
-                                onMouseLeave={() => setIsTooltipVisible('')}
-                            >
-                                <div className={`p-2 rounded-lg transition-all duration-300 ${mounted && pathname === link.href
-                                    ? 'bg-slate-800/50 shadow-lg'
-                                    : 'hover:bg-slate-800/30'
-                                    }`}>
-                                    {link.icon}
-                                </div>
-                            </Link>
+                        {/* Top decorative line */}
+                        <div className="w-px bg-gray-300 flex-1 mb-4"></div>
 
-                            {/* Tooltip */}
-                            {isTooltipVisible === link.name && (
-                                <div className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 bg-slate-800 text-white text-sm py-1 px-2 rounded whitespace-nowrap">
-                                    {link.name}
-                                    <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-slate-800"></div>
-                                </div>
-                            )}
-                        </li>
-                    ))}
-                </ul>
+                        {/* Navigation Links */}
+                        <ul className="flex flex-col items-center gap-6 list-none mb-4">
+                            {navLinks.map((link) => (
+                                <li key={link.name} className="relative">
+                                    <Link
+                                        href={link.href}
+                                        className={`text-gray-300 transition-all duration-300 cursor-pointer bg-transparent border-0 no-underline hover:text-[#3B85FE] group ${mounted && pathname === link.href ? 'text-[#3B85FE]' : ''
+                                            }`}
+                                        onMouseEnter={() => setIsTooltipVisible(link.name)}
+                                        onMouseLeave={() => setIsTooltipVisible('')}
+                                    >
+                                        <div className={`p-2 rounded-lg transition-all duration-300 ${mounted && pathname === link.href
+                                            ? 'bg-slate-800/50 shadow-lg'
+                                            : 'hover:bg-slate-800/30'
+                                            }`}>
+                                            {link.icon}
+                                        </div>
+                                    </Link>
 
-                {/* Middle decorative line */}
-                <div className="w-px bg-gray-300 flex-1 mb-4"></div>
+                                    {/* Tooltip */}
+                                    {isTooltipVisible === link.name && (
+                                        <div className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 bg-slate-800 text-white text-sm py-1 px-2 rounded whitespace-nowrap">
+                                            {link.name}
+                                            <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-slate-800"></div>
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
 
-                {/* Social Links */}
-                <ul className="flex flex-col items-center gap-5 list-none">
-                    {socialLinks.map((social) => (
-                        <li key={social.name}>
-                            <a
-                                href={social.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-300 transition-all duration-300 cursor-pointer bg-transparent no-underline hover:text-[#3B85FE] group"
-                            >
-                                <div className="p-2 rounded-lg transition-all duration-300 hover:bg-slate-800/30">
-                                    {social.icon}
-                                </div>
-                            </a>
-                        </li>
-                    ))}
-                </ul>
+                        {/* Middle decorative line */}
+                        <div className="w-px bg-gray-300 flex-1 mb-4"></div>
 
-                {/* Bottom decorative line */}
-                <div className="w-px bg-gray-300 h-8 mt-4"></div>
+                        {/* Social Links */}
+                        <ul className="flex flex-col items-center gap-5 list-none">
+                            {socialLinks.map((social) => (
+                                <li key={social.name}>
+                                    <a
+                                        href={social.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-gray-300 transition-all duration-300 cursor-pointer bg-transparent no-underline hover:text-[#3B85FE] group"
+                                    >
+                                        <div className="p-2 rounded-lg transition-all duration-300 hover:bg-slate-800/30">
+                                            {social.icon}
+                                        </div>
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+
+                        {/* Bottom decorative line */}
+                        <div className="w-px bg-gray-300 h-8 mt-4"></div>
+                    </div>
+                )}
             </nav>
 
             {/* Mobile menu - only visible on small devices when open */}

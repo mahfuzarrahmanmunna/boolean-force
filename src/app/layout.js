@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
 
         {/* This container holds the actual page layout */}
         <div className="relative z-10 flex flex-col min-h-screen">
-          {/* <Navbar1 /> */}
+          <Navbar1 />
           <VerticalNavbar4 />
 
 
