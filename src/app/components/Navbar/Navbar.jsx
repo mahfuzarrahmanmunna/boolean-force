@@ -136,6 +136,13 @@ export default function Navbar() {
                                     </Link>
                                 </NavigationMenuLink>
                             </NavigationMenuItem>
+                            <NavigationMenuItem>
+    <NavigationMenuLink asChild>
+        <Link href="/about" className={cn(navigationMenuTriggerStyle(), "group")}>
+            About 
+        </Link>
+    </NavigationMenuLink>
+</NavigationMenuItem>
                         </NavigationMenuList>
                     </NavigationMenu>
                 </div>
