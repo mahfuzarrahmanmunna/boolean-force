@@ -6,6 +6,7 @@ import Navbar1 from "./components/Navbar1/Navbar1";
 import Footer from "./components/Footer/Footer";
 import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
 import ClientLayout from "@/components/ui/ClientLayout/ClientLayout";
+import BinaryBack from "./components/BinarayBack/BinaryBack";
 // import { usePathname } from "next/navigation";
 
 const inter = Inter({
@@ -34,7 +35,8 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} ${poppins.variable} antialiased`}
       >
         {/* The background is a fixed layer behind everything */}
-        <BinaryBackground />
+        {/* <BinaryBackground /> */}
+        <BinaryBack />
 
         {/* This container holds the actual page layout */}
         <div className="relative z-10 flex flex-col min-h-screen">

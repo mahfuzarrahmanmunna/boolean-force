@@ -22,7 +22,7 @@ const BinaryBackground = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             // Redraw the background on resize
-            ctx.fillStyle = "#000000";
+            ctx.fillStyle = "#191c4eab";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         };
 

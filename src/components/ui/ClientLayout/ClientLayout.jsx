@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 export default function ClientLayout({ children }) {
     const pathname = usePathname();
-    const hideLayout = pathname.startsWith("/admin");
+    const hideLayout = pathname.startsWith("/dashboard");
 
     return (
         <div className="relative z-10 flex flex-col min-h-screen">

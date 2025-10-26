@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
-import { X, Check, ArrowRight, ChevronDown, Maximize2, Grid3x3, Sparkles, Play, Pause, SkipBack, SkipForward, Layers, Zap, Shield, Globe, Cpu, Code, BarChart, Users, Lightbulb, TrendingUp, Award, Clock, Target } from 'lucide-react';
+import { X, Check, ArrowRight, Grid3x3, Sparkles, Layers, Shield, Globe, Cpu, TrendingUp, Award, Clock, Target } from 'lucide-react';
 
 // Define your brand colors as constants for easy management
 const PRIMARY_COLOR = '#3B85FE';
@@ -11,28 +11,16 @@ const ACCENT_COLOR = '#6366F1';
 const DARK_BG = '#0F172A';
 const LIGHT_TEXT = '#F1F5F9';
 
-const OurServicesSlider = ({ onNavigateToSection }) => {
-    const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
+const ServicesPage = ({ onNavigateToSection }) => {
     const [selectedService, setSelectedService] = useState(null);
-    const [showAllServices, setShowAllServices] = useState(false);
     const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-    const [isFirstService, setIsFirstService] = useState(true);
-    const [isLastService, setIsLastService] = useState(false);
     const [isSectionInView, setIsSectionInView] = useState(false);
     const [isClient, setIsClient] = useState(false);
-    const [isAutoPlaying, setIsAutoPlaying] = useState(false);
-    const [progress, setProgress] = useState(0);
-    const [activeTab, setActiveTab] = useState('overview');
     const [hoveredServiceIndex, setHoveredServiceIndex] = useState(null);
     const [backgroundGradient, setBackgroundGradient] = useState({ from: PRIMARY_COLOR, to: ACCENT_COLOR });
 
     const containerRef = useRef(null);
     const backgroundRef = useRef(null);
-    const isScrolling = useRef(false);
-    const scrollTimeout = useRef(null);
-    const lastScrollTime = useRef(0);
-    const accumulatedScroll = useRef(0);
-    const autoPlayInterval = useRef(null);
     const { scrollYProgress } = useScroll();
     const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [1, 1, 0.5, 0]);
 
@@ -210,12 +198,6 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
         }
     ];
 
-    // Update first/last service states when index changes
-    useEffect(() => {
-        setIsFirstService(currentServiceIndex === 0);
-        setIsLastService(currentServiceIndex === services.length - 1);
-    }, [currentServiceIndex, services.length]);
-
     // Track if services section is in view
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -235,31 +217,6 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
             }
         };
     }, []);
-
-    // Auto-play functionality
-    useEffect(() => {
-        if (isAutoPlaying && !showAllServices) {
-            autoPlayInterval.current = setInterval(() => {
-                setCurrentServiceIndex((prevIndex) =>
-                    prevIndex === services.length - 1 ? 0 : prevIndex + 1
-                );
-                setProgress(0);
-            }, 5000);
-
-            // Progress animation
-            const progressInterval = setInterval(() => {
-                setProgress((prev) => (prev >= 100 ? 0 : prev + 2));
-            }, 100);
-
-            return () => {
-                clearInterval(autoPlayInterval.current);
-                clearInterval(progressInterval);
-            };
-        } else {
-            clearInterval(autoPlayInterval.current);
-            setProgress(0);
-        }
-    }, [isAutoPlaying, showAllServices, services.length]);
 
     // Track mouse position for interactive background
     useEffect(() => {
@@ -293,98 +250,6 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
             });
         }
     }, [hoveredServiceIndex]);
-
-    const handleScroll = (e) => {
-        if (showAllServices) return;
-
-        // Only handle scroll if we're in the services section
-        if (!isSectionInView) return;
-
-        e.preventDefault();
-
-        // Clear any existing timeout
-        if (scrollTimeout.current) {
-            clearTimeout(scrollTimeout.current);
-        }
-
-        // Add to accumulated scroll
-        accumulatedScroll.current += e.deltaY;
-
-        // Set a timeout to process the scroll after scrolling stops
-        scrollTimeout.current = setTimeout(() => {
-            // Only process if we're not already scrolling
-            if (!isScrolling.current) {
-                isScrolling.current = true;
-
-                // Determine scroll direction based on accumulated scroll
-                const scrollDirection = accumulatedScroll.current > 0 ? 1 : -1;
-                const newIndex = currentServiceIndex + scrollDirection;
-
-                if (newIndex >= 0 && newIndex < services.length) {
-                    setCurrentServiceIndex(newIndex);
-                    setProgress(0);
-                } else if (newIndex >= services.length && onNavigateToSection) {
-                    // Navigate to next section if available
-                    onNavigateToSection('next');
-                } else if (newIndex < 0 && onNavigateToSection) {
-                    // Navigate to previous section if available
-                    onNavigateToSection('prev');
-                }
-
-                // Reset accumulated scroll
-                accumulatedScroll.current = 0;
-
-                // Allow scrolling again after animation completes
-                setTimeout(() => {
-                    isScrolling.current = false;
-                }, 1000); // Match this with your animation duration
-            }
-        }, 100); // Short delay to detect when scrolling stops
-    };
-
-    const handleDotClick = (index) => {
-        setCurrentServiceIndex(index);
-        setProgress(0);
-    };
-
-    const handleKeyDown = (e) => {
-        if (showAllServices) return;
-
-        if (e.key === 'ArrowDown' && currentServiceIndex < services.length - 1) {
-            setCurrentServiceIndex(currentServiceIndex + 1);
-            setProgress(0);
-        } else if (e.key === 'ArrowDown' && currentServiceIndex === services.length - 1 && onNavigateToSection) {
-            onNavigateToSection('next');
-        } else if (e.key === 'ArrowUp' && currentServiceIndex > 0) {
-            setCurrentServiceIndex(currentServiceIndex - 1);
-            setProgress(0);
-        } else if (e.key === 'ArrowUp' && currentServiceIndex === 0 && onNavigateToSection) {
-            onNavigateToSection('prev');
-        }
-    };
-
-    const toggleAutoPlay = () => {
-        setIsAutoPlaying(!isAutoPlaying);
-        setProgress(0);
-    };
-
-    useEffect(() => {
-        const container = containerRef.current;
-        if (container) {
-            // Only add wheel listener when section is in view
-            if (isSectionInView) {
-                container.addEventListener('wheel', handleScroll, { passive: false });
-            }
-            window.addEventListener('keydown', handleKeyDown);
-            return () => {
-                container.removeEventListener('wheel', handleScroll);
-                window.removeEventListener('keydown', handleKeyDown);
-                if (scrollTimeout.current) {
-                    clearTimeout(scrollTimeout.current);
-                }
-            };
-        }
-    }, [currentServiceIndex, showAllServices, onNavigateToSection, isSectionInView]);
 
     const sliderImages = [
         {
@@ -597,29 +462,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 )}
             </div>
 
-            {/* View Toggle - Circular Grid Button - Only show when section is in view */}
-            {isSectionInView && (
-                <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="fixed top-8 left-8 z-30"
-                >
-                    <button
-                        onClick={() => setShowAllServices(!showAllServices)}
-                        className="w-14 h-14 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 hover:bg-white/10 flex items-center justify-center"
-                        style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                    >
-                        {showAllServices ? (
-                            <Maximize2 className="w-6 h-6 text-white" />
-                        ) : (
-                            <Grid3x3 className="w-6 h-6 text-white" />
-                        )}
-                    </button>
-                </motion.div>
-            )}
-
-            {/* Enhanced Section Header - Fixed positioning to prevent overlap */}
+            {/* Enhanced Section Header */}
             <motion.div
                 style={{ opacity }}
                 className="relative z-20 p-8 pt-16"
@@ -647,399 +490,72 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 </motion.div>
             </motion.div>
 
-            {/* Service Slider / Grid View - Added proper spacing to prevent overlap */}
+            {/* Service Cards Grid */}
             <div className="relative z-10 pt-8 pb-32">
-                <AnimatePresence mode="wait">
-                    {!showAllServices ? (
-                        <motion.div
-                            key="slider"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="relative h-full flex items-center justify-center"
-                        >
-                            <AnimatePresence mode="wait">
-                                <motion.div
-                                    key={currentServiceIndex}
-                                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    exit={{ opacity: 0, scale: 0.9, y: -20 }}
-                                    transition={{ duration: 0.5 }}
-                                    className="container mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl"
-                                    onMouseEnter={() => setHoveredServiceIndex(currentServiceIndex)}
-                                    onMouseLeave={() => setHoveredServiceIndex(null)}
+                <div className="container mx-auto px-8 py-24 max-w-6xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {services.map((service, index) => (
+                            <motion.div
+                                key={service.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: index * 0.1 }}
+                                className="relative group cursor-pointer"
+                                onClick={() => setSelectedService(service)}
+                                onMouseEnter={() => setHoveredServiceIndex(index)}
+                                onMouseLeave={() => setHoveredServiceIndex(null)}
+                                whileHover={{ y: -10 }}
+                            >
+                                <div className="relative overflow-hidden rounded-2xl border h-80"
+                                    style={{ background: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                                 >
-                                    {/* Service Image */}
-                                    <div className="relative order-2 lg:order-1">
-                                        <div className="relative overflow-hidden rounded-2xl shadow-2xl group">
-                                            <img
-                                                src={services[currentServiceIndex].image}
-                                                alt={services[currentServiceIndex].title}
-                                                className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                            />
+                                    <img
+                                        src={service.image}
+                                        alt={service.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+                                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                                        <div className="flex items-center mb-2">
                                             <motion.div
-                                                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"
-                                                style={{ background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)` }}
-                                            />
-                                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/70 to-transparent">
-                                                <div className="flex items-center">
-                                                    <motion.div
-                                                        className="w-16 h-16 rounded-xl flex items-center justify-center text-white mr-3"
-                                                        style={{ backgroundColor: services[currentServiceIndex].color }}
-                                                        whileHover={{ scale: 1.1, rotate: 5 }}
-                                                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                                                    >
-                                                        {services[currentServiceIndex].icon}
-                                                    </motion.div>
-                                                    <div>
-                                                        <h3 className="text-2xl font-bold text-white">{services[currentServiceIndex].title}</h3>
-                                                        <p className="text-sm text-gray-300">{services[currentServiceIndex].subtitle}</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Service Content */}
-                                    <div className="order-1 lg:order-2">
-                                        <div className="mb-6">
-                                            <span className="inline-block px-3 py-1 rounded-full text-sm font-medium mb-4"
-                                                style={{ backgroundColor: `${services[currentServiceIndex].color}20`, color: services[currentServiceIndex].color }}
+                                                className="w-12 h-12 rounded-xl flex items-center justify-center text-white mr-3"
+                                                style={{ backgroundColor: service.color }}
+                                                whileHover={{ scale: 1.2, rotate: 10 }}
+                                                transition={{ type: "spring", stiffness: 300, damping: 10 }}
                                             >
-                                                Service {currentServiceIndex + 1} of {services.length}
-                                            </span>
-                                            <h3 className="text-4xl font-bold mb-2 text-white">
-                                                {services[currentServiceIndex].title}
-                                            </h3>
-                                            <p className="text-xl text-gray-300 mb-4">{services[currentServiceIndex].subtitle}</p>
-                                        </div>
-
-                                        <p className="text-lg mb-8 leading-relaxed text-gray-300">
-                                            {services[currentServiceIndex].description}
-                                        </p>
-
-                                        {/* Tab Navigation */}
-                                        <div className="flex border-b border-gray-700 mb-6">
-                                            {['overview', 'benefits', 'process'].map((tab) => (
-                                                <button
-                                                    key={tab}
-                                                    onClick={() => setActiveTab(tab)}
-                                                    className={`px-4 py-2 font-medium transition-colors capitalize ${activeTab === tab
-                                                        ? 'text-white border-b-2'
-                                                        : 'text-gray-400 hover:text-white'
-                                                        }`}
-                                                    style={{ borderColor: activeTab === tab ? services[currentServiceIndex].color : 'transparent' }}
-                                                >
-                                                    {tab}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {/* Tab Content */}
-                                        <div className="mb-8">
-                                            {activeTab === 'overview' && (
-                                                <div>
-                                                    <div className="rounded-lg p-4 mb-6 font-mono text-sm border backdrop-blur-sm"
-                                                        style={{ background: 'rgba(0,0,0,0.3)', borderColor: 'rgba(255, 255, 255, 0.1)', color: '#4ade80' }}
-                                                    >
-                                                        {services[currentServiceIndex].code}
-                                                    </div>
-
-                                                    <ul className="space-y-3">
-                                                        {services[currentServiceIndex].features.map((feature, idx) => (
-                                                            <motion.li
-                                                                key={idx}
-                                                                initial={{ opacity: 0, x: -20 }}
-                                                                animate={{ opacity: 1, x: 0 }}
-                                                                transition={{ duration: 0.3, delay: idx * 0.1 }}
-                                                                className="flex items-start"
-                                                                whileHover={{ x: 5 }}
-                                                            >
-                                                                <Check className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" style={{ color: services[currentServiceIndex].color }} />
-                                                                <span className="text-gray-300">{feature}</span>
-                                                            </motion.li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-
-                                            {activeTab === 'benefits' && (
-                                                <div>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                                        {services[currentServiceIndex].stats.map((stat, idx) => (
-                                                            <motion.div
-                                                                key={idx}
-                                                                className="rounded-lg p-4 backdrop-blur-sm border"
-                                                                style={{ background: 'rgba(0,0,0,0.3)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                                                                whileHover={{ scale: 1.05, y: -5 }}
-                                                                transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                                                            >
-                                                                <div className="flex items-center justify-between">
-                                                                    <span className="text-gray-400 text-sm">{stat.label}</span>
-                                                                    <TrendingUp className="w-4 h-4" style={{ color: services[currentServiceIndex].color }} />
-                                                                </div>
-                                                                <div className="text-2xl font-bold mt-2" style={{ color: services[currentServiceIndex].color }}>
-                                                                    {stat.value}
-                                                                </div>
-                                                            </motion.div>
-                                                        ))}
-                                                    </div>
-
-                                                    <ul className="space-y-3">
-                                                        {services[currentServiceIndex].benefits.map((benefit, idx) => (
-                                                            <motion.li
-                                                                key={idx}
-                                                                initial={{ opacity: 0, x: -20 }}
-                                                                animate={{ opacity: 1, x: 0 }}
-                                                                transition={{ duration: 0.3, delay: idx * 0.1 }}
-                                                                className="flex items-start"
-                                                                whileHover={{ x: 5 }}
-                                                            >
-                                                                <Award className="w-5 h-5 mr-3 mt-0.5 flex-shrink-0" style={{ color: services[currentServiceIndex].color }} />
-                                                                <span className="text-gray-300">{benefit}</span>
-                                                            </motion.li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-
-                                            {activeTab === 'process' && (
-                                                <div>
-                                                    <div className="space-y-4">
-                                                        {services[currentServiceIndex].timeline.map((step, idx) => (
-                                                            <motion.div
-                                                                key={idx}
-                                                                className="flex items-start"
-                                                                whileHover={{ x: 5 }}
-                                                            >
-                                                                <motion.div
-                                                                    className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4"
-                                                                    style={{ backgroundColor: services[currentServiceIndex].color }}
-                                                                    whileHover={{ scale: 1.2, rotate: 10 }}
-                                                                    transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                                                                >
-                                                                    <span className="text-white font-bold">{idx + 1}</span>
-                                                                </motion.div>
-                                                                <div className="flex-grow">
-                                                                    <div className="flex items-center justify-between mb-1">
-                                                                        <h4 className="text-white font-medium">{step.phase}</h4>
-                                                                        <span className="text-sm text-gray-400 flex items-center">
-                                                                            <Clock className="w-3 h-3 mr-1" />
-                                                                            {step.duration}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div className="h-2 bg-gray-700 rounded-full overflow-hidden">
-                                                                        <motion.div
-                                                                            className="h-full"
-                                                                            style={{ backgroundColor: services[currentServiceIndex].color }}
-                                                                            initial={{ width: 0 }}
-                                                                            animate={{ width: '100%' }}
-                                                                            transition={{ duration: 1, delay: idx * 0.2 }}
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                            </motion.div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex flex-col sm:flex-row gap-4">
-                                            <motion.button
-                                                onClick={() => setSelectedService(services[currentServiceIndex])}
-                                                className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
-                                                style={{ background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`, boxShadow: `0 10px 25px -5px ${services[currentServiceIndex].color}40` }}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                Learn More
-                                                <ArrowRight className="w-4 h-4 ml-2" />
-                                            </motion.button>
-                                            <motion.button
-                                                className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 border flex items-center justify-center hover:bg-white/10"
-                                                style={{ background: 'rgba(51, 65, 85, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                            >
-                                                Contact Us
-                                            </motion.button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </AnimatePresence>
-                        </motion.div>
-                    ) : (
-                        <motion.div
-                            key="grid"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="container mx-auto px-8 py-24 max-w-6xl"
-                        >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {services.map((service, index) => (
-                                    <motion.div
-                                        key={service.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 0.5, delay: index * 0.1 }}
-                                        className={`relative group cursor-pointer ${index === currentServiceIndex ? 'ring-2' : ''}`}
-                                        style={{
-                                            ringColor: index === currentServiceIndex ? service.color : 'transparent',
-                                            transform: index === currentServiceIndex ? 'scale(1.03)' : 'scale(1)',
-                                            transition: 'all 0.3s ease'
-                                        }}
-                                        onClick={() => {
-                                            setCurrentServiceIndex(index);
-                                            setShowAllServices(false);
-                                        }}
-                                        onMouseEnter={() => setHoveredServiceIndex(index)}
-                                        onMouseLeave={() => setHoveredServiceIndex(null)}
-                                        whileHover={{ y: -10 }}
-                                    >
-                                        <div className="relative overflow-hidden rounded-2xl border h-64 group"
-                                            style={{ background: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                                        >
-                                            <img
-                                                src={service.image}
-                                                alt={service.title}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-                                            <div className="absolute bottom-0 left-0 right-0 p-6">
-                                                <div className="flex items-center mb-2">
-                                                    <motion.div
-                                                        className="w-12 h-12 rounded-xl flex items-center justify-center text-white mr-3"
-                                                        style={{ backgroundColor: service.color }}
-                                                        whileHover={{ scale: 1.2, rotate: 10 }}
-                                                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
-                                                    >
-                                                        {service.icon}
-                                                    </motion.div>
-                                                    <div>
-                                                        <h3 className="text-xl font-bold text-white">{service.title}</h3>
-                                                        <p className="text-sm text-gray-300">{service.subtitle}</p>
-                                                    </div>
-                                                </div>
-                                                <p className="text-sm text-gray-300">{service.description}</p>
-                                            </div>
-                                            <motion.div
-                                                className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                                style={{ background: `linear-gradient(135deg, ${service.color}20, transparent)` }}
-                                            >
-                                                <div className="px-6 py-3 rounded-lg backdrop-blur-md border"
-                                                    style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
-                                                >
-                                                    <span className="text-white font-medium">View Details</span>
-                                                </div>
+                                                {service.icon}
                                             </motion.div>
+                                            <div>
+                                                <h3 className="text-xl font-bold text-white">{service.title}</h3>
+                                                <p className="text-sm text-gray-300">{service.subtitle}</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-sm text-gray-300 mb-4">{service.description}</p>
+                                        <motion.button
+                                            className="px-4 py-2 rounded-lg text-white font-medium transition-all duration-300"
+                                            style={{ background: `linear-gradient(135deg, ${service.color}, ${service.color}80)` }}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            Learn More
+                                        </motion.button>
+                                    </div>
+                                    <motion.div
+                                        className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                        style={{ background: `linear-gradient(135deg, ${service.color}20, transparent)` }}
+                                    >
+                                        <div className="px-6 py-3 rounded-lg backdrop-blur-md border"
+                                            style={{ backgroundColor: 'rgba(15, 23, 42, 0.7)', borderColor: 'rgba(255, 255, 255, 0.2)' }}
+                                        >
+                                            <span className="text-white font-medium">View Details</span>
                                         </div>
                                     </motion.div>
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
             </div>
-
-            {/* Navigation Controls */}
-            {!showAllServices && (
-                <>
-                    {/* Progress Bar */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800 z-20">
-                        <motion.div
-                            className="h-full"
-                            style={{ backgroundColor: services[currentServiceIndex].color }}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 0.1 }}
-                        />
-                    </div>
-
-                    {/* Navigation Dots */}
-                    <div className="absolute bottom-8 left-0 right-0 flex justify-center z-20">
-                        <div className="flex items-center gap-2">
-                            {services.map((_, index) => (
-                                <motion.button
-                                    key={index}
-                                    onClick={() => handleDotClick(index)}
-                                    className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentServiceIndex
-                                        ? 'w-8'
-                                        : 'opacity-40 hover:opacity-100'
-                                        }`}
-                                    style={{ backgroundColor: index === currentServiceIndex ? services[currentServiceIndex].color : '#FFFFFF' }}
-                                    whileHover={{ scale: 1.5 }}
-                                    whileTap={{ scale: 0.8 }}
-                                    onMouseEnter={() => setHoveredServiceIndex(index)}
-                                    onMouseLeave={() => setHoveredServiceIndex(null)}
-                                />
-                            ))}
-                        </div>
-                        <div className="ml-4 text-sm text-gray-300">
-                            {currentServiceIndex + 1} / {services.length}
-                        </div>
-                    </div>
-
-                    {/* Navigation Buttons */}
-                    <div className="absolute bottom-24 left-0 right-0 flex justify-between px-8 z-20">
-                        <motion.button
-                            onClick={() => {
-                                setCurrentServiceIndex(currentServiceIndex > 0 ? currentServiceIndex - 1 : services.length - 1);
-                                setProgress(0);
-                            }}
-                            className="w-12 h-12 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 hover:bg-white/10 flex items-center justify-center"
-                            style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            <SkipBack className="w-5 h-5 text-white" />
-                        </motion.button>
-
-                        <motion.button
-                            onClick={toggleAutoPlay}
-                            className="w-12 h-12 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 hover:bg-white/10 flex items-center justify-center"
-                            style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            {isAutoPlaying ? (
-                                <Pause className="w-5 h-5 text-white" />
-                            ) : (
-                                <Play className="w-5 h-5 text-white" />
-                            )}
-                        </motion.button>
-
-                        <motion.button
-                            onClick={() => {
-                                setCurrentServiceIndex(currentServiceIndex < services.length - 1 ? currentServiceIndex + 1 : 0);
-                                setProgress(0);
-                            }}
-                            className="w-12 h-12 rounded-full backdrop-blur-md border transition-all duration-300 hover:scale-110 hover:bg-white/10 flex items-center justify-center"
-                            style={{ backgroundColor: 'rgba(15, 23, 42, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
-                            whileHover={{ scale: 1.2 }}
-                            whileTap={{ scale: 0.9 }}
-                        >
-                            <SkipForward className="w-5 h-5 text-white" />
-                        </motion.button>
-                    </div>
-
-                    {/* Scroll Hint for First Service */}
-                    {currentServiceIndex === 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 1 }}
-                            className="absolute bottom-40 left-0 right-0 flex justify-center z-20"
-                        >
-                            <div className="flex flex-col items-center text-sm text-gray-300">
-                                <span className="mb-2">Scroll to explore</span>
-                                <ChevronDown className="w-5 h-5 animate-bounce" />
-                            </div>
-                        </motion.div>
-                    )}
-                </>
-            )}
 
             {/* Enhanced Service Detail Modal */}
             <AnimatePresence>
@@ -1234,4 +750,4 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
     );
 };
 
-export default OurServicesSlider;
+export default ServicesPage;

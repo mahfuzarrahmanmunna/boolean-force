@@ -17,7 +17,7 @@ const VerticalNavbar4 = () => {
         setMounted(true);
 
         // Create sparkles
-        const colors = [];
+        const colors = ['#121a278e', '#2f25468a', '#3a2630be', '#27423969', '#4b3c2380'];
         const newSparkles = [];
 
         for (let i = 0; i < 100; i++) {
@@ -166,7 +166,7 @@ const VerticalNavbar4 = () => {
             </div>
 
             {/* Mobile menu button - only visible on small devices */}
-            <div className="md:hidden fixed top-4 right-4 z-50">
+            {/* <div className="md:hidden fixed top-4 right-4 z-50">
                 <button
                     onClick={toggleMobileMenu}
                     className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300 bg-black/30 backdrop-blur-sm"
@@ -183,7 +183,15 @@ const VerticalNavbar4 = () => {
                         </svg>
                     )}
                 </button>
-            </div>
+            </div> */}
+
+            {/* Shadow indicator - always visible when navbar is collapsed */}
+            {!isExpanded && (
+                <div
+                    className="hidden md:block fixed top-0 right-0 h-full w-8 bg-gradient-to-l from-black/40 to-transparent z-40 cursor-pointer"
+                    onMouseEnter={handleExpand}
+                />
+            )}
 
             {/* Vertical Navbar - only visible on medium+ devices */}
             <nav
@@ -191,23 +199,6 @@ const VerticalNavbar4 = () => {
                 onMouseEnter={handleExpand}
                 onMouseLeave={handleCollapse}
             >
-                {/* Collapsed state - small angled box in the middle */}
-                {!isExpanded && (
-                    <div
-                        className="absolute top-1/2 right-6 transform -translate-y-1/2 cursor-pointer"
-                        onClick={toggleExpand}
-                    >
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-2xl transform rotate-45 flex items-center justify-center hover:scale-110 transition-transform duration-300">
-                            <div className="transform -rotate-45">
-                                <svg className="w-6 h-6 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <div className="absolute inset-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-2xl transform rotate-45 opacity-30 blur-xl"></div>
-                    </div>
-                )}
-
                 {/* Expanded state - full navbar */}
                 {isExpanded && (
                     <div className="flex flex-col h-full p-4 w-64">
