@@ -1,16 +1,24 @@
-import { Geist, Geist_Mono } from "next/font/google";
+// "use client"
+import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
-import Navbar from "./components/Navbar/Navbar";
+import Navbar1 from "./components/Navbar1/Navbar1";
+import Footer from "./components/Footer/Footer";
+import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
+import ClientLayout from "@/components/ui/ClientLayout/ClientLayout";
+import BinaryBack from "./components/BinarayBack/BinaryBack";
+// import { usePathname } from "next/navigation";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata = {
@@ -19,14 +27,30 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  // const pathname = usePathname()
+  // const hideLayout = pathname.startsWith('/admin')
   return (
-    <html lang="en" data-arp="" data-theme="dark">
+    <html lang="en" data-arp="" data-theme="dark" className="scroll-smooth">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${inter.variable} ${poppins.variable} antialiased`}
       >
-        <BinaryBackground />
-        <Navbar />
-        {children}
+        {/* The background is a fixed layer behind everything */}
+        {/* <BinaryBackground /> */}
+        <BinaryBack />
+
+        {/* This container holds the actual page layout */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          {/* {!hideLayout && <Navbar1 />}
+          <VerticalNavbar4 /> */}
+
+
+          <main className="flex-grow">
+            <ClientLayout> {children}</ClientLayout>
+          </main>
+
+          {/* Footer is always at the bottom of the flex container */}
+          {/* {!hideLayout && <Footer />} */}
+        </div>
       </body>
     </html>
   );
