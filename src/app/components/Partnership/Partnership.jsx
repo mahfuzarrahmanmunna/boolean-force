@@ -56,7 +56,7 @@ const Partnership = () => {
     ];
 
     return (
-        <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className=" py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#3B85FE] rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>

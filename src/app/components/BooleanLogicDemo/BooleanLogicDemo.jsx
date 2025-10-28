@@ -122,7 +122,7 @@ const BooleanLogicDemo = () => {
     }, []);
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="relative  flex items-center justify-center overflow-hidden">
             {/* Background animation container */}
             <div id="particles-js" className="absolute inset-0 z-0"></div>
 
