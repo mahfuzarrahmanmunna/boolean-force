@@ -12,14 +12,17 @@ import OurServicesSlider from "./components/OurServicesSlider/OurServicesSlider"
 import Partnership from "./components/Partnership/Partnership";
 import PricingCard from "./components/PricingCard/PricingCard";
 import TechBanner from "./components/TechBanner/TechBanner";
+import Banner from "./components/banner/Banner";
+import PricingCart from "./components/PricingCart/PricingCart";
 
 export default function Home() {
 
-  
+
   return (
     <>
       {/* <TechBanner /> */}
-      <BooleanForceBanner />
+      {/* <BooleanForceBanner /> */}
+      <Banner />
       <BooleanLogicDemo />
       {/* <BooleanLogicSplit /> */}
       {/* <OurServices />
@@ -28,6 +31,7 @@ export default function Home() {
       {/* <OurServicesSlider /> */}
       <OurServicesOnlySlider />
       <PricingCard />
+      <PricingCart />
       <Partnership />
     </>
   );
