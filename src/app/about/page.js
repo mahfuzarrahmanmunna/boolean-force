@@ -56,7 +56,7 @@ export default function AboutPage() {
           </div>
           <h3 className="text-2xl font-semibold mb-4 text-white">Vision</h3>
           <p className="text-[#CBD5E1] text-lg">To be the most trusted IT force in Europe and beyond.</p>
-        </div>
+        </div>                                                                                                                                                                                                                
       </section>
 
       {/* Why Boolean */}
