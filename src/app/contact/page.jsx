@@ -737,35 +737,76 @@ const ContactPage = () => {
             return;
         }
 
+        // Log form data to console
+        console.log('=== FORM SUBMISSION ===');
+        console.log('Name:', formData.name);
+        console.log('Email:', formData.email);
+        console.log('Phone:', formData.phone);
+        console.log('Company:', formData.company);
+        console.log('Services:', formData.services);
+        console.log('Budget:', formData.budget);
+        console.log('Timeline:', formData.timeline);
+        console.log('Message:', formData.message);
+        console.log('========================');
+
+        // Also log the entire form object
+        console.log('Form Data Object:', formData);
+
         setIsSubmitting(true);
 
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            setFormStatus({
-                submitted: true,
-                success: true,
-                message: 'Thank you for your message. We will get back to you soon!',
-                errors: {}
+            // Send data to API
+            const apiResponse = await fetch('/api/contact', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
             });
 
-            // Reset form
-            setFormData({
-                name: '',
-                email: '',
-                phone: '',
-                company: '',
-                services: [],
-                budget: '',
-                timeline: '',
-                message: ''
-            });
+            // Check if response is ok
+            if (!apiResponse.ok) {
+                const errorText = await apiResponse.text();
+                console.error('Response not ok:', apiResponse.status, errorText);
+                throw new Error(`Server responded with ${apiResponse.status}: ${errorText}`);
+            }
+
+            const data = await apiResponse.json();
+            console.log('API Response:', data);
+
+            if (data.success) {
+                setFormStatus({
+                    submitted: true,
+                    success: true,
+                    message: data.message || 'Thank you for your message. We will get back to you soon!',
+                    errors: {}
+                });
+
+                // Reset form
+                setFormData({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    company: '',
+                    services: [],
+                    budget: '',
+                    timeline: '',
+                    message: ''
+                });
+            } else {
+                setFormStatus({
+                    submitted: true,
+                    success: false,
+                    message: data.error || 'Something went wrong. Please try again later.',
+                    errors: {}
+                });
+            }
         } catch (error) {
+            console.error('Error submitting form:', error);
             setFormStatus({
                 submitted: true,
                 success: false,
-                message: 'Something went wrong. Please try again later.',
+                message: 'Network error. Please check your connection and try again.',
                 errors: {}
             });
         } finally {

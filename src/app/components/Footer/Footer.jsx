@@ -1,11 +1,49 @@
 "use client"
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 const Footer = () => {
     const [emailHovered, setEmailHovered] = useState(false);
     const [phoneHovered, setPhoneHovered] = useState(false);
+
+    // Countdown timer state
+    const [timeLeft, setTimeLeft] = useState({
+        days: 6,
+        hours: 23,
+        minutes: 58,
+        seconds: 25
+    });
+
+    // Update countdown timer every second
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft(prevTime => {
+                const { days, hours, minutes, seconds } = prevTime;
+
+                // Calculate total seconds
+                let totalSeconds = days * 86400 + hours * 3600 + minutes * 60 + seconds;
+
+                // Decrease by 1 second
+                totalSeconds = Math.max(0, totalSeconds - 1);
+
+                // Calculate new time values
+                const newDays = Math.floor(totalSeconds / 86400);
+                const newHours = Math.floor((totalSeconds % 86400) / 3600);
+                const newMinutes = Math.floor((totalSeconds % 3600) / 60);
+                const newSeconds = totalSeconds % 60;
+
+                return {
+                    days: newDays,
+                    hours: newHours,
+                    minutes: newMinutes,
+                    seconds: newSeconds
+                };
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
 
     return (
         <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -62,16 +100,16 @@ const Footer = () => {
                         </h3>
                         <ul className="space-y-2">
                             {[
-                                'Brand Visual Identity',
-                                'Website Development',
-                                'ERP Software Solutions',
-                                'POS Systems'
+                                { name: 'Brand Visual Identity', path: 'brand-visual-identity' },
+                                { name: 'Website Development', path: 'website-development' },
+                                { name: 'ERP Software Solutions', path: 'erp-software-solutions' },
+                                { name: 'POS Systems', path: 'pos-systems' }
                             ].map((service, index) => (
                                 <li key={index} className="group">
-                                    <a href="#" className="text-gray-300 hover:text-white transition-all duration-300 inline-flex items-center group/item">
+                                    <Link href={`/${service.path}`} className="text-gray-300 hover:text-white transition-all duration-300 inline-flex items-center group/item">
                                         <span className="w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 mr-0 group-hover/item:w-4 group-hover/item:mr-2 transition-all duration-300"></span>
-                                        {service}
-                                    </a>
+                                        {service.name}
+                                    </Link>
                                 </li>
                             ))}
                         </ul>
@@ -85,36 +123,56 @@ const Footer = () => {
                         </h3>
                         <ul className="space-y-2">
                             {[
-                                'About Us',
-                                'Our Services'
+                                { name: 'About Us', path: 'about' },
+                                { name: 'Our Services', path: 'services' }
                             ].map((item, index) => (
                                 <li key={index} className="group">
-                                    <Link href="#" className="text-gray-300 hover:text-white transition-all duration-300 inline-flex items-center group/item">
+                                    <Link href={`/${item.path}`} className="text-gray-300 hover:text-white transition-all duration-300 inline-flex items-center group/item">
                                         <span className="w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 mr-0 group-hover/item:w-4 group-hover/item:mr-2 transition-all duration-300"></span>
-                                        {item}
+                                        {item.name}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
-                    {/* Newsletter */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-white relative inline-block group">
-                            Stay Connected
-                            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
-                        </h3>
-                        <p className="text-gray-300 text-sm">Subscribe to our newsletter for the latest updates.</p>
-                        <div className="flex flex-col space-y-2">
-                            <input
-                                type="email"
-                                placeholder="Your email"
-                                className="px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-300"
-                            />
-                            <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-cyan-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-purple-500/25">
-                                Subscribe
-                            </button>
+                    {/* Limited Time Offer - Now integrated into footer */}
+                    <div className="bg-gradient-to-br from-purple-800/40 to-cyan-800/40 backdrop-blur-md rounded-lg p-6 border border-white/10">
+                        <div className="flex items-center mb-3">
+                            <span className="text-2xl mr-2">🔥</span>
+                            <h3 className="text-xl font-bold text-white">LIMITED TIME OFFER</h3>
                         </div>
+                        <p className="text-sm text-gray-200 mb-4">
+                            Get 50% OFF your first project + FREE consultation
+                        </p>
+
+                        <div className="flex items-center mb-3">
+                            <span className="text-lg mr-2">⏰</span>
+                            <p className="text-white text-sm font-medium">Offer expires in:</p>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-1 mb-4">
+                            <div className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded p-1">
+                                <span className="text-lg font-bold text-white">{String(timeLeft.days).padStart(2, '0')}</span>
+                                <span className="text-xs text-gray-300">Days</span>
+                            </div>
+                            <div className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded p-1">
+                                <span className="text-lg font-bold text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
+                                <span className="text-xs text-gray-300">Hours</span>
+                            </div>
+                            <div className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded p-1">
+                                <span className="text-lg font-bold text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                                <span className="text-xs text-gray-300">Minutes</span>
+                            </div>
+                            <div className="flex flex-col items-center bg-white/10 backdrop-blur-sm rounded p-1">
+                                <span className="text-lg font-bold text-white">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                                <span className="text-xs text-gray-300">Seconds</span>
+                            </div>
+                        </div>
+
+                        <button className="w-full px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg font-bold hover:from-orange-600 hover:to-red-600 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-orange-500/25">
+                            Claim Your Discount
+                        </button>
                     </div>
                 </div>
 
