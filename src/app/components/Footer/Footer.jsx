@@ -1,7 +1,6 @@
 "use client"
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useState } from 'react';
 
 const Footer = () => {
     const [emailHovered, setEmailHovered] = useState(false);
@@ -9,16 +8,17 @@ const Footer = () => {
 
     return (
         <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+
             {/* Background decorative elements */}
             <div className="absolute inset-0">
                 <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
                 <div className="absolute bottom-0 right-0 w-64 h-64 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
             </div>
 
-            <div className="relative z-10 container mx-auto px-6 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="relative z-10 container mx-auto px-2 py-2 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {/* Company Info */}
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         <h2 className="text-2xl font-bold text-white relative inline-block group">
                             BooleanForce
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
@@ -28,7 +28,7 @@ const Footer = () => {
                         </p>
 
                         {/* Contact Info */}
-                        <div className="space-y-2 pt-4">
+                        <div className="space-y-2 pt-2">
                             <div
                                 className="flex items-center space-x-2 text-gray-300 hover:text-white transition-all duration-300 cursor-pointer group"
                                 onMouseEnter={() => setEmailHovered(true)}
@@ -55,7 +55,7 @@ const Footer = () => {
                     </div>
 
                     {/* Services */}
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-white relative inline-block group">
                             Services
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
@@ -78,7 +78,7 @@ const Footer = () => {
                     </div>
 
                     {/* Company */}
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-white relative inline-block group">
                             Company
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
@@ -99,7 +99,7 @@ const Footer = () => {
                     </div>
 
                     {/* Newsletter */}
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                         <h3 className="text-lg font-semibold text-white relative inline-block group">
                             Stay Connected
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-cyan-400 group-hover:w-full transition-all duration-300"></span>
@@ -119,7 +119,7 @@ const Footer = () => {
                 </div>
 
                 {/* Bottom Bar */}
-                <div className="mt-12 pt-8 border-t border-white/10">
+                <div className="mt-6 pt-4 border-t border-white/10">
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <p className="text-gray-400 text-sm">
                             © {new Date().getFullYear()} BooleanForce. All rights reserved.
