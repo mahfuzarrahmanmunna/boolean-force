@@ -19,10 +19,10 @@ export default function Home() {
 
 
   return (
-   <div className="min-h-screen my-12">
-     
+    <div className="min-h-screen my-12">
+
       {/* <TechBanner /> */}
-      
+
       <BooleanForceBanner />
       <BooleanLogicDemo />
       {/* <BooleanLogicSplit /> */}
@@ -31,10 +31,10 @@ export default function Home() {
       <OurServices3 /> */}
       {/* <OurServicesSlider /> */}
       <OurServicesOnlySlider />
-      <PricingCard />
+      {/* <PricingCard /> */}
       <PricingCart />
       <Partnership />
-   
-   </div>
+
+    </div>
   );
 }

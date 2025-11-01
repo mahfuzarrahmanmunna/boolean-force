@@ -1,62 +1,381 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const VerticalNavbar4 = () => {
-    const [mounted, setMounted] = useState(false);
+// Sub-components for better organization
+const SparkleBackground = () => {
     const [sparkles, setSparkles] = useState([]);
-    const [isTooltipVisible, setIsTooltipVisible] = useState('');
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
-    const timeoutRef = useRef(null);
-    const pathname = usePathname();
 
     useEffect(() => {
-        setMounted(true);
-
-        // Create sparkles
-        const colors = ['#121a278e', '#2f25468a', '#3a2630be', '#27423969', '#4b3c2380'];
+        // Optimize sparkle generation with fewer elements
         const newSparkles = [];
 
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 30; i++) { // Reduced from 100 for better performance
             newSparkles.push({
                 id: i,
-                size: Math.random() * 3 + 1,
-                color: colors[Math.floor(Math.random() * colors.length)],
+                size: Math.random() * 2 + 0.5, // Smaller size
                 top: Math.random() * 100,
                 left: Math.random() * 100,
-                animationDelay: Math.random() * 3
+                animationDelay: Math.random() * 5 // Longer animation cycle
             });
         }
 
         setSparkles(newSparkles);
     }, []);
 
-    const handleExpand = () => {
+    return (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            {sparkles.map((sparkle) => (
+                <div
+                    key={sparkle.id}
+                    className="absolute rounded-full opacity-70"
+                    style={{
+                        width: `${sparkle.size}px`,
+                        height: `${sparkle.size}px`,
+                        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                        top: `${sparkle.top}%`,
+                        left: `${sparkle.left}%`,
+                        animationDelay: `${sparkle.animationDelay}s`,
+                        boxShadow: `0 0 ${sparkle.size * 2}px rgba(255, 255, 255, 0.5)`,
+                        animation: 'twinkle 5s infinite'
+                    }}
+                />
+            ))}
+            <style jsx>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0; transform: scale(0.5); }
+          50% { opacity: 0.7; transform: scale(1); }
+        }
+      `}</style>
+        </div>
+    );
+};
+
+const HoverIndicator = ({ onExpand }) => {
+    return (
+        <div
+            className="hidden md:block fixed top-1/2 right-0 h-64 w-12 bg-gradient-to-l from-gray-900/90 to-transparent z-40 cursor-pointer transform -translate-y-1/2 rounded-l-2xl backdrop-blur-sm"
+            onMouseEnter={onExpand}
+            aria-label="Expand navigation menu"
+        >
+            <div className="flex flex-col items-center justify-center h-full">
+                <div className="flex flex-col items-center gap-2">
+                    <motion.div
+                        className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"
+                        animate={{ height: ["24px", "32px", "24px"] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                    />
+                    <motion.div
+                        className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"
+                        animate={{ height: ["24px", "32px", "24px"] }}
+                        transition={{ repeat: Infinity, duration: 1.5, delay: 0.2 }}
+                    />
+                    <motion.div
+                        className="w-1 h-8 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"
+                        animate={{ height: ["24px", "32px", "24px"] }}
+                        transition={{ repeat: Infinity, duration: 1.5, delay: 0.4 }}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const DesktopNav = ({
+    isExpanded,
+    navLinks,
+    socialLinks,
+    pathname,
+    onExpand,
+    onCollapse
+}) => {
+    const [activeTooltip, setActiveTooltip] = useState(null);
+
+    return (
+        <motion.nav
+            className="hidden md:flex fixed top-4/9 right-0 transform -translate-y-1/2 z-50"
+            style={{
+                height: 'min(80vh, 500px)',
+                borderTopLeftRadius: isExpanded ? '1.5rem' : '0',
+                borderBottomLeftRadius: isExpanded ? '1.5rem' : '0',
+                borderTopRightRadius: isExpanded ? '0' : '0',
+                borderBottomRightRadius: isExpanded ? '0' : '0',
+            }}
+            initial={false}
+            animate={{ width: isExpanded ? 256 : 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            onMouseEnter={onExpand}
+            onMouseLeave={onCollapse}
+        >
+            {isExpanded && (
+                <motion.div
+                    className="flex flex-col h-full p-6 w-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                >
+                    {/* Logo */}
+                    <div className="flex justify-center mb-6">
+                        <motion.div
+                            className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg cursor-pointer"
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span className="text-white font-bold text-2xl">BF</span>
+                        </motion.div>
+                    </div>
+
+                    {/* Decorative line */}
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-6"></div>
+
+                    {/* Navigation Links */}
+                    <ul className="flex flex-col items-center gap-3 mb-6">
+                        {navLinks.map((link) => (
+                            <li key={link.name} className="relative w-full">
+                                <Link
+                                    href={link.href}
+                                    className={`group flex items-center justify-center w-full transition-all duration-300 ${pathname === link.href ? 'text-white' : 'text-gray-300 hover:text-white'
+                                        }`}
+                                    onMouseEnter={() => setActiveTooltip(link.name)}
+                                    onMouseLeave={() => setActiveTooltip(null)}
+                                    aria-label={`Navigate to ${link.name}`}
+                                >
+                                    <motion.div
+                                        className={`p-3 rounded-xl w-full flex items-center justify-center ${pathname === link.href
+                                            ? 'bg-gradient-to-r from-blue-500/20 to-purple-600/20 shadow-lg border border-blue-500/30'
+                                            : 'hover:bg-gray-700/30'
+                                            }`}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        {link.icon}
+                                    </motion.div>
+                                </Link>
+
+                                {/* Tooltip */}
+                                <AnimatePresence>
+                                    {activeTooltip === link.name && (
+                                        <motion.div
+                                            className="absolute right-full mr-3 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white text-sm py-2 px-3 rounded-lg whitespace-nowrap shadow-xl"
+                                            initial={{ opacity: 0, x: 10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 10 }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            {link.name}
+                                            <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-l-8 border-l-gray-800"></div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* Decorative line */}
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-6"></div>
+
+                    {/* Social Links */}
+                    <ul className="flex flex-col items-center gap-3 mb-6">
+                        {socialLinks.map((social) => (
+                            <li key={social.name} className="relative w-full">
+                                <a
+                                    href={social.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-300 transition-all duration-300 hover:text-white group flex items-center justify-center w-full"
+                                    aria-label={`Visit our ${social.name} profile`}
+                                >
+                                    <motion.div
+                                        className="p-3 rounded-xl transition-all duration-300 hover:bg-gray-700/30 w-full flex items-center justify-center"
+                                        whileHover={{ scale: 1.05, rotate: 5 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        {social.icon}
+                                    </motion.div>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+
+                    {/* Decorative line */}
+                    <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mt-auto"></div>
+                </motion.div>
+            )}
+        </motion.nav>
+    );
+};
+
+const MobileMenu = ({
+    isOpen,
+    navLinks,
+    socialLinks,
+    pathname,
+    onClose
+}) => {
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <>
+                    <motion.div
+                        className="fixed inset-0 z-40 bg-black/90 backdrop-blur-xl md:hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={onClose}
+                    />
+                    <motion.div
+                        className="fixed top-0 right-0 h-full w-80 bg-gradient-to-b from-gray-900/95 to-gray-800/95 backdrop-blur-xl z-50 md:hidden"
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    >
+                        <div className="flex flex-col h-full p-6">
+                            {/* Close button */}
+                            <div className="flex justify-end mb-8">
+                                <motion.button
+                                    onClick={onClose}
+                                    className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none transition-all duration-300"
+                                    whileHover={{ scale: 1.1, rotate: 90 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    aria-label="Close menu"
+                                >
+                                    <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </motion.button>
+                            </div>
+
+                            {/* Logo */}
+                            <div className="flex justify-center mb-8">
+                                <motion.div
+                                    className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                >
+                                    <span className="text-white font-bold text-2xl">BF</span>
+                                </motion.div>
+                            </div>
+
+                            {/* Navigation Links */}
+                            <ul className="flex flex-col gap-2 mb-8">
+                                {navLinks.map((link, index) => (
+                                    <motion.li
+                                        key={link.name}
+                                        initial={{ opacity: 0, x: 50 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.1 }}
+                                    >
+                                        <Link
+                                            href={link.href}
+                                            onClick={onClose}
+                                            className={`flex items-center gap-3 font-medium text-lg p-3 rounded-xl transition-all duration-300 ${pathname === link.href
+                                                ? 'text-white bg-gradient-to-r from-blue-500/20 to-purple-600/20 border border-blue-500/30'
+                                                : 'text-gray-300 hover:text-white hover:bg-white/10'
+                                                }`}
+                                        >
+                                            <div className="p-2 rounded-lg transition-all duration-300">
+                                                {link.icon}
+                                            </div>
+                                            {link.name}
+                                        </Link>
+                                    </motion.li>
+                                ))}
+                            </ul>
+
+                            {/* Social Links */}
+                            <div className="mt-auto">
+                                <p className="text-gray-400 text-sm mb-4">Connect with us</p>
+                                <ul className="flex gap-4">
+                                    {socialLinks.map((social, index) => (
+                                        <motion.li
+                                            key={social.name}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: 0.5 + index * 0.1 }}
+                                        >
+                                            <a
+                                                href={social.href}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-300 transition-colors duration-300 text-xl hover:text-white p-2 rounded-lg hover:bg-white/10"
+                                                aria-label={`Visit our ${social.name} profile`}
+                                            >
+                                                {social.icon}
+                                            </a>
+                                        </motion.li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
+    );
+};
+
+const MobileMenuButton = ({ isOpen, onClick }) => {
+    return (
+        <div className="md:hidden fixed top-4 right-4 z-50">
+            <motion.button
+                onClick={onClick}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300 backdrop-blur-sm"
+                aria-expanded={isOpen}
+                aria-label="Toggle navigation menu"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+            >
+                <span className="sr-only">Open main menu</span>
+                {!isOpen ? (
+                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                ) : (
+                    <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                )}
+            </motion.button>
+        </div>
+    );
+};
+
+const VerticalNavbar4 = () => {
+    const [mounted, setMounted] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const timeoutRef = useRef(null);
+    const pathname = usePathname();
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const handleExpand = useCallback(() => {
         setIsExpanded(true);
-        // Clear any existing timeout
         if (timeoutRef.current) {
             clearTimeout(timeoutRef.current);
         }
-    };
+    }, []);
 
-    const handleCollapse = () => {
-        // Set a timeout to collapse after a short delay
+    const handleCollapse = useCallback(() => {
         timeoutRef.current = setTimeout(() => {
             setIsExpanded(false);
         }, 300);
-    };
+    }, []);
 
-    const toggleExpand = () => {
-        if (isExpanded) {
-            setIsExpanded(false);
-        } else {
-            setIsExpanded(true);
-        }
-    };
+    const toggleMobileMenu = useCallback(() => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    }, [isMobileMenuOpen]);
 
+    const closeMobileMenu = useCallback(() => {
+        setIsMobileMenuOpen(false);
+    }, []);
+
+    // Navigation links data
     const navLinks = [
         {
             name: 'Services',
@@ -105,6 +424,7 @@ const VerticalNavbar4 = () => {
         },
     ];
 
+    // Social links data
     const socialLinks = [
         {
             name: 'GitHub',
@@ -135,215 +455,35 @@ const VerticalNavbar4 = () => {
         },
     ];
 
-    const toggleMobileMenu = () => {
-        setIsMobileMenuOpen(!isMobileMenuOpen);
-    };
-
-    const closeMobileMenu = () => {
-        setIsMobileMenuOpen(false);
-    };
-
     return (
         <>
             {/* Sparkle Background */}
-            <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-                {sparkles.map((sparkle) => (
-                    <div
-                        key={sparkle.id}
-                        className="absolute rounded-full opacity-0"
-                        style={{
-                            width: `${sparkle.size}px`,
-                            height: `${sparkle.size}px`,
-                            backgroundColor: sparkle.color,
-                            top: `${sparkle.top}vh`,
-                            left: `${sparkle.left}vw`,
-                            animationDelay: `${sparkle.animationDelay}s`,
-                            boxShadow: `0 0 ${sparkle.size * 2}px ${sparkle.color}`,
-                            animation: 'twinkle 3s infinite'
-                        }}
-                    />
-                ))}
-            </div>
+            <SparkleBackground />
 
-            {/* Mobile menu button - only visible on small devices */}
-            {/* <div className="md:hidden fixed top-4 right-4 z-50">
-                <button
-                    onClick={toggleMobileMenu}
-                    className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300 bg-black/30 backdrop-blur-sm"
-                    aria-expanded={isMobileMenuOpen}
-                >
-                    <span className="sr-only">Open main menu</span>
-                    {!isMobileMenuOpen ? (
-                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    ) : (
-                        <svg className="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    )}
-                </button>
-            </div> */}
+            {/* Mobile Menu Button */}
+            <MobileMenuButton isOpen={isMobileMenuOpen} onClick={toggleMobileMenu} />
 
-            {/* Shadow indicator - always visible when navbar is collapsed */}
-            {!isExpanded && (
-                <div
-                    className="hidden md:block fixed top-0 right-0 h-full w-8 bg-gradient-to-l from-black/40 to-transparent z-40 cursor-pointer"
-                    onMouseEnter={handleExpand}
-                />
-            )}
+            {/* Hover Indicator for Desktop */}
+            {!isExpanded && <HoverIndicator onExpand={handleExpand} />}
 
-            {/* Vertical Navbar - only visible on medium+ devices */}
-            <nav
-                className={`hidden md:flex fixed top-0 right-0 h-screen bg-black/70 backdrop-blur-lg z-50 transition-all duration-500 ease-in-out ${isExpanded ? 'w-64' : 'w-0'}`}
-                onMouseEnter={handleExpand}
-                onMouseLeave={handleCollapse}
-            >
-                {/* Expanded state - full navbar */}
-                {isExpanded && (
-                    <div className="flex flex-col h-full p-4 w-64">
-                        {/* Logo at top */}
-                        <div className="flex w-12 h-12 justify-center items-center flex-shrink-0 mb-4 transition-transform duration-300 cursor-pointer hover:scale-110">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                                <span className="text-white font-bold text-xl">BF</span>
-                            </div>
-                        </div>
+            {/* Desktop Navigation */}
+            <DesktopNav
+                isExpanded={isExpanded}
+                navLinks={navLinks}
+                socialLinks={socialLinks}
+                pathname={pathname}
+                onExpand={handleExpand}
+                onCollapse={handleCollapse}
+            />
 
-                        {/* Top decorative line */}
-                        <div className="w-px bg-gray-300 flex-1 mb-4"></div>
-
-                        {/* Navigation Links */}
-                        <ul className="flex flex-col items-center gap-6 list-none mb-4">
-                            {navLinks.map((link) => (
-                                <li key={link.name} className="relative">
-                                    <Link
-                                        href={link.href}
-                                        className={`text-gray-300 transition-all duration-300 cursor-pointer bg-transparent border-0 no-underline hover:text-[#3B85FE] group ${mounted && pathname === link.href ? 'text-[#3B85FE]' : ''
-                                            }`}
-                                        onMouseEnter={() => setIsTooltipVisible(link.name)}
-                                        onMouseLeave={() => setIsTooltipVisible('')}
-                                    >
-                                        <div className={`p-2 rounded-lg transition-all duration-300 ${mounted && pathname === link.href
-                                            ? 'bg-slate-800/50 shadow-lg'
-                                            : 'hover:bg-slate-800/30'
-                                            }`}>
-                                            {link.icon}
-                                        </div>
-                                    </Link>
-
-                                    {/* Tooltip */}
-                                    {isTooltipVisible === link.name && (
-                                        <div className="absolute right-full mr-2 top-1/2 transform -translate-y-1/2 bg-slate-800 text-white text-sm py-1 px-2 rounded whitespace-nowrap">
-                                            {link.name}
-                                            <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-slate-800"></div>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-
-                        {/* Middle decorative line */}
-                        <div className="w-px bg-gray-300 flex-1 mb-4"></div>
-
-                        {/* Social Links */}
-                        <ul className="flex flex-col items-center gap-5 list-none">
-                            {socialLinks.map((social) => (
-                                <li key={social.name}>
-                                    <a
-                                        href={social.href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-gray-300 transition-all duration-300 cursor-pointer bg-transparent no-underline hover:text-[#3B85FE] group"
-                                    >
-                                        <div className="p-2 rounded-lg transition-all duration-300 hover:bg-slate-800/30">
-                                            {social.icon}
-                                        </div>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-
-                        {/* Bottom decorative line */}
-                        <div className="w-px bg-gray-300 h-8 mt-4"></div>
-                    </div>
-                )}
-            </nav>
-
-            {/* Mobile menu - only visible on small devices when open */}
-            <div className={`fixed inset-0 z-40 transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
-                <div
-                    className="absolute inset-0 bg-black/90 backdrop-blur-xl"
-                    onClick={closeMobileMenu}
-                ></div>
-                <div className={`absolute top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-xl transform transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                    <div className="flex flex-col h-full p-6">
-                        {/* Close button */}
-                        <div className="flex justify-end mb-8">
-                            <button
-                                onClick={closeMobileMenu}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none transition-all duration-300"
-                            >
-                                <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        {/* Logo */}
-                        <div className="flex w-12 h-12 justify-center items-center mb-8">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg">
-                                <span className="text-white font-bold text-xl">BF</span>
-                            </div>
-                        </div>
-
-                        {/* Navigation Links */}
-                        <ul className="flex flex-col gap-2 mb-8">
-                            {navLinks.map((link) => (
-                                <li key={link.name}>
-                                    <Link
-                                        href={link.href}
-                                        onClick={closeMobileMenu}
-                                        className={`flex items-center gap-3 text-gray-300 font-medium text-lg p-3 rounded-lg transition-all duration-300 hover:text-white hover:bg-white/10 ${mounted && pathname === link.href ? 'text-[#3B85FE] bg-white/5' : ''
-                                            }`}
-                                    >
-                                        <div className="p-2 rounded-lg transition-all duration-300">
-                                            {link.icon}
-                                        </div>
-                                        {link.name}
-                                    </Link>
-                                </li>
-                            ))}
-                        </ul>
-
-                        {/* Social Links */}
-                        <div className="mt-auto">
-                            <p className="text-gray-400 text-sm mb-4">Connect with us</p>
-                            <ul className="flex gap-4">
-                                {socialLinks.map((social) => (
-                                    <li key={social.name}>
-                                        <a
-                                            href={social.href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-gray-300 transition-colors duration-300 text-xl hover:text-[#3B85FE] p-2 rounded-lg hover:bg-white/10"
-                                        >
-                                            {social.icon}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* CSS for twinkle animation */}
-            <style jsx>{`
-                @keyframes twinkle {
-                    0%, 100% { opacity: 0; }
-                    50% { opacity: 1; }
-                }
-            `}</style>
+            {/* Mobile Menu */}
+            <MobileMenu
+                isOpen={isMobileMenuOpen}
+                navLinks={navLinks}
+                socialLinks={socialLinks}
+                pathname={pathname}
+                onClose={closeMobileMenu}
+            />
         </>
     );
 };
