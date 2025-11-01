@@ -45,7 +45,9 @@ export default function RootLayout({ children }) {
 
 
           <main className="flex-grow">
-            <ClientLayout> {children}</ClientLayout>
+            <ClientLayout>
+                {children}
+            </ClientLayout>
           </main>
 
           {/* Footer is always at the bottom of the flex container */}
