@@ -96,16 +96,16 @@ const DesktopNav = ({
 
     return (
         <motion.nav
-            className="hidden md:flex fixed top-4/9 right-0 transform -translate-y-1/2 z-50"
+            className="hidden md:flex fixed top-4/9 items-center right-0 transform -translate-y-2/4 z-50 shadow-lg"
             style={{
-                height: 'min(80vh, 500px)',
+                height: 'min( )',
                 borderTopLeftRadius: isExpanded ? '1.5rem' : '0',
                 borderBottomLeftRadius: isExpanded ? '1.5rem' : '0',
                 borderTopRightRadius: isExpanded ? '0' : '0',
                 borderBottomRightRadius: isExpanded ? '0' : '0',
             }}
             initial={false}
-            animate={{ width: isExpanded ? 256 : 0 }}
+            animate={{ width: isExpanded ? 120 : 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
             onMouseEnter={onExpand}
             onMouseLeave={onCollapse}
@@ -118,7 +118,7 @@ const DesktopNav = ({
                     transition={{ duration: 0.3, delay: 0.1 }}
                 >
                     {/* Logo */}
-                    <div className="flex justify-center mb-6">
+                    {/* <div className="flex justify-center mb-6">
                         <motion.div
                             className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg cursor-pointer"
                             whileHover={{ scale: 1.1, rotate: 5 }}
@@ -126,7 +126,7 @@ const DesktopNav = ({
                         >
                             <span className="text-white font-bold text-2xl">BF</span>
                         </motion.div>
-                    </div>
+                    </div> */}
 
                     {/* Decorative line */}
                     <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent mb-6"></div>

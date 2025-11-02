@@ -1,14 +1,13 @@
-// app/api/pricing-plans/route.js
-
+// app/api/services/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
-// GET - Fetch all pricing plans
+// GET - Fetch all services
 export async function GET(request) {
-    console.log("GET /api/pricing-plans called");
+    console.log("GET /api/services called");
     try {
-        const collection = await dbConnect('pricingPlans');
+        const collection = await dbConnect('services');
         const data = await collection.find({}).toArray();
 
         // Convert ObjectId to string for JSON serialization
@@ -17,11 +16,11 @@ export async function GET(request) {
             _id: item._id.toString()
         }));
 
-        console.log("Fetched pricing plans:", serializedData);
+        console.log("Fetched services:", serializedData);
         return NextResponse.json(serializedData);
     }
     catch (err) {
-        console.error("BooleanForce: Error in GET /api/pricing-plans:", err);
+        console.error("BooleanForce: Error in GET /api/services:", err);
         return new Response(
             JSON.stringify({
                 success: false,
@@ -36,13 +35,13 @@ export async function GET(request) {
     }
 }
 
-// POST - Add a new pricing plan
+// POST - Add a new service
 export async function POST(request) {
-    console.log("POST /api/pricing-plans called");
+    console.log("POST /api/services called");
     try {
         const postData = await request.json();
-        console.log("Adding new pricing plan:", postData);
-        const collection = await dbConnect('pricingPlans');
+        console.log("Adding new service:", postData);
+        const collection = await dbConnect('services');
         const result = await collection.insertOne(postData);
 
         // Return the inserted document with the string ID
@@ -55,7 +54,7 @@ export async function POST(request) {
         return NextResponse.json(
             {
                 success: true,
-                message: "Pricing plan added successfully!",
+                message: "Service added successfully!",
                 data: serializedDocument,
                 insertId: result.insertedId.toString(),
                 acknowledged: result.acknowledged,
@@ -64,7 +63,7 @@ export async function POST(request) {
         );
     }
     catch (err) {
-        console.error("BooleanForce: Error in POST /api/pricing-plans:", err);
+        console.error("BooleanForce: Error in POST /api/services:", err);
         return new Response(
             JSON.stringify({
                 success: false,
@@ -78,4 +77,3 @@ export async function POST(request) {
         );
     }
 }
-
