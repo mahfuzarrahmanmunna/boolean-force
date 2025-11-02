@@ -173,11 +173,12 @@ const ContactPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Validate form
         const errors = validateForm();
 
         if (Object.keys(errors).length > 0) {
             setFormStatus({
-                submitted: false,
+                submitted: true,
                 success: false,
                 message: 'Please fix the errors below',
                 errors
@@ -185,26 +186,13 @@ const ContactPage = () => {
             return;
         }
 
-        // Log form data to console
-        console.log('=== FORM SUBMISSION ===');
-        console.log('Name:', formData.name);
-        console.log('Email:', formData.email);
-        console.log('Phone:', formData.phone);
-        console.log('Company:', formData.company);
-        console.log('Services:', formData.services);
-        console.log('Budget:', formData.budget);
-        console.log('Timeline:', formData.timeline);
-        console.log('Message:', formData.message);
-        console.log('========================');
-
-        // Also log the entire form object
-        console.log('Form Data Object:', formData);
-
         setIsSubmitting(true);
 
         try {
-            // Send data to API
-            const apiResponse = await fetch('/api/contact', {
+            // Log the form data for debugging
+            console.log('Form Data Object:', formData);
+
+            const response = await fetch('/api/contact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -212,15 +200,13 @@ const ContactPage = () => {
                 body: JSON.stringify(formData),
             });
 
-            // Check if response is ok
-            if (!apiResponse.ok) {
-                const errorText = await apiResponse.text();
-                console.error('Response not ok:', apiResponse.status, errorText);
-                throw new Error(`Server responded with ${apiResponse.status}: ${errorText}`);
+            // Check if the response is OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await apiResponse.json();
-            console.log('API Response:', data);
+            const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
                 setFormStatus({
@@ -251,10 +237,17 @@ const ContactPage = () => {
             }
         } catch (error) {
             console.error('Error submitting form:', error);
+
+            // Provide more specific error messages
+            let errorMessage = 'Network error. Please check your connection and try again.';
+            if (error.message.includes('Failed to fetch')) {
+                errorMessage = 'Unable to connect to the server. Please check if the server is running.';
+            }
+
             setFormStatus({
                 submitted: true,
                 success: false,
-                message: 'Network error. Please check your connection and try again.',
+                message: errorMessage,
                 errors: {}
             });
         } finally {
