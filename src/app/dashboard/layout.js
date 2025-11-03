@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -52,11 +52,18 @@ import {
     Sparkles,
     Gem,
     Award,
-    Bookmark
+    Bookmark,
+    ChevronLeft,
+    ChevronRight,
+    ArrowLeft,
+    ArrowRight,
+    PanelLeftClose,
+    PanelLeftOpen
 } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [darkMode, setDarkMode] = useState(true);
     const [activeSubmenu, setActiveSubmenu] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +71,12 @@ export default function AdminLayout({ children }) {
     const [profileOpen, setProfileOpen] = useState(false);
     const [screenSize, setScreenSize] = useState('lg');
     const [isHovering, setIsHovering] = useState(false);
+    const [toggleHover, setToggleHover] = useState(false);
     const pathname = usePathname();
+
+    // Refs for dropdowns to handle clicks outside
+    const notificationsRef = useRef(null);
+    const profileRef = useRef(null);
 
     // Sample notifications data
     const notifications = [
@@ -95,6 +107,23 @@ export default function AdminLayout({ children }) {
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Close dropdowns when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
+                setNotificationsOpen(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(event.target)) {
+                setProfileOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
     }, []);
 
     const menuItems = [
@@ -228,32 +257,80 @@ export default function AdminLayout({ children }) {
                 />
             )}
 
+            {/* Professional Sidebar Toggle Button */}
+            {/* {sidebarOpen && (
+                <div
+                    className={`fixed top-24 z-50 transition-all duration-500 ease-in-out ${sidebarCollapsed ? 'left-16' : 'left-72'}`}
+                    onMouseEnter={() => setToggleHover(true)}
+                    onMouseLeave={() => setToggleHover(false)}
+                >
+                    <button
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        className={`relative flex items-center justify-center w-12 h-12 rounded-r-2xl shadow-xl transition-all duration-300 transform ${toggleHover ? 'scale-110' : 'scale-100'} ${sidebarCollapsed
+                            ? 'bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500'
+                            : 'bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600'
+                            } text-white border-t border-b border-r border-slate-600`}
+                        title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    >
+                        <div className={`relative transition-transform duration-300 ${sidebarCollapsed ? 'rotate-0' : 'rotate-180'}`}>
+                            {sidebarCollapsed ? (
+                                <ChevronRight className="w-6 h-6" />
+                            ) : (
+                                <ChevronLeft className="w-6 h-6" />
+                            )}
+                        </div>
+
+                        <div className={`absolute left-full ml-2 px-3 py-1 bg-slate-900 text-white text-sm rounded-md shadow-lg whitespace-nowrap transition-all duration-300 ${toggleHover ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'} pointer-events-none`}>
+                            {sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                            <div className="absolute top-1/2 -translate-y-1/2 -left-1 w-2 h-2 bg-slate-900 rotate-45"></div>
+                        </div>
+
+                        <span className="absolute inset-0 rounded-r-2xl bg-white opacity-0 hover:opacity-20 transition-opacity duration-300"></span>
+                    </button>
+                </div>
+            )} */}
+
+            {/* Alternative Toggle Button at Top */}
+            {sidebarOpen && (
+                <div className={`fixed top-4 z-50 transition-all duration-500 ease-in-out ${sidebarCollapsed ? 'left-16' : 'left-72'}`}>
+                    <button
+                        onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                        className={`group relative flex items-center justify-center w-10 h-10 rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 ${sidebarCollapsed
+                            ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500'
+                            : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500'
+                            } text-white`}
+                        title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+                    >
+                        <div className={`transition-transform duration-300 ${sidebarCollapsed ? 'rotate-0' : 'rotate-180'}`}>
+                            {sidebarCollapsed ? (
+                                <PanelLeftOpen className="w-5 h-5" />
+                            ) : (
+                                <PanelLeftClose className="w-5 h-5" />
+                            )}
+                        </div>
+
+                        {/* Glow Effect */}
+                        <span className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm"></span>
+                    </button>
+                </div>
+            )}
+
             {/* Sidebar - Fixed/Sticky Position */}
-            <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${screenSize === 'xl' ? 'w-72' : screenSize === 'lg' ? 'w-20' : 'w-72'} fixed top-0 left-0 h-screen bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-all duration-300 ease-in-out z-50 flex flex-col shadow-2xl`}
+            <aside className={`${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'w-16' : 'w-72'} fixed top-0 left-0 h-screen bg-gradient-to-b from-slate-900 to-slate-800 border-r border-slate-700 transition-all duration-500 ease-in-out z-50 flex flex-col shadow-2xl`}
                 onMouseEnter={() => setIsHovering(true)}
                 onMouseLeave={() => setIsHovering(false)}
             >
                 {/* Logo */}
                 <div className="p-6 border-b border-slate-700">
-                    <div className="flex items-center justify-between">
-                        <div className={`flex items-center ${screenSize === 'lg' && !sidebarOpen ? 'justify-center' : ''}`}>
-                            <div className="relative">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                                    <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-300" />
-                                    BF
-                                </div>
+                    <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''}`}>
+                        <div className="relative">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
+                                <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-yellow-300" />
+                                BF
                             </div>
-                            {(screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
-                                <span className="ml-3 text-xl font-bold text-white">Admin Panel</span>
-                            )}
                         </div>
-                        {screenSize !== 'xl' && (
-                            <button
-                                onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="p-2 rounded-lg hover:bg-slate-700 transition-colors text-slate-400 hover:text-white"
-                            >
-                                {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                            </button>
+                        {!sidebarCollapsed && (
+                            <span className="ml-3 text-xl font-bold text-white transition-opacity duration-300">Admin Panel</span>
                         )}
                     </div>
                 </div>
@@ -276,17 +353,17 @@ export default function AdminLayout({ children }) {
                                             <span className={`flex-shrink-0 ${isActive(item.href) ? '' : 'text-slate-400'}`}>
                                                 {item.icon}
                                             </span>
-                                            {(screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
-                                                <span className="ml-3 text-white font-medium">{item.title}</span>
+                                            {!sidebarCollapsed && (
+                                                <span className="ml-3 text-white font-medium transition-opacity duration-300">{item.title}</span>
                                             )}
                                         </div>
                                         <div className="flex items-center">
-                                            {item.badge && (screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
+                                            {item.badge && !sidebarCollapsed && (
                                                 <span className={`px-2 py-1 text-xs rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-sm`}>
                                                     {item.badge}
                                                 </span>
                                             )}
-                                            {item.submenu && (screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
+                                            {item.submenu && !sidebarCollapsed && (
                                                 <ChevronDown
                                                     className={`w-4 h-4 ml-2 transition-transform text-slate-400 ${activeSubmenu === item.title ? 'rotate-180' : ''
                                                         }`}
@@ -296,7 +373,7 @@ export default function AdminLayout({ children }) {
                                     </Link>
 
                                     {/* Submenu */}
-                                    {item.submenu && activeSubmenu === item.title && (screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
+                                    {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
                                         <ul className="mt-2 ml-10 space-y-1">
                                             {item.submenu.map((subitem) => (
                                                 <li key={subitem.title}>
@@ -326,15 +403,15 @@ export default function AdminLayout({ children }) {
                         className="w-full flex items-center justify-center p-3 rounded-lg bg-slate-800 hover:bg-slate-700 transition-all duration-200 text-slate-300 hover:text-white"
                     >
                         {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                        {(screenSize === 'xl' || (screenSize === 'lg' && sidebarOpen)) && (
-                            <span className="ml-3">{darkMode ? 'Light' : 'Dark'}</span>
+                        {!sidebarCollapsed && (
+                            <span className="ml-3 transition-opacity duration-300">{darkMode ? 'Light' : 'Dark'}</span>
                         )}
                     </button>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? (screenSize === 'xl' ? 'ml-72' : screenSize === 'lg' ? 'ml-20' : 'ml-0') : 'ml-0'}`}>
+            <div className={`flex-1 flex flex-col min-h-screen transition-all duration-500 ${sidebarOpen ? (sidebarCollapsed ? 'ml-16' : 'ml-72') : 'ml-0'}`}>
                 {/* Header */}
                 <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 sm:px-6 py-4 shadow-sm sticky top-0 z-30">
                     <div className="flex items-center justify-between">
@@ -363,7 +440,7 @@ export default function AdminLayout({ children }) {
                         {/* Right Side Actions */}
                         <div className="flex items-center space-x-2 sm:space-x-4">
                             {/* Notifications */}
-                            <div className="relative">
+                            <div className="relative" ref={notificationsRef}>
                                 <button
                                     onClick={() => setNotificationsOpen(!notificationsOpen)}
                                     className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 relative transition-colors"
@@ -409,7 +486,7 @@ export default function AdminLayout({ children }) {
                             </div>
 
                             {/* Profile */}
-                            <div className="relative">
+                            <div className="relative" ref={profileRef}>
                                 <button
                                     onClick={() => setProfileOpen(!profileOpen)}
                                     className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
