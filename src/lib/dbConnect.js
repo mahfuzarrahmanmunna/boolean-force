@@ -1,17 +1,29 @@
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion } from 'mongodb';
 
-let client;
-let db;
+let cachedClient = null;
+let cachedDb = null;
 
-export default async function dbConnect() {
-    if (!client) {
-        client = new MongoClient(process.env.MONGO_DB_URI, {
-            serverApi: { version: ServerApiVersion.v1, strict: true, deprecationErrors: true }
-        });
+const uri = process.env.MONGODB_URI;
+const dbName = process.env.DB_NAME;
+
+if (!uri || !dbName) {
+    throw new Error("Please define MONGO_URI and DB_NAME in your .env file");
+}
+
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    },
+});
+
+export async function dbConnect(collectionName) {
+    if (!cachedClient || !cachedDb) {
         await client.connect();
-        db = client.db(process.env.DB_NAME)
+        cachedClient = client;
+        cachedDb = client.db(dbName);
     }
 
-    // return db.collection(collectionName)
-    return db;
+    return cachedDb.collection(collectionName);
 }

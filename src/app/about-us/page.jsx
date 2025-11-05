@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import {
     Renderer,
     Program,
@@ -21,7 +21,26 @@ import {
     Github,
     Star,
     Quote,
-    Calendar
+    Calendar,
+    Globe,
+    Zap,
+    Shield,
+    TrendingUp,
+    Clock,
+    CheckCircle,
+    BarChart,
+    Briefcase,
+    Code,
+    Palette,
+    Megaphone,
+    ChevronUp,
+    ArrowUpRight,
+    Sparkles,
+    Layers,
+    Cpu,
+    Cloud,
+    Database,
+    Smartphone
 } from 'lucide-react';
 
 const AboutUs = () => {
@@ -30,6 +49,7 @@ const AboutUs = () => {
     const [activeTeamMember, setActiveTeamMember] = useState(null);
     const [isClient, setIsClient] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [activeTab, setActiveTab] = useState('mission');
 
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll();
@@ -48,9 +68,9 @@ const AboutUs = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Orb Component
+    // Enhanced Orb Component with more professional appearance
     const Orb = ({
-        hue = 0,
+        hue = 220,
         hoverIntensity = 0.2,
         rotateOnHover = true,
         forceHoverState = false,
@@ -329,59 +349,63 @@ const AboutUs = () => {
         return <div ref={ctnDom} className="w-full h-full" />;
     };
 
-    // Data
+    // Enhanced Data
     const teamMembers = [
         {
             id: 1,
             name: "Alex Johnson",
             position: "CEO & Founder",
-            bio: "Visionary leader with 15+ years of experience in digital transformation and business strategy.",
+            bio: "Visionary leader with 15+ years of experience in digital transformation and business strategy. Harvard MBA with a track record of successful exits.",
             image: "https://picsum.photos/seed/alexjohnson/400/400.jpg",
             social: {
                 twitter: "#",
                 linkedin: "#",
                 github: "#"
             },
-            skills: ["Leadership", "Strategy", "Innovation"]
+            skills: ["Leadership", "Strategy", "Innovation"],
+            achievements: ["Forbes 30 Under 30", "TechCrunch Disrupt Winner", "3x Founder"]
         },
         {
             id: 2,
             name: "Sarah Williams",
             position: "CTO",
-            bio: "Tech enthusiast passionate about building scalable solutions and leading development teams.",
+            bio: "Tech enthusiast passionate about building scalable solutions and leading development teams. Former Google engineer with expertise in distributed systems.",
             image: "https://picsum.photos/seed/sarahwilliams/400/400.jpg",
             social: {
                 twitter: "#",
                 linkedin: "#",
                 github: "#"
             },
-            skills: ["Architecture", "Cloud", "AI/ML"]
+            skills: ["Architecture", "Cloud", "AI/ML"],
+            achievements: ["AWS Certified Architect", "Kubernetes Contributor", "Patent Holder"]
         },
         {
             id: 3,
             name: "Michael Chen",
             position: "Head of Design",
-            bio: "Creative mind focused on user experience and creating visually stunning interfaces.",
+            bio: "Creative mind focused on user experience and creating visually stunning interfaces. Former Apple designer with multiple design awards.",
             image: "https://picsum.photos/seed/michaelchen/400/400.jpg",
             social: {
                 twitter: "#",
                 linkedin: "#",
                 github: "#"
             },
-            skills: ["UI/UX", "Branding", "Animation"]
+            skills: ["UI/UX", "Branding", "Animation"],
+            achievements: ["Red Dot Design Award", "Awwwards Site of the Day", "D&AD Pencil Winner"]
         },
         {
             id: 4,
             name: "Emily Rodriguez",
             position: "Marketing Director",
-            bio: "Strategic marketer with a proven track record of growing brands and reaching audiences.",
+            bio: "Strategic marketer with a proven track record of growing brands and reaching audiences. Former VP of Marketing at a unicorn startup.",
             image: "https://picsum.photos/seed/emilyrodriguez/400/400.jpg",
             social: {
                 twitter: "#",
                 linkedin: "#",
                 github: "#"
             },
-            skills: ["Strategy", "Content", "Analytics"]
+            skills: ["Strategy", "Content", "Analytics"],
+            achievements: ["Clio Award Winner", "AdAge 40 Under 40", "Marketing Book Author"]
         }
     ];
 
@@ -389,28 +413,28 @@ const AboutUs = () => {
         {
             id: 1,
             title: "Innovation",
-            description: "We constantly push boundaries and explore new possibilities to deliver cutting-edge solutions.",
+            description: "We constantly push boundaries and explore new possibilities to deliver cutting-edge solutions that transform industries.",
             icon: <Lightbulb className="w-8 h-8" />,
             color: "#3B85FE"
         },
         {
             id: 2,
             title: "Excellence",
-            description: "We are committed to delivering the highest quality in everything we do.",
+            description: "We are committed to delivering the highest quality in everything we do, exceeding expectations at every turn.",
             icon: <Award className="w-8 h-8" />,
             color: "#A9DBDC"
         },
         {
             id: 3,
             title: "Integrity",
-            description: "We conduct business with honesty, transparency, and ethical principles.",
+            description: "We conduct business with honesty, transparency, and ethical principles that build lasting trust with our clients.",
             icon: <Target className="w-8 h-8" />,
             color: "#6366F1"
         },
         {
             id: 4,
             title: "Collaboration",
-            description: "We believe in the power of teamwork and diverse perspectives.",
+            description: "We believe in the power of teamwork and diverse perspectives to create solutions that no single individual could achieve alone.",
             icon: <Users className="w-8 h-8" />,
             color: "#3B85FE"
         }
@@ -420,27 +444,32 @@ const AboutUs = () => {
         {
             year: "2015",
             title: "Company Founded",
-            description: "Started with a small team and a big vision to transform digital experiences."
+            description: "Started with a small team and a big vision to transform digital experiences. Initial investment of $500K from angel investors.",
+            icon: <Sparkles className="w-6 h-6" />
         },
         {
             year: "2017",
             title: "First Major Client",
-            description: "Landed our first enterprise client, marking our entry into the big league."
+            description: "Landed our first enterprise client, marking our entry into the big league. Revenue grew 300% in the first year.",
+            icon: <Briefcase className="w-6 h-6" />
         },
         {
             year: "2019",
             title: "Expansion",
-            description: "Opened new offices in three cities and expanded our team to 50+ professionals."
+            description: "Opened new offices in three cities and expanded our team to 50+ professionals. Series A funding of $5M secured.",
+            icon: <Globe className="w-6 h-6" />
         },
         {
             year: "2021",
             title: "Product Launch",
-            description: "Launched our flagship SaaS product, serving over 10,000 users worldwide."
+            description: "Launched our flagship SaaS product, serving over 10,000 users worldwide. Reached profitability in Q3.",
+            icon: <Zap className="w-6 h-6" />
         },
         {
             year: "2023",
             title: "Industry Recognition",
-            description: "Received multiple industry awards and recognized as a market leader."
+            description: "Received multiple industry awards and recognized as a market leader. Series B funding of $20M at $100M valuation.",
+            icon: <Award className="w-6 h-6" />
         }
     ];
 
@@ -450,32 +479,75 @@ const AboutUs = () => {
             name: "John Smith",
             position: "CEO, TechCorp",
             image: "https://picsum.photos/seed/client1/50/50.jpg",
-            content: "Working with this team has been an absolute game-changer for our business. Their expertise and dedication are unmatched.",
-            rating: 5
+            content: "Working with this team has been an absolute game-changer for our business. Their expertise and dedication are unmatched. They delivered our complex project ahead of schedule and under budget.",
+            rating: 5,
+            project: "Enterprise Cloud Migration"
         },
         {
             id: 2,
             name: "Sarah Johnson",
             position: "Marketing Director, InnovateCo",
             image: "https://picsum.photos/seed/client2/50/50.jpg",
-            content: "The team delivered exceptional results beyond our expectations. They truly understand our needs and deliver solutions that work.",
-            rating: 5
+            content: "The team delivered exceptional results beyond our expectations. They truly understand our needs and deliver solutions that work. Our conversion rates increased by 40% after their redesign.",
+            rating: 5,
+            project: "E-commerce Platform Redesign"
         },
         {
             id: 3,
             name: "Michael Brown",
             position: "Founder, StartupXYZ",
             image: "https://picsum.photos/seed/client3/50/50.jpg",
-            content: "From concept to execution, they were with us every step of the way. Our new platform has transformed how we do business.",
-            rating: 5
+            content: "From concept to execution, they were with us every step of the way. Our new platform has transformed how we do business. We couldn't have launched without their expertise.",
+            rating: 5,
+            project: "MVP Development & Launch"
         }
     ];
 
     const stats = [
-        { value: "500+", label: "Happy Clients" },
-        { value: "1000+", label: "Projects Completed" },
-        { value: "50+", label: "Team Members" },
-        { value: "8", label: "Years of Excellence" }
+        { value: "500+", label: "Happy Clients", icon: <Users className="w-6 h-6" /> },
+        { value: "1000+", label: "Projects Completed", icon: <CheckCircle className="w-6 h-6" /> },
+        { value: "50+", label: "Team Members", icon: <Briefcase className="w-6 h-6" /> },
+        { value: "8", label: "Years of Excellence", icon: <Clock className="w-6 h-6" /> }
+    ];
+
+    const services = [
+        {
+            id: 1,
+            title: "Web Development",
+            description: "Custom web applications built with cutting-edge technologies",
+            icon: <Code className="w-8 h-8" />,
+            color: "#3B85FE"
+        },
+        {
+            id: 2,
+            title: "UI/UX Design",
+            description: "Beautiful, intuitive interfaces that users love",
+            icon: <Palette className="w-8 h-8" />,
+            color: "#A9DBDC"
+        },
+        {
+            id: 3,
+            title: "Digital Marketing",
+            description: "Strategic campaigns that drive growth and engagement",
+            icon: <Megaphone className="w-8 h-8" />,
+            color: "#6366F1"
+        },
+        {
+            id: 4,
+            title: "Cloud Solutions",
+            description: "Scalable infrastructure that grows with your business",
+            icon: <Cloud className="w-8 h-8" />,
+            color: "#3B85FE"
+        }
+    ];
+
+    const technologies = [
+        { name: "React", level: 95 },
+        { name: "Node.js", level: 90 },
+        { name: "TypeScript", level: 85 },
+        { name: "Python", level: 80 },
+        { name: "AWS", level: 88 },
+        { name: "Docker", level: 75 }
     ];
 
     const scrollToTop = () => {
@@ -484,12 +556,12 @@ const AboutUs = () => {
 
     return (
         <div ref={containerRef} className="relative min-h-screen overflow-hidden bg-black" id="about">
-            {/* Hero Section with Orb Animation */}
+            {/* Hero Section with Enhanced Orb Animation */}
             <motion.section
                 className="relative min-h-screen flex items-center justify-center overflow-hidden"
                 style={{ opacity: heroOpacity, y: heroY }}
             >
-                {/* Orb Animation Background */}
+                {/* Enhanced Orb Animation Background */}
                 <div className="absolute inset-0 z-0">
                     <Orb
                         hue={220}
@@ -503,7 +575,7 @@ const AboutUs = () => {
                     />
                 </div>
 
-                {/* Content Overlay */}
+                {/* Enhanced Content Overlay */}
                 <div className="relative z-10 container mx-auto px-6 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -561,7 +633,7 @@ const AboutUs = () => {
                     </motion.div>
                 </div>
 
-                {/* Animated scroll indicator */}
+                {/* Enhanced Animated scroll indicator */}
                 <motion.div
                     className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10"
                     animate={{ y: [0, 10, 0] }}
@@ -573,9 +645,23 @@ const AboutUs = () => {
                 </motion.div>
             </motion.section>
 
-            {/* Stats Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Stats Section */}
+            <section className="relative py-20 px-6 bg-gradient-to-b from-black to-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        viewport={{ once: true }}
+                        className="text-center mb-12"
+                    >
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                            Our <span className="text-blue-400">Impact</span>
+                        </h2>
+                        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                            Numbers that speak for themselves
+                        </p>
+                    </motion.div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                         {stats.map((stat, index) => (
                             <motion.div
@@ -587,7 +673,10 @@ const AboutUs = () => {
                                 className="text-center"
                                 whileHover={{ y: -10 }}
                             >
-                                <div className="rounded-2xl p-6 backdrop-blur-sm border border-white/10 bg-white/5">
+                                <div className="rounded-2xl p-6 backdrop-blur-sm border border-white/10 bg-white/5 h-full">
+                                    <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 bg-blue-500/20">
+                                        {stat.icon}
+                                    </div>
                                     <div className="text-4xl md:text-5xl font-bold mb-2 text-blue-400">
                                         {stat.value}
                                     </div>
@@ -599,8 +688,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Our Story Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Our Story Section */}
+            <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <motion.div
@@ -654,8 +743,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Values Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Values Section */}
+            <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -696,8 +785,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Team Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Team Section */}
+            <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -790,8 +879,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Timeline Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Timeline Section */}
+            <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -824,7 +913,9 @@ const AboutUs = () => {
                                 <div className={`w-5/12 ${index % 2 === 0 ? 'text-right pr-8' : 'text-left pl-8'}`}>
                                     <div className="rounded-2xl p-6 backdrop-blur-sm border border-white/10 bg-white/5">
                                         <div className="flex items-center mb-2" style={{ justifyContent: index % 2 === 0 ? 'flex-end' : 'flex-start' }}>
-                                            <Calendar className="w-4 h-4 mr-2 text-blue-400" />
+                                            <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-blue-500/20">
+                                                {item.icon}
+                                            </div>
                                             <span className="text-sm font-medium text-blue-400">{item.year}</span>
                                         </div>
                                         <h3 className="text-xl font-bold mb-2 text-white">{item.title}</h3>
@@ -840,8 +931,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Testimonial Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced Testimonial Section */}
+            <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -878,16 +969,21 @@ const AboutUs = () => {
                                 <p className="text-gray-300 mb-4">
                                     "{testimonial.content}"
                                 </p>
-                                <div className="flex items-center">
-                                    <img
-                                        src={testimonial.image}
-                                        alt={testimonial.name}
-                                        className="w-12 h-12 rounded-full mr-3"
-                                    />
-                                    <div>
-                                        <h4 className="font-bold text-white">{testimonial.name}</h4>
-                                        <p className="text-sm text-gray-400">{testimonial.position}</p>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        <img
+                                            src={testimonial.image}
+                                            alt={testimonial.name}
+                                            className="w-12 h-12 rounded-full mr-3"
+                                        />
+                                        <div>
+                                            <h4 className="font-bold text-white">{testimonial.name}</h4>
+                                            <p className="text-sm text-gray-400">{testimonial.position}</p>
+                                        </div>
                                     </div>
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-white/10">
+                                    <p className="text-xs text-blue-400">{testimonial.project}</p>
                                 </div>
                             </motion.div>
                         ))}
@@ -895,8 +991,8 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="relative py-20 px-6">
+            {/* Enhanced CTA Section */}
+            <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
