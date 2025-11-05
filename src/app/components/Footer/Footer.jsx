@@ -2,29 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
-  const socialLinks = [
-    {
-      name: "Facebook",
-      icon: "facebook",
-      url: "https://www.facebook.com/",
-    },
-    {
-      name: "Twitter",
-      icon: "twitter",
-      url: "https://twitter.com/",
-    },
-    {
-      name: "LinkedIn",
-      icon: "linkedin",
-      url: "https://www.linkedin.com/company/",
-    },
-    {
-  name: "GitHub",
-  icon: "github",
-  url: "https://github.com/",
-},
-  ];
-
 const Footer = () => {
   const [emailHovered, setEmailHovered] = useState(false);
   const [phoneHovered, setPhoneHovered] = useState(false);
@@ -52,7 +29,28 @@ const Footer = () => {
     return () => clearInterval(timer);
   }, []);
 
-
+  const socialLinks = [
+    {
+      name: "Facebook",
+      icon: "facebook",
+      url: "https://www.facebook.com/booleanforce",
+    },
+    {
+      name: "Twitter",
+      icon: "twitter",
+      url: "https://twitter.com/booleanforce",
+    },
+    {
+      name: "LinkedIn",
+      icon: "linkedin",
+      url: "https://www.linkedin.com/company/booleanforce",
+    },
+    {
+      name: "Instagram",
+      icon: "instagram",
+      url: "https://www.instagram.com/booleanforce",
+    },
+  ];
 
   return (
     <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -252,24 +250,15 @@ const Footer = () => {
                       <path d="M20.45 20.45h-3.55v-5.56c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.95v5.65H9.36V9h3.4v1.56h.05a3.73 3.73 0 0 1 3.35-1.84c3.58 0 4.24 2.36 4.24 5.43v6.3zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z" />
                     </svg>
                   )}
-                  {s.icon === "github" && (
-  <svg
-    fill="currentColor"
-    viewBox="0 0 24 24"
-    className="w-4 h-4"
-  >
-    <path
-      fillRule="evenodd"
-      d="M12 2C6.48 2 2 6.58 2 12.25c0 4.51 2.87 8.33 6.84 9.68.5.1.68-.23.68-.5
-      0-.25-.01-.9-.01-1.77-2.78.62-3.37-1.37-3.37-1.37-.45-1.17-1.11-1.48-1.11-1.48-.9-.64.07-.63.07-.63
-      1 .07 1.53 1.05 1.53 1.05.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.64-1.36-2.22-.26-4.56-1.14-4.56-5.08
-      0-1.12.39-2.04 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.28 2.75 1.05A9.2 9.2 0 0 1 12 6.75c.85 0 1.7.12
-      2.5.36 1.9-1.33 2.74-1.05 2.74-1.05.55 1.4.2 2.44.1 2.7.64.71 1.03 1.63 1.03 2.75
-      0 3.95-2.34 4.82-4.57 5.07.36.32.68.94.68 1.9 0 1.37-.01 2.48-.01 2.82
-      0 .27.18.61.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
-    />
-  </svg>
-)}
+                  {s.icon === "instagram" && (
+                    <svg
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      className="w-4 h-4"
+                    >
+                      <path d="M12 2.2c3.2 0 3.584.012 4.85.07 1.17.056 1.97.247 2.43.415a4.92 4.92 0 0 1 1.78 1.03 4.92 4.92 0 0 1 1.03 1.78c.168.46.36 1.26.415 2.43.058 1.27.07 1.65.07 4.85s-.012 3.584-.07 4.85c-.056 1.17-.247 1.97-.415 2.43a4.92 4.92 0 0 1-1.03 1.78 4.92 4.92 0 0 1-1.78 1.03c-.46.168-1.26.36-2.43.415-1.27.058-1.65.07-4.85.07s-3.584-.012-4.85-.07c-1.17-.056-1.97-.247-2.43-.415a4.92 4.92 0 0 1-1.78-1.03 4.92 4.92 0 0 1-1.03-1.78c-.168-.46-.36-1.26-.415-2.43C2.212 15.584 2.2 15.2 2.2 12s.012-3.584.07-4.85c.056-1.17.247-1.97.415-2.43a4.92 4.92 0 0 1 1.03-1.78 4.92 4.92 0 0 1 1.78-1.03c.46-.168 1.26-.36 2.43-.415C8.416 2.212 8.8 2.2 12 2.2zM12 5.6a6.4 6.4 0 1 0 0 12.8 6.4 6.4 0 0 0 0-12.8zm0 10.56a4.16 4.16 0 1 1 0-8.32 4.16 4.16 0 0 1 0 8.32zm6.44-10.86a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" />
+                    </svg>
+                  )}
                 </div>
               </a>
             ))}
