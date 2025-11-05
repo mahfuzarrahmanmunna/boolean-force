@@ -2,19 +2,39 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
+  const socialLinks = [
+    {
+      name: "Facebook",
+      icon: "facebook",
+      url: "https://www.facebook.com/",
+    },
+    {
+      name: "Twitter",
+      icon: "twitter",
+      url: "https://twitter.com/",
+    },
+    {
+      name: "LinkedIn",
+      icon: "linkedin",
+      url: "https://www.linkedin.com/company/",
+    },
+    {
+  name: "GitHub",
+  icon: "github",
+  url: "https://github.com/",
+},
+  ];
+
 const Footer = () => {
   const [emailHovered, setEmailHovered] = useState(false);
   const [phoneHovered, setPhoneHovered] = useState(false);
-
-  // Countdown timer state 
   const [timeLeft, setTimeLeft] = useState({
     days: 6,
     hours: 23,
     minutes: 58,
     seconds: 25,
   });
-  
-// Update countdown timer every second 
+
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -32,28 +52,7 @@ const Footer = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const socialLinks = [
-    {
-      name: "Facebook",
-      icon: "facebook",
-      url: "https://www.facebook.com",
-    },
-    {
-      name: "Twitter",
-      icon: "twitter",
-      url: "https://twitter.com",
-    },
-    {
-      name: "LinkedIn",
-      icon: "linkedin",
-      url: "https://linkedin.com",
-    },
-   {
-  name: "GitHub",
-  icon: "github",
-  url: "https://github.com",
-},
-  ];
+
 
   return (
     <footer className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -271,7 +270,6 @@ const Footer = () => {
     />
   </svg>
 )}
-
                 </div>
               </a>
             ))}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import ScrollStack, { ScrollStackItem } from './ScrollStack'
+import { useState, useEffect, useRef } from 'react';
 import { FaGithub, FaExternalLinkAlt, FaEnvelope, FaLinkedin, FaArrowRight, FaCreditCard, FaPalette, FaChartBar, FaGlobe, FaMobileAlt, FaCloud, FaUsers, FaAward, FaHandshake, FaCheckCircle, FaRocket, FaLightbulb } from 'react-icons/fa';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -187,6 +188,9 @@ export default function Portfolio() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [filteredProjects, setFilteredProjects] = useState(portfolioProjects);
   const [mounted, setMounted] = useState(false);
+  const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+  const portfolioRef = useRef(null);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -198,7 +202,44 @@ export default function Portfolio() {
     } else {
       setFilteredProjects(portfolioProjects.filter(project => project.category === selectedCategory));
     }
+    setCurrentProjectIndex(0); // Reset index when category changes
   }, [selectedCategory]);
+
+  useEffect(() => {
+    const handleWheel = (e) => {
+      if (!portfolioRef.current || isScrolling) return;
+
+      // Check if we're scrolling within the portfolio section
+      const rect = portfolioRef.current.getBoundingClientRect();
+      const isInPortfolioSection = rect.top <= window.innerHeight && rect.bottom >= 0;
+
+      if (isInPortfolioSection) {
+        e.preventDefault();
+        setIsScrolling(true);
+
+        if (e.deltaY > 0) {
+          // Scrolling down - go to next project
+          setCurrentProjectIndex(prevIndex =>
+            prevIndex < filteredProjects.length - 1 ? prevIndex + 1 : prevIndex
+          );
+        } else {
+          // Scrolling up - go to previous project
+          setCurrentProjectIndex(prevIndex =>
+            prevIndex > 0 ? prevIndex - 1 : prevIndex
+          );
+        }
+
+        // Reset scrolling state after animation completes
+        setTimeout(() => setIsScrolling(false), 600);
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+    };
+  }, [filteredProjects.length, isScrolling]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
@@ -231,12 +272,112 @@ export default function Portfolio() {
           </div>
         </div>
 
-        <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="absolute bottom-25 left-1/2 transform -translate-x-1/2 animate-bounce">
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </div>
       </section>
+
+
+    {/* Portfolio Section with Slider Effect */}
+      <section id="projects" ref={portfolioRef} className="py-20 px-6 bg-gray-800 bg-opacity-50 relative overflow-hidden">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Explore our recent projects and see how we've helped businesses transform
+            </p>
+          </div>
+
+          {/* Category Filter */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            {portfolioCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${selectedCategory === category
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-800 text-gray-300 hover:bg-blue-600 hover:text-white"
+                  }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {/* Portfolio Slider Container */}
+          <div className="relative h-[600px] mb-8">
+            <div className="absolute inset-0 flex items-center justify-center">
+              {filteredProjects.map((project, index) => (
+                <div
+                  key={project.id}
+                  className={`absolute w-full max-w-4xl bg-gray-800 rounded-lg overflow-hidden transition-all duration-600 ease-in-out ${index === currentProjectIndex
+                    ? 'z-30 opacity-100 scale-100'
+                    : index < currentProjectIndex
+                      ? 'z-10 opacity-0 scale-95 translate-x-[-100%]'
+                      : 'z-10 opacity-0 scale-95 translate-x-[100%]'
+                    }`}
+                >
+                  <div className="h-64 relative">
+                    <Image
+                      src={project.image}
+                      alt={project.title}
+                      fill
+                      className="object-cover"
+                      unoptimized={true}
+                    />
+                    {project.featured && (
+                      <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                        Featured
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-8">
+                    <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
+                    <p className="text-gray-400 mb-6">{project.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-6">
+                      {project.technologies.map((tech, techIndex) => (
+                        <span key={techIndex} className="text-xs bg-blue-600 bg-opacity-20 text-blue-400 px-3 py-1 rounded">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex justify-between">
+                      <a href={project.githubUrl} className="text-gray-400 hover:text-white transition-colors">
+                        <FaGithub size={24} />
+                      </a>
+                      <a href={project.liveUrl} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                        <span className="mr-2">View Project</span>
+                        <FaExternalLinkAlt size={18} />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Slider Indicators */}
+          <div className="flex justify-center space-x-2">
+            {filteredProjects.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentProjectIndex(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentProjectIndex ? 'bg-blue-600 w-8' : 'bg-gray-600'
+                  }`}
+              />
+            ))}
+          </div>
+
+          {/* Navigation Instructions */}
+          <div className="text-center mt-8 text-gray-400">
+            <p>Use mouse wheel to navigate through projects</p>
+          </div>
+        </div>
+      </section>
+
+      
 
       {/* Company Stats Section */}
       <section className="py-16 px-6 bg-gray-800 bg-opacity-50">
@@ -349,108 +490,7 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Portfolio Section */}
-      <section id="projects" className="py-20 px-6 bg-gray-800 bg-opacity-50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Explore our recent projects and see how we've helped businesses transform
-            </p>
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {portfolioCategories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${selectedCategory === category
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-blue-600 hover:text-white"
-                  }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-
-          {/* Featured Projects */}
-          {selectedCategory === 'All' && (
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-6">Featured Projects</h3>
-              <div className="grid md:grid-cols-3 gap-8">
-                {portfolioProjects.filter(project => project.featured).map((project) => (
-                  <div key={project.id} className="bg-gray-800 rounded-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                    <div className="h-48 relative">
-                      <Image
-                        src={project.image}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                        unoptimized={true}
-                      />
-                      <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Featured
-                      </div>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                      <p className="text-gray-400 mb-4">{project.description}</p>
-                      <div className="flex justify-between">
-                        <a href={project.githubUrl} className="text-gray-400 hover:text-white transition-colors">
-                          <FaGithub size={20} />
-                        </a>
-                        <a href={project.liveUrl} className="text-gray-400 hover:text-white transition-colors flex items-center">
-                          <span className="mr-2">View Project</span>
-                          <FaExternalLinkAlt size={16} />
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Projects Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProjects.map((project) => (
-              <div key={project.id} className="bg-gray-800 rounded-lg overflow-hidden transform hover:scale-105 transition-all duration-300">
-                <div className="h-48 relative">
-                  <Image
-                    src={project.image}
-                    alt={project.title}
-                    fill
-                    className="object-cover"
-                    unoptimized={true}
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{project.title}</h3>
-                  <p className="text-gray-400 mb-4">{project.description}</p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.technologies.map((tech, index) => (
-                      <span key={index} className="text-xs bg-blue-600 bg-opacity-20 text-blue-400 px-2 py-1 rounded">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex justify-between">
-                    <a href={project.githubUrl} className="text-gray-400 hover:text-white transition-colors">
-                      <FaGithub size={20} />
-                    </a>
-                    <a href={project.liveUrl} className="text-gray-400 hover:text-white transition-colors flex items-center">
-                      <span className="mr-2">View Project</span>
-                      <FaExternalLinkAlt size={16} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+    
 
       {/* Testimonials Section */}
       <section className="py-20 px-6">

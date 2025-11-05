@@ -1,81 +1,79 @@
 // components/PricingCard.jsx
 import React, { useState, useEffect } from 'react';
-import { FaCheck, FaCode, FaRocket, FaShieldAlt, FaUsers, FaBolt, FaClock, FaStar, FaInfinity, FaHeadset, FaDatabase, FaCloud, FaGitAlt, FaReact, FaNodeJs, FaArrowRight } from 'react-icons/fa';
+import { FaCheck, FaCode, FaRocket, FaShieldAlt, FaUsers, FaBolt, FaClock, FaStar, FaInfinity, FaHeadset, FaDatabase, FaCloud, FaGitAlt, FaReact, FaNodeJs, FaArrowRight, FaSpinner } from 'react-icons/fa';
+
+// Icon mapping to convert string names to components
+const iconMap = {
+    FaCheck, FaCode, FaRocket, FaShieldAlt, FaUsers, FaBolt, FaClock, FaStar,
+    FaInfinity, FaHeadset, FaDatabase, FaCloud, FaGitAlt, FaReact, FaNodeJs
+};
+
+// Helper function to render icon
+const renderIcon = (iconName) => {
+    if (typeof iconName === 'object') {
+        // If it's already a component, return it
+        return iconName;
+    }
+
+    const IconComponent = iconMap[iconName];
+    return IconComponent ? <IconComponent /> : <FaCheck />;
+};
 
 const PricingCard = () => {
+    const [pricingData, setPricingData] = useState([]);
     const [hoveredCard, setHoveredCard] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const pricingData = [
-        {
-            id: 1,
-            name: "Starter",
-            subtitle: "Perfect for indie developers",
-            price: "$2,999",
-            priceUnit: "/project",
-            originalPrice: "$4,999",
-            description: "Launch your project with professional-grade development and modern tech stack.",
-            badge: { text: "POPULAR", color: "from-gray-600 to-gray-800" },
-            features: [
-                { text: "Custom Web Application", icon: <FaCode /> },
-                { text: "React/Vue.js Frontend", icon: <FaReact /> },
-                { text: "Node.js/Python Backend", icon: <FaNodeJs /> },
-                { text: "MongoDB/PostgreSQL Database", icon: <FaDatabase /> },
-                { text: "Basic CI/CD Pipeline", icon: <FaGitAlt /> },
-                { text: "3 Months Technical Support", icon: <FaHeadset /> },
-                { text: "48hr Delivery Guarantee", icon: <FaClock /> }
-            ],
-            buttonText: "Start Building",
-            buttonColor: "from-gray-600 to-gray-800",
-            gradient: "from-gray-800/30 to-gray-900/30"
-        },
-        {
-            id: 2,
-            name: "Professional",
-            subtitle: "For growing tech teams",
-            price: "$7,999",
-            priceUnit: "/project",
-            originalPrice: "$12,999",
-            description: "Complete solution for scaling applications with enterprise architecture.",
-            badge: { text: "BEST VALUE", color: "from-cyan-600 to-blue-600" },
-            features: [
-                { text: "Everything in Starter", icon: <FaCheck /> },
-                { text: "Microservices Architecture", icon: <FaCloud /> },
-                { text: "Advanced CI/CD with Testing", icon: <FaGitAlt /> },
-                { text: "Containerization (Docker)", icon: <FaBolt /> },
-                { text: "Cloud Deployment (AWS/Azure)", icon: <FaCloud /> },
-                { text: "12 Months Priority Support", icon: <FaHeadset /> },
-                { text: "24hr Priority Delivery", icon: <FaClock /> },
-                { text: "Performance Optimization", icon: <FaRocket /> }
-            ],
-            buttonText: "Scale Up",
-            buttonColor: "from-cyan-600 to-blue-600",
-            gradient: "from-cyan-900/30 to-blue-900/30",
-            highlight: true
-        },
-        {
-            id: 3,
-            name: "Enterprise",
-            subtitle: "For large organizations",
-            price: "Custom",
-            priceUnit: "",
-            originalPrice: "",
-            description: "Tailored enterprise solutions with dedicated development teams.",
-            badge: { text: "ENTERPRISE", color: "from-gray-600 to-gray-800" },
-            features: [
-                { text: "Everything in Professional", icon: <FaCheck /> },
-                { text: "Dedicated Development Team", icon: <FaUsers /> },
-                { text: "Multi-region Infrastructure", icon: <FaCloud /> },
-                { text: "Advanced Security & Compliance", icon: <FaShieldAlt /> },
-                { text: "Custom API Development", icon: <FaCode /> },
-                { text: "Unlimited Support & Maintenance", icon: <FaInfinity /> },
-                { text: "On-site Team Option", icon: <FaUsers /> },
-                { text: "Custom SLA Agreements", icon: <FaStar /> }
-            ],
-            buttonText: "Contact Sales",
-            buttonColor: "from-gray-600 to-gray-800",
-            gradient: "from-gray-800/30 to-gray-900/30"
-        }
-    ];
+    useEffect(() => {
+        const fetchPricingData = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch('/api/pricing-plans');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch pricing plans');
+                }
+
+                const data = await response.json();
+                setPricingData(data);
+            } catch (err) {
+                console.error("Error fetching pricing plans:", err);
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPricingData();
+    }, []);
+
+    if (isLoading) {
+        return (
+            <div className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gray-900 min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <FaSpinner className="animate-spin text-4xl text-cyan-400 mx-auto mb-4" />
+                    <p className="text-white text-lg">Loading pricing plans...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gray-900 min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-400 text-lg mb-4">Error: {error}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="py-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gray-900">
@@ -103,15 +101,15 @@ const PricingCard = () => {
 
                 {/* Pricing Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-                    {pricingData.map((plan, index) => {
+                    {pricingData.map((plan) => {
                         const isMiddle = plan.highlight;
-                        const isHovered = hoveredCard === plan.id;
+                        const isHovered = hoveredCard === plan._id;
 
                         return (
                             <div
-                                key={plan.id}
+                                key={plan._id}
                                 className={`relative group ${isMiddle ? 'md:col-span-1 md:row-span-1' : ''}`}
-                                onMouseEnter={() => setHoveredCard(plan.id)}
+                                onMouseEnter={() => setHoveredCard(plan._id)}
                                 onMouseLeave={() => setHoveredCard(null)}
                             >
                                 {/* Card Container with different sizes */}
@@ -121,9 +119,11 @@ const PricingCard = () => {
                     ${isMiddle ? 'md:scale-105 md:shadow-2xl border-cyan-500/50 z-10' : 'hover:scale-[1.02]'}`}
                                 >
                                     {/* Badge */}
-                                    <div className={`absolute top-0 right-0 bg-gradient-to-r ${plan.badge.color} text-white px-4 py-2 rounded-bl-lg text-sm font-semibold z-10`}>
-                                        {plan.badge.text}
-                                    </div>
+                                    {plan.badge && plan.badge.text && (
+                                        <div className={`absolute top-0 right-0 bg-gradient-to-r ${plan.badge.color} text-white px-4 py-2 rounded-bl-lg text-sm font-semibold z-10`}>
+                                            {plan.badge.text}
+                                        </div>
+                                    )}
 
                                     {/* Glow effect for middle card */}
                                     {isMiddle && (
@@ -147,9 +147,11 @@ const PricingCard = () => {
 
                                         <div className={`border-t border-gray-700/50 pt-6 mb-8 flex-grow ${isMiddle ? 'md:pt-8' : ''}`}>
                                             <ul className="space-y-3">
-                                                {plan.features.map((feature, i) => (
+                                                {plan.features && plan.features.map((feature, i) => (
                                                     <li key={i} className="flex items-start gap-3">
-                                                        <span className={`text-cyan-400 mt-1 ${isMiddle ? 'text-lg' : ''}`}>{feature.icon}</span>
+                                                        <span className={`text-cyan-400 mt-1 ${isMiddle ? 'text-lg' : ''}`}>
+                                                            {renderIcon(feature.icon)}
+                                                        </span>
                                                         <span className="text-gray-200">{feature.text}</span>
                                                     </li>
                                                 ))}
