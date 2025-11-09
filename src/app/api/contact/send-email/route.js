@@ -51,7 +51,7 @@ export async function POST(request) {
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Reply from TechSolutions</title>
+                    <title>Reply from BooleanForce</title>
                     <style>
                         body {
                             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -106,7 +106,7 @@ export async function POST(request) {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <div class="logo">TechSolutions</div>
+                            <div class="logo">BooleanForce</div>
                             <h1>Reply to Your Inquiry</h1>
                         </div>
                         
@@ -121,8 +121,8 @@ export async function POST(request) {
                         </div>
                         
                         <div class="footer">
-                            <p>Best regards,<br>${fromName || 'The TechSolutions Team'}</p>
-                            <p>© ${new Date().getFullYear()} TechSolutions. All rights reserved.</p>
+                            <p>Best regards,<br>${fromName || 'The BooleanForce Team'}</p>
+                            <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
                             <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | ${fromEmail || process.env.GMAIL_USER}</p>
                         </div>
                     </div>
