@@ -5,12 +5,15 @@ const nextConfig = {
             {
                 protocol: "https",
                 hostname: "**",
+                // port: "",
+                // pathname: "/**",
             },
             {
                 protocol: "https",
                 hostname: "lh3.googleusercontent.com",
             },
         ],
+        domains: ['images.unsplash.com'],
     },
 
 };

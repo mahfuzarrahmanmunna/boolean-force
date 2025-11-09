@@ -10,15 +10,15 @@ function BooleanForceBanner() {
     const [isLoaded, setIsLoaded] = useState(false);
 
     // Boolean logic terms to display
-    const booleanTerms = ["TRUE", "FALSE", "XOR", "NOR", "AND", "OR", "NOT", "NAND", "XNOR"];
+    const booleanTerms = [];
 
     // Enhanced stats with icons
-    const stats = [
-        { value: "4.9/5", label: "Rating", icon: "⭐" },
-        { value: "500+", label: "Happy Clients", icon: "👥" },
-        { value: "24-48hr", label: "Delivery", icon: "⚡" },
-        { value: "ROI", label: "Guaranteed", icon: "📈" }
-    ];
+    // const stats = [
+    //     { value: "4.9/5", label: "Rating", icon: "⭐" },
+    //     { value: "500+", label: "Happy Clients", icon: "👥" },
+    //     { value: "24-48hr", label: "Delivery", icon: "⚡" },
+    //     { value: "ROI", label: "Guaranteed", icon: "📈" }
+    // ];
 
     // Track mouse position for interactive effects
     const handleMouseMove = (e) => {
@@ -168,7 +168,7 @@ function BooleanForceBanner() {
                 </p>
 
                 {/* Enhanced stats with better design and hover effects */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+                {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
                     {stats.map((stat, index) => (
                         <div
                             key={index}
@@ -183,13 +183,12 @@ function BooleanForceBanner() {
                             </div>
                             <div className="text-sm md:text-base text-white/80">{stat.label}</div>
 
-                            {/* Decorative element that appears on hover */}
                             {activeStatIndex === index && (
                                 <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
                             )}
                         </div>
                     ))}
-                </div>
+                </div> */}
 
                 {/* Enhanced CTA button */}
                 <div className="mb-16">

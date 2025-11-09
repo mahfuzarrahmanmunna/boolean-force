@@ -121,7 +121,7 @@ const PricingCard = () => {
     }, []);
 
     return (
-        <div className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        <div className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
             {/* Background decoration */}
             {/* <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
