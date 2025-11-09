@@ -150,7 +150,7 @@ const sendAdminEmail = async (formData, transporter) => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <div class="logo">TechSolutions</div>
+                        <div class="logo">BooleanForce</div>
                         <h1>New Contact Form Submission</h1>
                     </div>
                     
@@ -222,7 +222,7 @@ const sendAdminEmail = async (formData, transporter) => {
                     
                     <div class="footer">
                         <p>This message was sent from your website contact form.</p>
-                        <p>© ${new Date().getFullYear()} TechSolutions. All rights reserved.</p>
+                        <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
                     </div>
                 </div>
             </body>
@@ -240,14 +240,14 @@ const sendUserEmail = async (formData, transporter) => {
     const mailOptions = {
         from: process.env.GMAIL_USER,
         to: email,
-        subject: 'Thank you for contacting TechSolutions',
+        subject: 'Thank you for contacting BooleanForce',
         html: `
             <!DOCTYPE html>
             <html lang="en">
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Thank you for contacting TechSolutions</title>
+                <title>Thank you for contacting BooleanForce</title>
                 <style>
                     body {
                         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -372,13 +372,13 @@ const sendUserEmail = async (formData, transporter) => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <div class="logo">TechSolutions</div>
+                        <div class="logo">BooleanForce</div>
                         <h1>Thank You for Contacting Us</h1>
                     </div>
                     
                     <div class="content">
                         <p>Dear ${name},</p>
-                        <p>Thank you for reaching out to TechSolutions. We have received your message and will get back to you within 24 hours.</p>
+                        <p>Thank you for reaching out to BooleanForce. We have received your message and will get back to you within 24 hours.</p>
                         
                         <div class="section">
                             <div class="section-title">Your Inquiry Summary</div>
@@ -420,16 +420,16 @@ const sendUserEmail = async (formData, transporter) => {
                             <p>Our team will review your inquiry and assign a dedicated project manager who will contact you to discuss your requirements in detail. We typically respond within 24 hours.</p>
                             
                             <div style="text-align: center;">
-                                <a href="https://techsolutions.com" class="cta-button">Visit Our Website</a>
+                                <a href="https://BooleanForce.com" class="cta-button">Visit Our Website</a>
                             </div>
                         </div>
                         
                         <div class="section">
                             <div class="section-title">Your Dedicated Team</div>
-                            <p>At TechSolutions, we pride ourselves on delivering exceptional results. Our team of experts is ready to bring your vision to life.</p>
+                            <p>At BooleanForce, we pride ourselves on delivering exceptional results. Our team of experts is ready to bring your vision to life.</p>
                             
                             <div class="team-member">
-                                <img src="https://picsum.photos/seed/techsolutions/50/50.jpg" alt="Team Member">
+                                <img src="https://picsum.photos/seed/BooleanForce/50/50.jpg" alt="Team Member">
                                 <div class="team-member-info">
                                     <h4>Alex Johnson</h4>
                                     <p>Senior Project Manager</p>
@@ -439,9 +439,9 @@ const sendUserEmail = async (formData, transporter) => {
                     </div>
                     
                     <div class="footer">
-                        <p>Best regards,<br>The TechSolutions Team</p>
-                        <p>© ${new Date().getFullYear()} TechSolutions. All rights reserved.</p>
-                        <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | info@techsolutions.com</p>
+                        <p>Best regards,<br>The BooleanForce Team</p>
+                        <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
+                        <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | info@BooleanForce.com</p>
                     </div>
                 </div>
             </body>
