@@ -315,7 +315,7 @@ export default function Portfolio() {
        
       </section>
 
-<div className='w-3xl mx-auto'>
+<div >
    <ScrollStack></ScrollStack>
 </div>
 

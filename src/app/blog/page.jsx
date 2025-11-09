@@ -269,7 +269,7 @@ export default function BlogPage() {
             <section className="py-12">
                 <div className="container mx-auto px-6">
                     <h2 className="text-3xl font-bold text-white mb-8 text-center">Latest Articles</h2>
-                    {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredPosts.map((post) => (
                             <div key={post.id} className="bg-gray-800 bg-opacity-90 rounded-lg shadow-md overflow-hidden transform hover:scale-105 hover:shadow-xl transition-all duration-300">
                                 <div className="h-48 relative">
@@ -328,8 +328,8 @@ export default function BlogPage() {
                                 </div>
                             </div>
                         ))}
-                    </div> */}
-                  <ScrollStack></ScrollStack>
+                    </div>
+                  
 
                     {/* Load More Button */}
                     <div className="text-center mt-12">
