@@ -34,3 +34,32 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+<!-- # MONGODB_URI=mongodb+srv://boolean_force:m4EC9LauYnw1oaSj@cluster0.bcb6bbw.mongodb.net/?appName=Cluster0
+
+# DB_NAME=boolean_force
+
+# DB_PASS = m4EC9LauYnw1oaSj
+
+# OPENROUTER_API_KEY=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
+
+# MongoDB Configuration
+MONGODB_URI=mongodb+srv://boolean_force:m4EC9LauYnw1oaSj@cluster0.bcb6bbw.mongodb.net/boolean_force?retryWrites=true&w=majority&appName=Cluster0
+
+# Database Name (for reference)
+DB_NAME=boolean_force
+
+# OpenRouter API Configuration
+OPENROUTER_API_KEY=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
+
+# Next.js Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your_nextauth_secret_here
+
+# Optional: Node environment
+NODE_ENV=development
+
+# node email 
+GMAIL_USER = mdmahfuzarrahmanmunna44@gmail.com
+GMAIL_PASS = zmyiuqybrwtwykrt -->
