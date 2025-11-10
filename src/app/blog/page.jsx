@@ -15,6 +15,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import 'swiper/css/effect-fade';
 import 'swiper/css/parallax';
+import ScrollStack from "../portfolio/ScrollStack";
 // import BinaryBackground from "@/components/BinaryBackground";
 // import Header from "@/components/Header";
 
@@ -328,6 +329,7 @@ export default function BlogPage() {
                             </div>
                         ))}
                     </div>
+                  
 
                     {/* Load More Button */}
                     <div className="text-center mt-12">

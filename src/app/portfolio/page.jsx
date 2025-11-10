@@ -306,76 +306,18 @@ export default function Portfolio() {
             ))}
           </div>
 
-          {/* Portfolio Slider Container */}
-          <div className="relative h-[600px] mb-8">
-            <div className="absolute inset-0 flex items-center justify-center">
-              {filteredProjects.map((project, index) => (
-                <div
-                  key={project.id}
-                  className={`absolute w-full max-w-4xl bg-gray-800 rounded-lg overflow-hidden transition-all duration-600 ease-in-out ${index === currentProjectIndex
-                    ? 'z-30 opacity-100 scale-100'
-                    : index < currentProjectIndex
-                      ? 'z-10 opacity-0 scale-95 translate-x-[-100%]'
-                      : 'z-10 opacity-0 scale-95 translate-x-[100%]'
-                    }`}
-                >
-                  <div className="h-64 relative">
-                    <Image
-                      src={project.image}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                      unoptimized={true}
-                    />
-                    {project.featured && (
-                      <div className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                        Featured
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-8">
-                    <h3 className="text-2xl font-bold mb-3">{project.title}</h3>
-                    <p className="text-gray-400 mb-6">{project.description}</p>
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.technologies.map((tech, techIndex) => (
-                        <span key={techIndex} className="text-xs bg-blue-600 bg-opacity-20 text-blue-400 px-3 py-1 rounded">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="flex justify-between">
-                      <a href={project.githubUrl} className="text-gray-400 hover:text-white transition-colors">
-                        <FaGithub size={24} />
-                      </a>
-                      <a href={project.liveUrl} className="text-gray-400 hover:text-white transition-colors flex items-center">
-                        <span className="mr-2">View Project</span>
-                        <FaExternalLinkAlt size={18} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        
+           
+        
 
-          {/* Slider Indicators */}
-          <div className="flex justify-center space-x-2">
-            {filteredProjects.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentProjectIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentProjectIndex ? 'bg-blue-600 w-8' : 'bg-gray-600'
-                  }`}
-              />
-            ))}
-          </div>
+   </div>
 
-          {/* Navigation Instructions */}
-          <div className="text-center mt-8 text-gray-400">
-            <p>Use mouse wheel to navigate through projects</p>
-          </div>
-        </div>
+       
       </section>
+
+<div >
+   <ScrollStack></ScrollStack>
+</div>
 
       
 
