@@ -10,6 +10,7 @@ import ClientLayout from "@/components/ui/ClientLayout/ClientLayout";
 import BinaryBack from "./components/BinarayBack/BinaryBack";
 import { AuthProviders } from "@/providers/AuthProviders";
 import AuthDebug from "./components/AuthDebug";
+import Chatbot from "./components/Chatbot/Chatbot";
 // import AuthDebug from "./components/AuthDebug";
 
 const inter = Inter({
@@ -49,6 +50,7 @@ export default function RootLayout({ children }) {
             <ClientLayout>
               <AuthProviders>
                 {children}
+                <Chatbot />
               </AuthProviders>
             </ClientLayout>
           </main>

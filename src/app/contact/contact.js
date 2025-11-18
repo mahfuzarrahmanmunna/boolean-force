@@ -106,8 +106,8 @@
 //     return (
 //         <>
 //             <Head>
-//                 <title>Contact Us | TechSolutions - Professional Development Services</title>
-//                 <meta name="description" content="Contact TechSolutions for professional POS systems, Brand Visual Identity, ERP Software Solutions, and Web Development services." />
+//                 <title>Contact Us | BooleanForce - Professional Development Services</title>
+//                 <meta name="description" content="Contact BooleanForce for professional POS systems, Brand Visual Identity, ERP Software Solutions, and Web Development services." />
 //                 <meta name="viewport" content="width=device-width, initial-scale=1" />
 //                 <link rel="icon" href="/favicon.ico" />
 //             </Head>
@@ -441,7 +441,7 @@
 //                                             </div>
 //                                             <div className="ml-4">
 //                                                 <h3 className="text-lg font-semibold text-white">Email</h3>
-//                                                 <p className="text-gray-300 mt-1">info@techsolutions.com</p>
+//                                                 <p className="text-gray-300 mt-1">info@BooleanForce.com</p>
 //                                             </div>
 //                                         </div>
 
