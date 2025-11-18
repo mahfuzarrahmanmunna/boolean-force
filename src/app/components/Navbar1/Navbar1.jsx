@@ -61,7 +61,7 @@ const Navbar1 = () => {
         { name: "Services", href: "/services" },
         { name: "Portfolio", href: "/portfolio" },
         { name: "Blog", href: "/blog" },
-        { name: "About", href: "/about" },
+        { name: "About", href: "/about-us" },
         { name: "Contact", href: "/contact" },
     ];
 
@@ -276,7 +276,7 @@ const Navbar1 = () => {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <Link
-                                href="/about"
+                                href="/about-us"
                                 className="group p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 border border-slate-600/30 hover:border-blue-500/30"
                             >
                                 <div className="flex items-start space-x-3">
@@ -360,7 +360,7 @@ const Navbar1 = () => {
                             {link.name === "About" && (
                                 <div className="pl-6 space-y-1">
                                     <Link
-                                        href="/about"
+                                        href="/about-us"
                                         className="block text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
                                     >
                                         About Us
