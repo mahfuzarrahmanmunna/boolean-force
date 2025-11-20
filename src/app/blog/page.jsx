@@ -1,3 +1,4 @@
+// app/blog/page.js (Updated version of your BlogPage component)
 "use client";
 
 import Link from "next/link";
@@ -29,10 +30,43 @@ export default function BlogPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
     const [likedPosts, setLikedPosts] = useState([]);
+    const [themeSettings, setThemeSettings] = useState({
+        primaryColor: "#3B82F6",
+        secondaryColor: "#10B981",
+        accentColor: "#F59E0B",
+        backgroundColor: "from-gray-900 to-gray-800",
+        cardBackgroundColor: "bg-gray-800 bg-opacity-70",
+        textColor: "text-white",
+        secondaryTextColor: "text-gray-300",
+        borderColor: "border-gray-700",
+        heroBackground: "from-gray-900 to-gray-800",
+        newsletterBackground: "from-blue-900 to-purple-900",
+        borderRadius: "rounded-xl",
+        fontFamily: "font-sans",
+        buttonStyle: "px-6 py-3 rounded-full"
+    });
 
     // Fix for hydration issues with Swiper
     useEffect(() => {
         setMounted(true);
+    }, []);
+
+    // Fetch theme settings
+    useEffect(() => {
+        const fetchThemeSettings = async () => {
+            try {
+                const response = await fetch('/api/theme');
+                const data = await response.json();
+                
+                if (data.success) {
+                    setThemeSettings(data.data);
+                }
+            } catch (error) {
+                console.error("Error fetching theme settings:", error);
+            }
+        };
+
+        fetchThemeSettings();
     }, []);
 
     // Fetch blog data from API
@@ -165,13 +199,13 @@ export default function BlogPage() {
     // Show loading state while fetching data
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+            <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${themeSettings.backgroundColor}`}>
                 <div className="text-center">
                     <div className="relative w-24 h-24 mx-auto mb-4">
                         <div className="absolute top-0 left-0 w-full h-full rounded-full border-4 border-gray-700"></div>
                         <div className="absolute top-0 left-0 w-full h-full rounded-full border-4 border-t-blue-500 animate-spin"></div>
                     </div>
-                    <p className="text-white text-xl font-medium">Loading blog posts...</p>
+                    <p className={`${themeSettings.textColor} text-xl font-medium`}>Loading blog posts...</p>
                 </div>
             </div>
         );
@@ -180,11 +214,11 @@ export default function BlogPage() {
     // Show error state if API call fails
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+            <div className={`min-h-screen flex items-center justify-center bg-gradient-to-br ${themeSettings.backgroundColor}`}>
                 <div className="text-center max-w-md mx-auto p-8 bg-gray-800 bg-opacity-50 rounded-xl backdrop-blur-sm">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h2 className="text-white text-2xl font-bold mb-2">Something went wrong</h2>
-                    <p className="text-gray-300 mb-6">{error}</p>
+                    <h2 className={`${themeSettings.textColor} text-2xl font-bold mb-2`}>Something went wrong</h2>
+                    <p className={`${themeSettings.secondaryTextColor} mb-6`}>{error}</p>
                     <button
                         onClick={() => window.location.reload()}
                         className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -197,7 +231,7 @@ export default function BlogPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+        <div className={`min-h-screen bg-gradient-to-br ${themeSettings.backgroundColor} ${themeSettings.textColor} ${themeSettings.fontFamily}`}>
             {/* Hero Section with Enhanced Carousel */}
             <section className="relative h-[600px] overflow-hidden">
                 {mounted && (
@@ -280,7 +314,10 @@ export default function BlogPage() {
                                                 onChange={(e) => setSearchTerm(e.target.value)}
                                                 className="w-full py-4 px-6 pr-14 rounded-full text-gray-800 bg-white bg-opacity-90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300 shadow-lg"
                                             />
-                                            <button className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors shadow-md">
+                                            <button 
+                                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-white p-3 rounded-full hover:opacity-80 transition-opacity shadow-md"
+                                                style={{ backgroundColor: themeSettings.primaryColor }}
+                                            >
                                                 <FaSearch />
                                             </button>
                                         </div>
@@ -308,6 +345,10 @@ export default function BlogPage() {
                                     ? "bg-blue-600 text-white shadow-lg shadow-blue-600/30"
                                     : "bg-gray-700 text-gray-300 hover:bg-blue-600 hover:text-white"
                                     }`}
+                                style={{ 
+                                    backgroundColor: selectedCategory === category ? themeSettings.primaryColor : '',
+                                    boxShadow: selectedCategory === category ? `0 10px 15px -3px ${themeSettings.primaryColor}30` : ''
+                                }}
                             >
                                 {category}
                             </button>
@@ -322,9 +363,14 @@ export default function BlogPage() {
                     <div className="container mx-auto">
                         <div className="flex items-center justify-center mb-8">
                             <h2 className="text-3xl md:text-4xl font-bold text-white text-center">Featured Article</h2>
-                            <div className="ml-4 px-3 py-1 bg-yellow-500 text-gray-900 text-sm font-bold rounded-full">Featured</div>
+                            <div 
+                                className="ml-4 px-3 py-1 text-gray-900 text-sm font-bold rounded-full"
+                                style={{ backgroundColor: themeSettings.accentColor }}
+                            >
+                                Featured
+                            </div>
                         </div>
-                        <div className="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-2xl shadow-2xl overflow-hidden max-w-6xl mx-auto transform hover:shadow-3xl transition-all duration-500">
+                        <div className={`${themeSettings.cardBackgroundColor} backdrop-blur-sm ${themeSettings.borderRadius} shadow-2xl overflow-hidden max-w-6xl mx-auto transform hover:shadow-3xl transition-all duration-500`}>
                             <div className="md:flex">
                                 <div className="md:w-1/2">
                                     <div className="h-64 md:h-full relative min-h-[400px]">
@@ -342,7 +388,12 @@ export default function BlogPage() {
                                 </div>
                                 <div className="md:w-1/2 p-8 md:p-12">
                                     <div className="flex items-center text-sm text-gray-400 mb-4">
-                                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold mr-3">Featured</span>
+                                        <span 
+                                            className="text-white px-3 py-1 rounded-full text-xs font-semibold mr-3"
+                                            style={{ backgroundColor: themeSettings.primaryColor }}
+                                        >
+                                            Featured
+                                        </span>
                                         <FaCalendarAlt className="mr-2" />
                                         <span className="mr-4">{featuredPost.date}</span>
                                         <FaClock className="mr-2" />
@@ -389,7 +440,11 @@ export default function BlogPage() {
                                                 <p className="text-xs text-gray-400">{featuredPost.author.role}</p>
                                             </div>
                                         </div>
-                                        <Link href={`/blog/${featuredPost.slug}`} className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium group">
+                                        <Link 
+                                            href={`/blog/${featuredPost.slug}`} 
+                                            className="inline-flex items-center font-medium group"
+                                            style={{ color: themeSettings.primaryColor }}
+                                        >
                                             Read More
                                             <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
                                         </Link>
@@ -410,7 +465,7 @@ export default function BlogPage() {
                     {filteredPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {filteredPosts.map((post) => (
-                                <div key={post.id} className="bg-gray-800 bg-opacity-70 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden transform hover:scale-105 hover:shadow-2xl transition-all duration-500 group">
+                                <div key={post.id} className={`${themeSettings.cardBackgroundColor} backdrop-blur-sm ${themeSettings.borderRadius} shadow-lg overflow-hidden transform hover:scale-105 hover:shadow-2xl transition-all duration-500 group`}>
                                     <div className="relative h-56 overflow-hidden">
                                         <Image
                                             src={post.image}
@@ -482,7 +537,14 @@ export default function BlogPage() {
                                         </div>
                                         <div className="flex flex-wrap gap-2 mb-4">
                                             {post.tags.slice(0, 3).map((tag) => (
-                                                <span key={tag} className="text-xs bg-blue-600 bg-opacity-30 text-blue-300 px-3 py-1 rounded-full hover:bg-opacity-50 transition-colors cursor-pointer">
+                                                <span 
+                                                    key={tag} 
+                                                    className="text-xs px-3 py-1 rounded-full hover:opacity-80 transition-opacity cursor-pointer"
+                                                    style={{ 
+                                                        backgroundColor: `${themeSettings.primaryColor}30`,
+                                                        color: themeSettings.primaryColor 
+                                                    }}
+                                                >
                                                     {tag}
                                                 </span>
                                             ))}
@@ -492,7 +554,11 @@ export default function BlogPage() {
                                                 </span>
                                             )}
                                         </div>
-                                        <Link href={`/blog/${post.slug}`} className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
+                                        <Link 
+                                            href={`/blog/${post.slug}`} 
+                                            className="inline-flex items-center font-medium group"
+                                            style={{ color: themeSettings.primaryColor }}
+                                        >
                                             Read More
                                             <FaArrowRight className="ml-2 transform group-hover:translate-x-1 transition-transform" />
                                         </Link>
@@ -511,7 +577,8 @@ export default function BlogPage() {
                                         setSearchTerm("");
                                         setSelectedCategory("All");
                                     }}
-                                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                    className="px-6 py-3 text-white rounded-lg hover:opacity-80 transition-opacity"
+                                    style={{ backgroundColor: themeSettings.primaryColor }}
                                 >
                                     Reset Filters
                                 </button>
@@ -524,7 +591,11 @@ export default function BlogPage() {
                         <div className="text-center mt-12">
                             <button
                                 onClick={loadMorePosts}
-                                className="px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors transform hover:scale-105 transition-transform font-medium shadow-lg shadow-blue-600/30"
+                                className={`${themeSettings.buttonStyle} text-white hover:opacity-80 transition-opacity transform hover:scale-105 transition-transform font-medium shadow-lg`}
+                                style={{ 
+                                    backgroundColor: themeSettings.primaryColor,
+                                    boxShadow: `0 10px 15px -3px ${themeSettings.primaryColor}30`
+                                }}
                             >
                                 Load More Articles
                             </button>
@@ -534,7 +605,7 @@ export default function BlogPage() {
             </section>
 
             {/* Newsletter Section */}
-            <section className="py-16 px-6 bg-gradient-to-r from-blue-900 to-purple-900">
+            <section className={`py-16 px-6 bg-gradient-to-r ${themeSettings.newsletterBackground}`}>
                 <div className="container mx-auto">
                     <div className="max-w-2xl mx-auto text-center">
                         <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Subscribe to Our Newsletter</h2>
@@ -547,7 +618,10 @@ export default function BlogPage() {
                                 placeholder="Enter your email"
                                 className="flex-1 py-3 px-4 rounded-l-full focus:outline-none focus:ring-2 focus:ring-blue-300 text-gray-800"
                             />
-                            <button className="bg-yellow-400 text-gray-800 py-3 px-6 rounded-r-full hover:bg-yellow-300 transition-colors font-medium sm:mt-0 mt-2">
+                            <button 
+                                className="text-gray-800 py-3 px-6 rounded-r-full hover:opacity-80 transition-opacity font-medium sm:mt-0 mt-2"
+                                style={{ backgroundColor: themeSettings.accentColor }}
+                            >
                                 Subscribe
                             </button>
                         </div>
