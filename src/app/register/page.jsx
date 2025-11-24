@@ -1,9 +1,8 @@
+
 'use client'
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaLock, FaEnvelope, FaGoogle, FaGithub, FaEye, FaEyeSlash, FaArrowRight, FaExclamationTriangle, FaCheck, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -207,357 +206,258 @@ const Register = () => {
         return 'Strong';
     };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
-            {/* Background decorative elements */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
-            </div>
+return (
+ <div className="w-full py-16 bg-gradient-to-br from-[#0A0F1F] via-[#0F1F43] to-[#1A184E] flex items-center justify-center px-6">
+  <div className="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-10 items-center mt-24">
 
-            <div className="max-w-md w-full space-y-8 relative z-10">
-                <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 transform transition-all duration-500 hover:shadow-cyan-500/20">
-                    <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full mb-4 shadow-lg">
-                            <FaUser className="text-white text-2xl" />
-                        </div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Create Account</h2>
-                        <p className="text-gray-300">Join us to get started with your project</p>
-                    </div>
+     {/* Left: Form */}
+<div className="flex justify-center">
+  <div className="
+      bg-white/5 backdrop-blur-2xl 
+      rounded-3xl p-8 
+      shadow-[0_0_60px_rgba(0,255,255,0.15)]
+      border border-white/20 
+      w-full max-w-md 
+      transition-all duration-300 
+      hover:shadow-[0_0_80px_rgba(0,255,255,0.25)] 
+      hover:border-cyan-400/40
+  ">
 
-                    {error && (
-                        <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg flex items-center animate-pulse">
-                            <FaExclamationTriangle className="text-red-400 mr-3 flex-shrink-0" />
-                            <p className="text-red-200 text-sm">{error}</p>
-                            <button
-                                onClick={() => setError('')}
-                                className="ml-auto text-red-400 hover:text-red-300"
-                            >
-                                <FaTimes />
-                            </button>
-                        </div>
-                    )}
+    {/* Header */}
+    <div className="text-center mb-5">
+      <h2 className="text-3xl font-bold text-white tracking-wide">
+        Create Account
+      </h2>
+      <p className="text-gray-300 text-base mt-1">
+        Join our platform today
+      </p>
+    </div>
 
-                    {success && (
-                        <div className="mb-6 p-4 bg-green-500/20 border border-green-500/50 rounded-lg flex items-center animate-pulse">
-                            <FaCheck className="text-green-400 mr-3 flex-shrink-0" />
-                            <p className="text-green-200 text-sm">{success}</p>
-                            <button
-                                onClick={() => setSuccess('')}
-                                className="ml-auto text-green-400 hover:text-green-300"
-                            >
-                                <FaTimes />
-                            </button>
-                        </div>
-                    )}
+    {/* Error / Success */}
+    {error && (
+      <div className="mb-5 p-3 bg-red-500/20 border border-red-500/40 rounded-xl">
+        <p className="text-red-300 text-sm">{error}</p>
+      </div>
+    )}
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div className="space-y-4">
-                            <div className={`transition-all duration-300 ${focusedField === 'name' ? 'transform scale-105' : ''}`}>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Full Name
-                                </label>
-                                <div className="relative">
-                                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-300 ${focusedField === 'name' ? 'text-cyan-400' : 'text-gray-400'}`}>
-                                        <FaUser />
-                                    </div>
-                                    <input
-                                        id="name"
-                                        name="name"
-                                        type="text"
-                                        autoComplete="name"
-                                        required
-                                        className={`appearance-none relative block w-full pl-10 pr-3 py-3 bg-white/10 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${fieldErrors.name
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : focusedField === 'name'
-                                                ? 'border-cyan-500 focus:ring-cyan-500'
-                                                : 'border-gray-600/50 focus:ring-cyan-500'
-                                            } placeholder-gray-400 text-white`}
-                                        placeholder="John Doe"
-                                        value={formData.name}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedField('name')}
-                                        onBlur={() => setFocusedField('')}
-                                    />
-                                </div>
-                                {fieldErrors.name && (
-                                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                                        <FaExclamationTriangle className="mr-1" />
-                                        {fieldErrors.name}
-                                    </p>
-                                )}
-                            </div>
+    {success && (
+      <div className="mb-5 p-3 bg-green-500/20 border border-green-500/40 rounded-xl">
+        <p className="text-green-300 text-sm">{success}</p>
+      </div>
+    )}
 
-                            <div className={`transition-all duration-300 ${focusedField === 'email' ? 'transform scale-105' : ''}`}>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-300 ${focusedField === 'email' ? 'text-cyan-400' : 'text-gray-400'}`}>
-                                        <FaEnvelope />
-                                    </div>
-                                    <input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        autoComplete="email"
-                                        required
-                                        className={`appearance-none relative block w-full pl-10 pr-3 py-3 bg-white/10 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${fieldErrors.email
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : focusedField === 'email'
-                                                ? 'border-cyan-500 focus:ring-cyan-500'
-                                                : 'border-gray-600/50 focus:ring-cyan-500'
-                                            } placeholder-gray-400 text-white`}
-                                        placeholder="you@example.com"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedField('email')}
-                                        onBlur={() => setFocusedField('')}
-                                    />
-                                </div>
-                                {fieldErrors.email && (
-                                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                                        <FaExclamationTriangle className="mr-1" />
-                                        {fieldErrors.email}
-                                    </p>
-                                )}
-                            </div>
+    {/* Form */}
+    <form onSubmit={handleSubmit} className="space-y-5">
 
-                            <div className={`transition-all duration-300 ${focusedField === 'password' ? 'transform scale-105' : ''}`}>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-300 ${focusedField === 'password' ? 'text-cyan-400' : 'text-gray-400'}`}>
-                                        <FaLock />
-                                    </div>
-                                    <input
-                                        id="password"
-                                        name="password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        autoComplete="new-password"
-                                        required
-                                        className={`appearance-none relative block w-full pl-10 pr-10 py-3 bg-white/10 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${fieldErrors.password
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : focusedField === 'password'
-                                                ? 'border-cyan-500 focus:ring-cyan-500'
-                                                : 'border-gray-600/50 focus:ring-cyan-500'
-                                            } placeholder-gray-400 text-white`}
-                                        placeholder="••••••••"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedField('password')}
-                                        onBlur={() => setFocusedField('')}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300 transition-colors"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                    >
-                                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                                    </button>
-                                </div>
-
-                                {formData.password && (
-                                    <div className="mt-2">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-xs text-gray-400">Password strength</span>
-                                            <span className={`text-xs ${passwordStrength < 50 ? 'text-red-400' : passwordStrength < 75 ? 'text-yellow-400' : 'text-green-400'}`}>
-                                                {getPasswordStrengthText()}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-gray-700 rounded-full h-2">
-                                            <div
-                                                className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
-                                                style={{ width: `${passwordStrength}%` }}
-                                            ></div>
-                                        </div>
-                                        {passwordFeedback && (
-                                            <p className="mt-1 text-xs text-gray-400">
-                                                Add: {passwordFeedback}
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                {fieldErrors.password && (
-                                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                                        <FaExclamationTriangle className="mr-1" />
-                                        {fieldErrors.password}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className={`transition-all duration-300 ${focusedField === 'confirmPassword' ? 'transform scale-105' : ''}`}>
-                                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Confirm Password
-                                </label>
-                                <div className="relative">
-                                    <div className={`absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-300 ${focusedField === 'confirmPassword' ? 'text-cyan-400' : 'text-gray-400'}`}>
-                                        <FaLock />
-                                    </div>
-                                    <input
-                                        id="confirmPassword"
-                                        name="confirmPassword"
-                                        type={showConfirmPassword ? 'text' : 'password'}
-                                        autoComplete="new-password"
-                                        required
-                                        className={`appearance-none relative block w-full pl-10 pr-10 py-3 bg-white/10 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300 ${fieldErrors.confirmPassword
-                                            ? 'border-red-500 focus:ring-red-500'
-                                            : focusedField === 'confirmPassword'
-                                                ? 'border-cyan-500 focus:ring-cyan-500'
-                                                : 'border-gray-600/50 focus:ring-cyan-500'
-                                            } placeholder-gray-400 text-white`}
-                                        placeholder="••••••••"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        onFocus={() => setFocusedField('confirmPassword')}
-                                        onBlur={() => setFocusedField('')}
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300 transition-colors"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    >
-                                        {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                                    </button>
-                                </div>
-                                {fieldErrors.confirmPassword && (
-                                    <p className="mt-1 text-sm text-red-400 flex items-center">
-                                        <FaExclamationTriangle className="mr-1" />
-                                        {fieldErrors.confirmPassword}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className={`flex items-start p-3 rounded-lg transition-all duration-300 ${fieldErrors.terms
-                            ? 'bg-red-500/10 border border-red-500/30'
-                            : agreeToTerms
-                                ? 'bg-green-500/10 border border-green-500/30'
-                                : 'bg-white/5 border border-gray-600/30'
-                            }`}>
-                            <input
-                                id="agree-to-terms"
-                                name="agree-to-terms"
-                                type="checkbox"
-                                checked={agreeToTerms}
-                                onChange={(e) => setAgreeToTerms(e.target.checked)}
-                                className="h-4 w-4 bg-white/10 border-gray-600 rounded focus:ring-cyan-500 focus:ring-2 text-cyan-500 mt-0.5"
-                            />
-                            <label htmlFor="agree-to-terms" className="ml-3 block text-sm text-gray-300">
-                                I agree to the{' '}
-                                <Link href="/terms" className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
-                                    Terms and Conditions
-                                </Link>
-                                {' '}and{' '}
-                                <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
-                                    Privacy Policy
-                                </Link>
-                            </label>
-                        </div>
-                        {fieldErrors.terms && (
-                            <p className="mt-1 text-sm text-red-400 flex items-center">
-                                <FaExclamationTriangle className="mr-1" />
-                                {fieldErrors.terms}
-                            </p>
-                        )}
-
-                        <div>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 disabled:opacity-50 transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
-                            >
-                                {isLoading ? (
-                                    <span className="flex items-center">
-                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Creating account...
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center">
-                                        Create Account
-                                        <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                                    </span>
-                                )}
-                            </button>
-                        </div>
-                    </form>
-
-                    <div className="mt-8">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-600/50"></div>
-                            </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-transparent text-gray-400">Or continue with</span>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                disabled={socialLoading === 'Google'}
-                                className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-600/50 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-gray-300 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={() => handleSocialRegister('Google')}
-                            >
-                                {socialLoading === 'Google' ? (
-                                    <svg className="animate-spin h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                ) : (
-                                    <>
-                                        <FaGoogle className="text-red-400" />
-                                        <span className="ml-2">Google</span>
-                                    </>
-                                )}
-                            </button>
-
-                            <button
-                                type="button"
-                                disabled={socialLoading === 'GitHub'}
-                                className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-600/50 rounded-lg shadow-sm bg-white/10 text-sm font-medium text-gray-300 hover:bg-white/20 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                                onClick={() => handleSocialRegister('GitHub')}
-                            >
-                                {socialLoading === 'GitHub' ? (
-                                    <svg className="animate-spin h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                ) : (
-                                    <>
-                                        <FaGithub className="text-gray-300" />
-                                        <span className="ml-2">GitHub</span>
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 text-center">
-                        <p className="text-gray-300">
-                            Already have an account?{' '}
-                            <Link href="/login" className="font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
-                                Sign in
-                            </Link>
-                        </p>
-                    </div>
-
-                    <div className="mt-6 flex items-center justify-center">
-                        <FaShieldAlt className="text-gray-400 mr-2" />
-                        <p className="text-xs text-gray-400">
-                            Your data is secure and encrypted
-                        </p>
-                    </div>
-                </div>
-            </div>
+      {/* Name */}
+      <div>
+        <label className="text-sm text-gray-300">Full Name</label>
+        <div className="relative mt-1">
+          <FaUser className="absolute left-4 top-3 text-gray-400" />
+          <input
+            type="text"
+            name="name"
+            placeholder="John Doe"
+            value={formData.name}
+            onChange={handleChange}
+            className="
+              w-full bg-white/10 border border-white/20 rounded-xl 
+              py-3 pl-12 pr-4 
+              text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
+              outline-none transition-all
+            "
+          />
         </div>
-    );
+        {fieldErrors.name && (
+          <p className="text-red-400 text-xs mt-1">{fieldErrors.name}</p>
+        )}
+      </div>
+
+      {/* Email */}
+      <div>
+        <label className="text-sm text-gray-300">Email</label>
+        <div className="relative mt-1">
+          <FaEnvelope className="absolute left-4 top-3 text-gray-400" />
+          <input
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            value={formData.email}
+            onChange={handleChange}
+            className="
+              w-full bg-white/10 border border-white/20 rounded-xl 
+              py-3 pl-12 pr-4 
+              text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 
+              outline-none transition-all
+            "
+          />
+        </div>
+        {fieldErrors.email && (
+          <p className="text-red-400 text-xs mt-1">{fieldErrors.email}</p>
+        )}
+      </div>
+
+      {/* Password */}
+      <div>
+        <label className="text-sm text-gray-300">Password</label>
+        <div className="relative mt-1">
+          <FaLock className="absolute left-4 top-3 text-gray-400" />
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            className="
+              w-full bg-white/10 border border-white/20 rounded-xl 
+              py-3 pl-12 pr-10 
+              text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400
+              outline-none transition-all
+            "
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-4 top-3 text-gray-300"
+          >
+            {showPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+        {fieldErrors.password && (
+          <p className="text-red-400 text-xs mt-1">{fieldErrors.password}</p>
+        )}
+      </div>
+
+      {/* Confirm Password */}
+      <div>
+        <label className="text-sm text-gray-300">Confirm Password</label>
+        <div className="relative mt-1">
+          <FaLock className="absolute left-4 top-3 text-gray-400" />
+          <input
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            placeholder="••••••••"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            className="
+              w-full bg-white/10 border border-white/20 rounded-xl 
+              py-3 pl-12 pr-10 
+              text-white placeholder-gray-400 
+              focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400
+              outline-none transition-all
+            "
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            className="absolute right-4 top-3 text-gray-300"
+          >
+            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+          </button>
+        </div>
+        {fieldErrors.confirmPassword && (
+          <p className="text-red-400 text-xs mt-1">{fieldErrors.confirmPassword}</p>
+        )}
+      </div>
+
+      {/* Terms */}
+      <div className="flex items-center gap-3 bg-white/5 border border-white/20 p-3 rounded-xl">
+        <input
+          type="checkbox"
+          checked={agreeToTerms}
+          onChange={(e) => setAgreeToTerms(e.target.checked)}
+          className="h-4 w-4 accent-cyan-400"
+        />
+        <p className="text-sm text-gray-300">
+          I agree to the{" "}
+          <Link href="/terms" className="text-cyan-300">Terms</Link> &
+          <Link href="/privacy" className="text-cyan-300 ml-1">Privacy</Link>
+        </p>
+      </div>
+
+      {/* Submit */}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="
+          w-full py-3 
+          bg-gradient-to-r from-cyan-400 to-blue-500 
+          rounded-xl text-white font-semibold text-sm 
+          shadow-lg hover:scale-[1.03] transition-all 
+          disabled:opacity-50
+        "
+      >
+        {isLoading ? "Creating..." : "Create Account"}
+      </button>
+    </form>
+
+    {/* Divider */}
+    <div className="flex items-center gap-4 my-6">
+      <div className="h-px bg-white/20 w-full"></div>
+      <span className="text-gray-300 text-sm">OR</span>
+      <div className="h-px bg-white/20 w-full"></div>
+    </div>
+
+    {/* Social Login */}
+    <div className="space-y-3">
+      <button
+        type="button"
+        className="
+          w-full flex items-center justify-center gap-3 
+          bg-white/10 backdrop-blur-sm 
+          border border-white/20 
+          py-3 rounded-xl 
+          hover:scale-[1.03] transition-all text-white
+        "
+      >
+        <FaGoogle className="text-red-400" />
+        <span className="text-sm font-medium">Continue with Google</span>
+      </button>
+
+      <button
+        type="button"
+        className="
+          w-full flex items-center justify-center gap-3 
+          bg-white/10 backdrop-blur-sm 
+          border border-white/20 
+          py-3 rounded-xl 
+          hover:scale-[1.03] transition-all text-white
+        "
+      >
+        <FaGithub className="text-gray-300" />
+        <span className="text-sm font-medium">Continue with GitHub</span>
+      </button>
+    </div>
+
+    {/* Login Link */}
+    <p className="text-gray-300 text-center mt-6 text-sm">
+      Already have an account?{" "}
+      <Link href="/login" className="text-cyan-300 hover:underline">Sign in</Link>
+    </p>
+  </div>
+</div>
+
+
+      {/* Right: Lottie Animation */}
+      <div className="hidden md:flex justify-center ">
+        <Lottie
+          animationData={registerAnimation}
+          loop
+          className="w-[480px] h-[480px] drop-shadow-[0_0_25px_rgba(0,200,255,0.4)]"
+        />
+      </div>
+
+    </div>
+  </div>
+);
+
+
+
+
 };
 
 export default Register;
+

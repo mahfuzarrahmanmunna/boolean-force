@@ -597,7 +597,7 @@ export default function Portfolio() {
         Why Choose <span className="text-white">booleanforce</span>
       </h2>
       <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
-        We're not just another tech company — we are your strategic partner in digital transformation.
+        We're not just another tech company we are your strategic partner in digital transformation.
       </p>
     </div>
 
