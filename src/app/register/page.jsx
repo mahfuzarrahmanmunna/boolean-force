@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaLock, FaEnvelope, FaGoogle, FaGithub, FaEye, FaEyeSlash, FaArrowRight, FaExclamationTriangle, FaCheck, FaShieldAlt, FaTimes } from 'react-icons/fa';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -21,6 +23,7 @@ const Register = () => {
     const [passwordFeedback, setPasswordFeedback] = useState('');
     const [fieldErrors, setFieldErrors] = useState({});
     const [socialLoading, setSocialLoading] = useState('');
+    const router = useRouter();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -136,17 +139,25 @@ const Register = () => {
         try {
             validateForm();
 
-            // API call would go here
-            // const response = await fetch('/api/auth/register', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(formData)
-            // });
+            // API call to register user
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: formData.name,
+                    email: formData.email,
+                    password: formData.password
+                })
+            });
 
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const data = await response.json();
 
-            setSuccess('Account created successfully! You can now log in.');
+            if (!response.ok) {
+                throw new Error(data.error || 'Registration failed');
+            }
+
+            setSuccess('Account created successfully! Redirecting to login...');
+
             // Reset form
             setFormData({
                 name: '',
@@ -157,6 +168,11 @@ const Register = () => {
             setAgreeToTerms(false);
             setPasswordStrength(0);
             setPasswordFeedback('');
+
+            // Redirect to login after successful registration
+            setTimeout(() => {
+                router.push('/login');
+            }, 2000);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -167,12 +183,12 @@ const Register = () => {
     const handleSocialRegister = async (provider) => {
         setSocialLoading(provider);
         try {
-            // Social registration logic would go here
-            console.log(`Registering with ${provider}`);
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Use NextAuth's signIn function for social providers
+            await signIn(provider.toLowerCase(), {
+                callbackUrl: '/dashboard' // Redirect after successful login
+            });
         } catch (err) {
             setError(`Failed to register with ${provider}`);
-        } finally {
             setSocialLoading('');
         }
     };

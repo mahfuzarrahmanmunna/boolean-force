@@ -476,7 +476,7 @@ const Chatbot = () => {
     };
 
     return (
-        <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 ${darkMode ? 'dark' : ''}`}>
+        <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 ${darkMode ? 'dark' : ''}`}>
             {isOpen && (
                 <div className={`mb-4 ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gray-900 text-white' : 'bg-white'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-gray-700' : 'border-gray-100'} transition-all duration-300 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
                     {/* Header */}
@@ -551,18 +551,18 @@ const Chatbot = () => {
                                     <MoreVertical className="w-4 h-4" />
                                 </button>
                                 {showOptionsMenu && (
-                                    <div className={`absolute right-0 top-full mt-2 w-64 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl shadow-xl border ${darkMode ? 'border-gray-700' : 'border-gray-200'} overflow-visible z-[9999] animate-fadeIn`}>
+                                    <div className={`absolute right-0 top-full z-50 opacity-100 mt-2 w-64 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl shadow-xl border ${darkMode ? 'border-gray-700' : 'border-gray-200'} overflow-visible z-[9999] animate-fadeIn`}>
                                         <div className={`p-2 ${darkMode ? 'bg-gray-750' : 'bg-gray-50'} border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                                             <p className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Chat Options</p>
                                         </div>
 
-                                        <div className="py-1">
+                                        <div className="py-1 z-50 opacity-95">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     toggleMinimize();
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 z-50 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
                                             >
                                                 <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
                                                     {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -894,7 +894,7 @@ const Chatbot = () => {
                     {/* Messages */}
                     {!isMinimized && (
                         <>
-                            <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
+                            <div className={`flex-1 overflow-y-auto p-4 space-y-4 z-10 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
                                 {filteredMessages.length === 0 && searchQuery ? (
                                     <div className="text-center py-8">
                                         <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No messages found matching "{searchQuery}"</p>
@@ -972,7 +972,6 @@ const Chatbot = () => {
                                     ))
                                 )}
 
-                                {/* Quick Actions */}
                                 {showQuickActions && messages.length === 1 && (
                                     <div className="mt-6 animate-fadeIn">
                                         <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4 font-medium flex items-center justify-center`}>
@@ -1011,7 +1010,6 @@ const Chatbot = () => {
                                     </div>
                                 )}
 
-                                {/* Error Display */}
                                 {error && (
                                     <div className="flex justify-start animate-fadeIn">
                                         <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl px-4 py-3 shadow-sm max-w-[85%]">
@@ -1044,7 +1042,6 @@ const Chatbot = () => {
                                 <div ref={messagesEndRef} />
                             </div>
 
-                            {/* Scroll to Bottom Button */}
                             {showScrollToBottom && (
                                 <button
                                     onClick={scrollToBottom}
@@ -1055,7 +1052,6 @@ const Chatbot = () => {
                                 </button>
                             )}
 
-                            {/* Input */}
                             <div className={`border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-100 bg-white'} p-4`}>
                                 <div className="flex items-center">
                                     <button

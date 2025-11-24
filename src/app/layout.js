@@ -11,6 +11,7 @@ import BinaryBack from "./components/BinarayBack/BinaryBack";
 import { AuthProviders } from "@/providers/AuthProviders";
 import AuthDebug from "./components/AuthDebug";
 import Chatbot from "./components/Chatbot/Chatbot";
+import AnimatedCursor from "react-animated-cursor";
 // import AuthDebug from "./components/AuthDebug";
 
 const inter = Inter({
@@ -47,6 +48,26 @@ export default function RootLayout({ children }) {
           <VerticalNavbar4 /> */}
 
           <main className="flex-grow">
+
+            {/* <AnimatedCursor
+              showSystemCursor={true}
+              color="#fff"
+              innerSize={8}
+              outerSize={35}
+              innerScale={1}
+              outerScale={1.7}
+              outerAlpha={0}
+              outerStyle={{
+                border: "2px solid rgba(0,150,255,0.8)",
+                backgroundColor: "transparent",
+                borderRadius: "50%",
+              }}
+              innerStyle={{
+                backgroundColor: "rgba(0,150,255,1)",
+                borderRadius: "50%",
+              }}
+            /> */}
+
             <ClientLayout>
               <AuthProviders>
                 {children}
