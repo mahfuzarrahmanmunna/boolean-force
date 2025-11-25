@@ -593,10 +593,10 @@ export default function Portfolio() {
   <div className="container mx-auto max-w-6xl relative z-10">
     {/* Header */}
     <div className="text-center mb-14 -mt-8">
-      <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+      <h2 className="text-5xl font-extrabold  mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
         Why Choose <span className="text-white">booleanforce</span>
       </h2>
-      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto  ">
         We're not just another tech company we are your strategic partner in digital transformation.
       </p>
     </div>
