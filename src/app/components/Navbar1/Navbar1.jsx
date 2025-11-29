@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, Palette, Globe, Cpu, ShoppingBag } from 'lucide-react';
+import { ChevronRight, Palette, Globe, Cpu, ShoppingBag, Search, Menu, X, ArrowRight, Sparkles, Users, Award, Target, Zap, Briefcase, Lightbulb } from 'lucide-react';
 
 const Navbar1 = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -11,8 +11,11 @@ const Navbar1 = () => {
     const [mounted, setMounted] = useState(false);
     const [servicesModalOpen, setServicesModalOpen] = useState(false);
     const [aboutModalOpen, setAboutModalOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const servicesTimeoutRef = useRef(null);
     const aboutTimeoutRef = useRef(null);
+    const searchInputRef = useRef(null);
     const pathname = usePathname();
 
     useEffect(() => {
@@ -31,11 +34,18 @@ const Navbar1 = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    useEffect(() => {
+        if (searchOpen && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [searchOpen]);
+
     const handleServicesMouseEnter = () => {
         if (servicesTimeoutRef.current) {
             clearTimeout(servicesTimeoutRef.current);
         }
         setServicesModalOpen(true);
+        setAboutModalOpen(false);
     };
 
     const handleServicesMouseLeave = () => {
@@ -49,12 +59,21 @@ const Navbar1 = () => {
             clearTimeout(aboutTimeoutRef.current);
         }
         setAboutModalOpen(true);
+        setServicesModalOpen(false);
     };
 
     const handleAboutMouseLeave = () => {
         aboutTimeoutRef.current = setTimeout(() => {
             setAboutModalOpen(false);
         }, 200);
+    };
+
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        // Handle search functionality
+        console.log("Searching for:", searchQuery);
+        setSearchOpen(false);
+        setSearchQuery('');
     };
 
     const navLinks = [
@@ -70,32 +89,67 @@ const Navbar1 = () => {
             name: "Brand Visual Identity",
             href: "/brand-visual-identity",
             description: "Creating memorable brand experiences",
-            icon: <Palette className="w-5 h-5" />
+            icon: <Palette className="w-5 h-5" />,
+            color: "from-purple-500 to-pink-500"
         },
         {
             name: "Website Development",
             href: "/website-development",
             description: "Building responsive, high-performance websites",
-            icon: <Globe className="w-5 h-5" />
+            icon: <Globe className="w-5 h-5" />,
+            color: "from-blue-500 to-cyan-500"
         },
         {
             name: "ERP Software Solutions",
             href: "/erp-software-solutions",
             description: "Streamlining business operations",
-            icon: <Cpu className="w-5 h-5" />
+            icon: <Cpu className="w-5 h-5" />,
+            color: "from-indigo-500 to-purple-500"
         },
         {
             name: "POS Systems",
             href: "/pos-systems",
             description: "Modern point-of-sale solutions",
-            icon: <ShoppingBag className="w-5 h-5" />
+            icon: <ShoppingBag className="w-5 h-5" />,
+            color: "from-green-500 to-teal-500"
+        }
+    ];
+
+    const aboutLinks = [
+        {
+            name: "About Us",
+            href: "/about-us",
+            description: "Learn more about our company and team",
+            icon: <Users className="w-5 h-5" />,
+            color: "from-blue-500 to-indigo-500"
+        },
+        {
+            name: "Partnership",
+            href: "/partnership",
+            description: "Explore partnership opportunities with us",
+            icon: <Award className="w-5 h-5" />,
+            color: "from-purple-500 to-pink-500"
+        },
+        {
+            name: "Careers",
+            href: "/careers",
+            description: "Join our team of talented professionals",
+            icon: <Target className="w-5 h-5" />,
+            color: "from-green-500 to-teal-500"
+        },
+        {
+            name: "Our Process",
+            href: "/our-process",
+            description: "How we deliver exceptional results",
+            icon: <Zap className="w-5 h-5" />,
+            color: "from-yellow-500 to-orange-500"
         }
     ];
 
     return (
         <nav
             className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-                ? "bg-slate-900/90 bg-gray-700 backdrop-blur-xl shadow-2xl border-b border-slate-700/30"
+                ? "bg-slate-900/95 bg-gray-900 backdrop-blur-xl shadow-2xl border-b border-slate-700/30"
                 : "bg-transparent"
                 }`}
         >
@@ -162,27 +216,23 @@ const Navbar1 = () => {
                         </div>
                     </div>
 
-                    {/* CTA Button */}
-                    <div className="hidden md:block">
+                    {/* Desktop Right Side Actions */}
+                    <div className="hidden md:flex items-center space-x-3">
+                        {/* Search Button */}
+                        <button
+                            onClick={() => setSearchOpen(true)}
+                            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-slate-700/30 transition-all duration-300"
+                        >
+                            <Search className="w-5 h-5" />
+                        </button>
+
+                        {/* CTA Button */}
                         <Link href="/contact" className="relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-300"></div>
                             <button className="relative bg-slate-800 border border-slate-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
                                 <span className="relative z-10 flex items-center">
                                     Let's Talk
-                                    <svg
-                                        className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                        ></path>
-                                    </svg>
+                                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                                 </span>
                             </button>
                         </Link>
@@ -196,37 +246,39 @@ const Navbar1 = () => {
                                 }`}
                         >
                             {!isOpen ? (
-                                <svg
-                                    className="block h-6 w-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                </svg>
+                                <Menu className="block h-6 w-6" />
                             ) : (
-                                <svg
-                                    className="block h-6 w-6"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
+                                <X className="block h-6 w-6" />
                             )}
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Search Modal */}
+            <div className={`absolute inset-x-0 top-0 transition-all duration-300 ${searchOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+                <div className="bg-slate-900/95 backdrop-blur-xl shadow-2xl border-b border-slate-700/50">
+                    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                        <form onSubmit={handleSearchSubmit} className="relative">
+                            <div className="flex items-center">
+                                <Search className="absolute left-3 w-5 h-5 text-gray-400" />
+                                <input
+                                    ref={searchInputRef}
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search for services, articles, and more..."
+                                    className="w-full pl-10 pr-12 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchOpen(false)}
+                                    className="absolute right-3 p-1 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -238,22 +290,22 @@ const Navbar1 = () => {
                 onMouseLeave={handleServicesMouseLeave}
             >
                 <div className="bg-slate-800/95 backdrop-blur-md shadow-2xl border border-slate-700/50 rounded-b-lg">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             {services.map((service, index) => (
                                 <Link
                                     key={index}
                                     href={service.href}
-                                    className="group p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 border border-slate-600/30 hover:border-blue-500/30"
+                                    className="group p-5 rounded-xl bg-slate-700/20 hover:bg-slate-700/40 transition-all duration-300 border border-slate-600/20 hover:border-blue-500/30 transform hover:scale-105 hover:-translate-y-1"
                                 >
-                                    <div className="flex items-start space-x-3">
-                                        <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
+                                    <div className="flex items-start space-x-4">
+                                        <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
                                             {service.icon}
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-medium group-hover:text-blue-300 transition-colors duration-300">{service.name}</h3>
-                                            <p className="text-gray-400 text-sm mt-1">{service.description}</p>
-                                            <div className="flex items-center mt-2 text-blue-400 text-sm group-hover:text-blue-300">
+                                            <h3 className="text-white font-semibold text-base group-hover:text-blue-300 transition-colors duration-300">{service.name}</h3>
+                                            <p className="text-gray-400 text-sm mt-2">{service.description}</p>
+                                            <div className="flex items-center mt-3 text-blue-400 text-sm group-hover:text-blue-300 font-medium">
                                                 <span>Learn more</span>
                                                 <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
                                             </div>
@@ -261,6 +313,16 @@ const Navbar1 = () => {
                                     </div>
                                 </Link>
                             ))}
+                        </div>
+                        <div className="mt-8 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-white font-semibold text-lg mb-2">Need help choosing?</h3>
+                                <p className="text-gray-400 text-sm">Our team is here to guide you to the perfect solution for your business.</p>
+                            </div>
+                            <Link href="/contact" className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                                Get Consultation
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -273,48 +335,45 @@ const Navbar1 = () => {
                 onMouseLeave={handleAboutMouseLeave}
             >
                 <div className="bg-slate-800/95 backdrop-blur-md shadow-2xl border border-slate-700/50 rounded-b-lg">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Link
-                                href="/about-us"
-                                className="group p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 border border-slate-600/30 hover:border-blue-500/30"
-                            >
-                                <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-white font-medium group-hover:text-blue-300 transition-colors duration-300">About Us</h3>
-                                        <p className="text-gray-400 text-sm mt-1">Learn more about our company and team</p>
-                                        <div className="flex items-center mt-2 text-blue-400 text-sm group-hover:text-blue-300">
-                                            <span>Learn more</span>
-                                            <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {aboutLinks.map((link, index) => (
+                                <Link
+                                    key={index}
+                                    href={link.href}
+                                    className="group p-5 rounded-xl bg-slate-700/20 hover:bg-slate-700/40 transition-all duration-300 border border-slate-600/20 hover:border-blue-500/30 transform hover:scale-105 hover:-translate-y-1"
+                                >
+                                    <div className="flex items-start space-x-4">
+                                        <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
+                                            {link.icon}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white font-semibold text-base group-hover:text-blue-300 transition-colors duration-300">{link.name}</h3>
+                                            <p className="text-gray-400 text-sm mt-2">{link.description}</p>
+                                            <div className="flex items-center mt-3 text-blue-400 text-sm group-hover:text-blue-300 font-medium">
+                                                <span>Learn more</span>
+                                                <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </Link>
-                            <Link
-                                href="/partnership"
-                                className="group p-4 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 border border-slate-600/30 hover:border-blue-500/30"
-                            >
-                                <div className="flex items-start space-x-3">
-                                    <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-600/20 rounded-lg flex items-center justify-center text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-white font-medium group-hover:text-blue-300 transition-colors duration-300">Partnership</h3>
-                                        <p className="text-gray-400 text-sm mt-1">Explore partnership opportunities with us</p>
-                                        <div className="flex items-center mt-2 text-blue-400 text-sm group-hover:text-blue-300">
-                                            <span>Learn more</span>
-                                            <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            ))}
+                        </div>
+                        <div className="mt-8 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-white font-semibold text-lg mb-2">Join our community</h3>
+                                <p className="text-gray-400 text-sm">Connect with us and stay updated on the latest trends and innovations.</p>
+                            </div>
+                            <div className="flex space-x-3">
+                                <Link href="/newsletter" className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                                    Subscribe
+                                    <Sparkles className="ml-2 w-4 h-4" />
+                                </Link>
+                                <Link href="/community" className="inline-flex items-center px-5 py-2.5 bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-600 transition-all duration-300 transform hover:scale-105">
+                                    Join Community
+                                    <Users className="ml-2 w-4 h-4" />
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -327,10 +386,22 @@ const Navbar1 = () => {
             >
                 <div
                     className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 ${scrolled
-                        ? "bg-slate-900/90 backdrop-blur-xl"
-                        : "bg-slate-800/90 backdrop-blur-md"
+                        ? "bg-slate-900/95 backdrop-blur-xl"
+                        : "bg-slate-800/95 backdrop-blur-md"
                         }`}
                 >
+                    {/* Mobile Search */}
+                    <div className="px-4 py-3">
+                        <div className="relative">
+                            <Search className="absolute left-3 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+
                     {navLinks.map((link) => (
                         <div key={link.name}>
                             <Link
@@ -348,9 +419,15 @@ const Navbar1 = () => {
                                         <Link
                                             key={index}
                                             href={service.href}
-                                            className="block text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
+                                            className="flex items-center text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
                                         >
-                                            {service.name}
+                                            <div className={`w-8 h-8 bg-gradient-to-br ${service.color} rounded-lg flex items-center justify-center text-white mr-3`}>
+                                                {service.icon}
+                                            </div>
+                                            <div>
+                                                <div className="font-medium">{service.name}</div>
+                                                <div className="text-xs text-gray-500">{service.description}</div>
+                                            </div>
                                         </Link>
                                     ))}
                                 </div>
@@ -359,18 +436,21 @@ const Navbar1 = () => {
                             {/* Show About dropdown under mobile */}
                             {link.name === "About" && (
                                 <div className="pl-6 space-y-1">
-                                    <Link
-                                        href="/about-us"
-                                        className="block text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
-                                    >
-                                        About Us
-                                    </Link>
-                                    <Link
-                                        href="/partnership"
-                                        className="block text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
-                                    >
-                                        Partnership
-                                    </Link>
+                                    {aboutLinks.map((link, index) => (
+                                        <Link
+                                            key={index}
+                                            href={link.href}
+                                            className="flex items-center text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
+                                        >
+                                            <div className={`w-8 h-8 bg-gradient-to-br ${link.color} rounded-lg flex items-center justify-center text-white mr-3`}>
+                                                {link.icon}
+                                            </div>
+                                            <div>
+                                                <div className="font-medium">{link.name}</div>
+                                                <div className="text-xs text-gray-500">{link.description}</div>
+                                            </div>
+                                        </Link>
+                                    ))}
                                 </div>
                             )}
                         </div>
@@ -383,20 +463,7 @@ const Navbar1 = () => {
                             <button className="relative w-full bg-slate-800 border border-slate-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
                                 <span className="relative z-10 flex items-center justify-center">
                                     Let's Talk
-                                    <svg
-                                        className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M13 7l5 5m0 0l-5 5m5-5H6"
-                                        ></path>
-                                    </svg>
+                                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                                 </span>
                             </button>
                         </Link>

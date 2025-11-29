@@ -12,19 +12,19 @@ import {
 } from 'lucide-react';
 
 const QUICK_ACTIONS = [
-    { icon: <Briefcase className="w-5 h-5" />, text: "Our Services", query: "What services does booleanforce offer?", color: "blue", gradient: "from-blue-500 to-blue-600" },
-    { icon: <Palette className="w-5 h-5" />, text: "Brand Identity", query: "Tell me about your brand visual identity services", color: "purple", gradient: "from-purple-500 to-purple-600" },
-    { icon: <Globe className="w-5 h-5" />, text: "Website Development", query: "What kind of websites do you develop?", color: "green", gradient: "from-green-500 to-green-600" },
-    { icon: <Cpu className="w-5 h-5" />, text: "ERP Solutions", query: "How can your ERP solutions help my business?", color: "red", gradient: "from-red-500 to-red-600" },
-    { icon: <ShoppingBag className="w-5 h-5" />, text: "POS Systems", query: "What features do your POS systems have?", color: "yellow", gradient: "from-yellow-500 to-yellow-600" },
-    { icon: <HelpCircle className="w-5 h-5" />, text: "Getting Started", query: "How can I get started with booleanforce services?", color: "indigo", gradient: "from-indigo-500 to-indigo-600" }
+    { icon: <Briefcase className="w-5 h-5" />, text: "Our Services", query: "What services does booleanforce offer?", color: "blue" },
+    { icon: <Palette className="w-5 h-5" />, text: "Brand Identity", query: "Tell me about your brand visual identity services", color: "purple" },
+    { icon: <Globe className="w-5 h-5" />, text: "Website Development", query: "What kind of websites do you develop?", color: "green" },
+    { icon: <Cpu className="w-5 h-5" />, text: "ERP Solutions", query: "How can your ERP solutions help my business?", color: "red" },
+    { icon: <ShoppingBag className="w-5 h-5" />, text: "POS Systems", query: "What features do your POS systems have?", color: "yellow" },
+    { icon: <HelpCircle className="w-5 h-5" />, text: "Getting Started", query: "How can I get started with booleanforce services?", color: "indigo" }
 ];
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
     const [isOnline, setIsOnline] = useState(true);
     const [messages, setMessages] = useState([
         {
@@ -63,6 +63,7 @@ const Chatbot = () => {
     const [showRatingDialog, setShowRatingDialog] = useState(false);
     const [rating, setRating] = useState(0);
     const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
 
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
@@ -372,7 +373,6 @@ const Chatbot = () => {
         setShowQuickActions(true);
         setError(null);
         setShowOptionsMenu(false);
-        setShowClearConfirmation(false);
     };
 
     const clearChatHistory = () => {
@@ -476,28 +476,21 @@ const Chatbot = () => {
     };
 
     return (
-        <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-30 ${darkMode ? 'dark' : ''}`}>
+        <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 ${darkMode ? 'dark' : ''}`}>
             {isOpen && (
-                <div className={`mb-4 ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gray-900 text-white' : 'bg-white'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-gray-700' : 'border-gray-100'} transition-all duration-300 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
+                <div className={`mb-4 ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800 text-white' : 'bg-gradient-to-b from-white to-slate-50 text-slate-800'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-500 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
                     {/* Header */}
-                    <div className={`bg-gradient-to-r ${darkMode ? 'from-indigo-700 to-purple-800' : 'from-indigo-600 to-purple-600'} text-white p-4 flex justify-between items-center rounded-t-2xl relative overflow-hidden`}>
-                        {/* Background decoration */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-12 -mb-12"></div>
-
-                        {/* Animated gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 transform -skew-x-12 -translate-x-full animate-shimmer"></div>
-
-                        <div className="flex items-center relative z-10">
+                    <div className={`${darkMode ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} text-white p-4 flex justify-between items-center rounded-t-2xl`}>
+                        <div className="flex items-center">
                             <div className="relative">
-                                <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                                    <Bot className="w-6 h-6" />
+                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                    <Bot className="w-6 h-6 text-white" />
                                 </div>
-                                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${connectionStatus === 'connected' ? 'bg-green-400 border-white' : connectionStatus === 'connecting' ? 'bg-yellow-400 border-white animate-pulse' : 'bg-red-400 border-white'}`}></div>
+                                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${connectionStatus === 'connected' ? 'bg-emerald-500 border-white' : connectionStatus === 'connecting' ? 'bg-amber-500 border-white animate-pulse' : 'bg-red-500 border-white'}`}></div>
                             </div>
                             <div className="ml-3">
                                 <h3 className="font-semibold text-lg">booleanforce Assistant</h3>
-                                <p className="text-xs opacity-90 flex items-center">
+                                <p className="text-xs opacity-75 flex items-center">
                                     {connectionStatus === 'connected' ? (
                                         <>
                                             <Wifi className="w-3 h-3 mr-1" />
@@ -517,17 +510,17 @@ const Chatbot = () => {
                                 </p>
                             </div>
                         </div>
-                        <div className="flex items-center relative z-10">
+                        <div className="flex items-center">
                             <button
                                 onClick={toggleFullscreen}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-all duration-200 mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
                                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                             >
                                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                             </button>
                             <button
                                 onClick={toggleDarkMode}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-all duration-200 mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
                                 title="Toggle dark mode"
                             >
                                 {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -537,7 +530,7 @@ const Chatbot = () => {
                                     setShowSearch(!showSearch);
                                     setShowOptionsMenu(false);
                                 }}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-all duration-200 mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
                                 title="Search messages"
                             >
                                 <Search className="w-4 h-4" />
@@ -545,33 +538,48 @@ const Chatbot = () => {
                             <div className="relative" ref={optionsMenuRef}>
                                 <button
                                     onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                                    className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-all duration-200 mr-1"
+                                    className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
                                     title="More options"
                                 >
                                     <MoreVertical className="w-4 h-4" />
                                 </button>
                                 {showOptionsMenu && (
-                                    <div className={`absolute right-0 top-full z-50 opacity-100 mt-2 w-64 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl shadow-xl border ${darkMode ? 'border-gray-700' : 'border-gray-200'} overflow-visible z-[9999] animate-fadeIn`}>
-                                        <div className={`p-2 ${darkMode ? 'bg-gray-750' : 'bg-gray-50'} border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                                            <p className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Chat Options</p>
+                                    <div className={`absolute right-0 top-full z-40 mt-2 w-72 ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl shadow-xl border ${darkMode ? 'border-slate-700' : 'border-slate-200'} overflow-hidden z-[9999] animate-fadeIn max-h-96 overflow-y-auto`}>
+                                        {/* Chat Options Header */}
+                                        <div className={`p-4 ${darkMode ? 'bg-slate-900' : 'bg-slate-100'} border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-semibold text-lg flex items-center">
+                                                    <Settings className="w-5 h-5 mr-2" />
+                                                    Chat Options
+                                                </h3>
+                                                <button
+                                                    onClick={() => setShowOptionsMenu(false)}
+                                                    className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-200'} transition-colors`}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <div className="py-1 z-50 opacity-95">
+                                        {/* Basic Options Section */}
+                                        <div className="p-2">
+                                            <div className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wider px-3 py-2`}>Basic Options</div>
+
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     toggleMinimize();
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 z-50 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    {isMinimized ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    {isMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">{isMinimized ? 'Expand' : 'Minimize'}</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{isMinimized ? 'Show chat window' : 'Hide chat window'}</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{isMinimized ? 'Show chat window' : 'Hide chat window'}</p>
                                                 </div>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'} font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded`}>Ctrl+M</span>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+M</span>
                                             </button>
 
                                             <button
@@ -580,14 +588,14 @@ const Chatbot = () => {
                                                     setShowSettings(!showSettings);
                                                     setShowOptionsMenu(false);
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <Settings className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Settings className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Settings</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Customize your experience</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Customize your experience</p>
                                                 </div>
                                             </button>
 
@@ -596,16 +604,16 @@ const Chatbot = () => {
                                                     e.stopPropagation();
                                                     exportChat();
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <Download className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Download className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Export chat</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Download conversation</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Download conversation</p>
                                                 </div>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'} font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded`}>Ctrl+S</span>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+S</span>
                                             </button>
 
                                             <button
@@ -614,37 +622,36 @@ const Chatbot = () => {
                                                     setShowRatingDialog(true);
                                                     setShowOptionsMenu(false);
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <StarIcon className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <StarIcon className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Rate conversation</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Help us improve</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Help us improve</p>
                                                 </div>
                                             </button>
                                         </div>
 
-                                        <div className={`p-2 ${darkMode ? 'bg-gray-750' : 'bg-gray-50'} border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-                                            <p className={`text-xs font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'} uppercase tracking-wider`}>Advanced</p>
-                                        </div>
+                                        {/* Advanced Options Section */}
+                                        <div className="p-2 border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'}">
+                                            <div className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wider px-3 py-2`}>Advanced</div>
 
-                                        <div className="py-1">
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setShowClearConfirmation(true);
                                                     setShowOptionsMenu(false);
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-red-900/30 group-hover:bg-red-900/50' : 'bg-red-50 group-hover:bg-red-100'} mr-3 transition-colors`}>
-                                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-900/30 group-hover:bg-red-900/50' : 'bg-red-50 group-hover:bg-red-100'} mr-3 transition-colors`}>
+                                                    <Trash2 className="w-5 h-5 text-red-500" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium text-red-500">Clear chat history</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Delete all messages</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Delete all messages</p>
                                                 </div>
                                             </button>
 
@@ -653,16 +660,16 @@ const Chatbot = () => {
                                                     e.stopPropagation();
                                                     resetChat();
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <RefreshCw className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <RefreshCw className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Reset chat</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Start new conversation</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Start new conversation</p>
                                                 </div>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'} font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded`}>Ctrl+R</span>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+R</span>
                                             </button>
 
                                             <button
@@ -671,16 +678,16 @@ const Chatbot = () => {
                                                     setShowKeyboardShortcuts(true);
                                                     setShowOptionsMenu(false);
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <Keyboard className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Keyboard className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Keyboard shortcuts</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>View all shortcuts</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>View all shortcuts</p>
                                                 </div>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-400'} font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded`}>Ctrl+?</span>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+?</span>
                                             </button>
 
                                             <button
@@ -690,14 +697,14 @@ const Chatbot = () => {
                                                     alert('Help & Support page would open here');
                                                     setShowOptionsMenu(false);
                                                 }}
-                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'} transition-colors group`}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
                                             >
-                                                <div className={`p-1.5 rounded-md ${darkMode ? 'bg-gray-700 group-hover:bg-gray-600' : 'bg-gray-100 group-hover:bg-gray-200'} mr-3 transition-colors`}>
-                                                    <HelpCircle className="w-4 h-4" />
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <HelpCircle className="w-5 h-5" />
                                                 </div>
                                                 <div className="flex-1">
                                                     <p className="text-sm font-medium">Help & Support</p>
-                                                    <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Get assistance</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Get assistance</p>
                                                 </div>
                                             </button>
                                         </div>
@@ -706,7 +713,7 @@ const Chatbot = () => {
                             </div>
                             <button
                                 onClick={toggleChat}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1.5 transition-all duration-200"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -715,17 +722,17 @@ const Chatbot = () => {
 
                     {/* Settings Panel */}
                     {showSettings && !isMinimized && (
-                        <div className={`p-4 border-b ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'} animate-fadeIn`}>
-                            <h4 className={`font-medium mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Settings</h4>
+                        <div className={`p-4 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-slate-50'} animate-fadeIn`}>
+                            <h4 className={`font-medium mb-3 ${darkMode ? 'text-white' : 'text-slate-800'}`}>Settings</h4>
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         {soundEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Sound Effects</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Sound Effects</span>
                                     </div>
                                     <button
                                         onClick={() => setSoundEnabled(!soundEnabled)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${soundEnabled ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${soundEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                                     >
                                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${soundEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                                     </button>
@@ -733,20 +740,20 @@ const Chatbot = () => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         {notificationsEnabled ? <Bell className="w-4 h-4 mr-2" /> : <BellOff className="w-4 h-4 mr-2" />}
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Notifications</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Notifications</span>
                                     </div>
                                     <button
                                         onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${notificationsEnabled ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${notificationsEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                                     >
                                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                                     </button>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Auto-scroll</span>
+                                    <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Auto-scroll</span>
                                     <button
                                         onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${autoScrollEnabled ? 'bg-indigo-600' : 'bg-gray-300'}`}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${autoScrollEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                                     >
                                         <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${autoScrollEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
                                     </button>
@@ -758,40 +765,40 @@ const Chatbot = () => {
                     {/* Keyboard Shortcuts Modal */}
                     {showKeyboardShortcuts && (
                         <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                            <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold">Keyboard Shortcuts</h3>
                                     <button
                                         onClick={() => setShowKeyboardShortcuts(false)}
-                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Minimize chat</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Ctrl+M</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Minimize chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+M</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Toggle dark mode</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Ctrl+D</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Toggle dark mode</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+D</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Export chat</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Ctrl+S</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Export chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+S</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Reset chat</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Ctrl+R</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Reset chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+R</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Show shortcuts</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Ctrl+?</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Show shortcuts</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+?</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Close menus</span>
-                                        <span className={`text-xs font-mono ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} px-2 py-1 rounded`}>Esc</span>
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Close menus</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Esc</span>
                                     </div>
                                 </div>
                             </div>
@@ -801,17 +808,17 @@ const Chatbot = () => {
                     {/* Rating Dialog */}
                     {showRatingDialog && (
                         <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                            <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
                                 <div className="flex justify-between items-center mb-4">
                                     <h3 className="text-lg font-semibold">Rate this conversation</h3>
                                     <button
                                         onClick={() => setShowRatingDialog(false)}
-                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}
+                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
                                     >
                                         <X className="w-5 h-5" />
                                     </button>
                                 </div>
-                                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4`}>How would you rate your experience with our assistant?</p>
+                                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-4`}>How would you rate your experience with our assistant?</p>
                                 <div className="flex justify-center space-x-2 mb-6">
                                     {[1, 2, 3, 4, 5].map((star) => (
                                         <button
@@ -820,7 +827,7 @@ const Chatbot = () => {
                                             className="transition-colors"
                                         >
                                             <StarIcon
-                                                className={`w-8 h-8 ${star <= rating ? 'text-yellow-500 fill-current' : darkMode ? 'text-gray-600' : 'text-gray-300'}`}
+                                                className={`w-8 h-8 ${star <= rating ? 'text-amber-500 fill-current' : darkMode ? 'text-slate-600' : 'text-slate-300'}`}
                                             />
                                         </button>
                                     ))}
@@ -828,14 +835,14 @@ const Chatbot = () => {
                                 <div className="flex justify-end space-x-2">
                                     <button
                                         onClick={() => setShowRatingDialog(false)}
-                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
+                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'} transition-colors`}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={submitRating}
                                         disabled={rating === 0}
-                                        className={`px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed`}
+                                        className={`px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed`}
                                     >
                                         Submit
                                     </button>
@@ -847,20 +854,20 @@ const Chatbot = () => {
                     {/* Clear Confirmation Dialog */}
                     {showClearConfirmation && (
                         <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                            <div className={`${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
                                 <div className="flex items-center mb-4">
                                     <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full mr-3">
                                         <Trash2 className="w-6 h-6 text-red-500" />
                                     </div>
                                     <h3 className="text-lg font-semibold">Clear chat history?</h3>
                                 </div>
-                                <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
+                                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-6`}>
                                     This will permanently delete all messages in this conversation. This action cannot be undone.
                                 </p>
                                 <div className="flex justify-end space-x-2">
                                     <button
                                         onClick={() => setShowClearConfirmation(false)}
-                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition-colors`}
+                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'} transition-colors`}
                                     >
                                         Cancel
                                     </button>
@@ -877,15 +884,15 @@ const Chatbot = () => {
 
                     {/* Search Bar */}
                     {showSearch && !isMinimized && (
-                        <div className={`p-3 border-b ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-50'} animate-fadeIn`}>
+                        <div className={`p-3 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-slate-50'} animate-fadeIn`}>
                             <div className="relative">
-                                <Search className={`absolute left-3 top-2.5 w-4 h-4 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                                <Search className={`absolute left-3 top-2.5 w-4 h-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
                                 <input
                                     type="text"
                                     placeholder="Search messages..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className={`w-full pl-10 pr-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white text-gray-800 border-gray-300'} border focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                                    className={`w-full pl-10 pr-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-white text-slate-800 border-slate-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500`}
                                 />
                             </div>
                         </div>
@@ -894,10 +901,10 @@ const Chatbot = () => {
                     {/* Messages */}
                     {!isMinimized && (
                         <>
-                            <div className={`flex-1 overflow-y-auto p-4 space-y-4 z-10 ${darkMode ? 'bg-gradient-to-b from-gray-900 to-gray-800' : 'bg-gradient-to-b from-gray-50 to-white'}`}>
+                            <div className={`flex-1 overflow-y-auto p-4 space-y-4 z-10 ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
                                 {filteredMessages.length === 0 && searchQuery ? (
                                     <div className="text-center py-8">
-                                        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>No messages found matching "{searchQuery}"</p>
+                                        <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No messages found matching "{searchQuery}"</p>
                                     </div>
                                 ) : (
                                     filteredMessages.map((message) => (
@@ -907,17 +914,17 @@ const Chatbot = () => {
                                         >
                                             <div
                                                 className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${message.role === 'user'
-                                                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                                                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
                                                     : message.isError
                                                         ? 'bg-red-50 border border-red-200 text-red-800'
                                                         : darkMode
-                                                            ? 'bg-gray-800 text-white border border-gray-700'
-                                                            : 'bg-white text-gray-800 border border-gray-100'
+                                                            ? 'bg-slate-800 text-white border border-slate-700'
+                                                            : 'bg-white text-slate-800 border border-slate-200'
                                                     }`}
                                             >
                                                 <div className="flex items-start">
                                                     {message.role === 'assistant' && (
-                                                        <div className={`mr-2 mt-0.5 flex-shrink-0 ${message.isError ? 'text-red-600' : 'text-indigo-600'}`}>
+                                                        <div className={`mr-2 mt-0.5 flex-shrink-0 ${message.isError ? 'text-red-600' : 'text-blue-600'}`}>
                                                             <Bot className="w-5 h-5" />
                                                         </div>
                                                     )}
@@ -929,7 +936,7 @@ const Chatbot = () => {
                                                     )}
                                                 </div>
                                                 <div className={`flex items-center justify-between mt-2 ${message.role === 'user' ? 'text-right' : ''}`}>
-                                                    <div className={`text-xs ${message.role === 'user' ? 'text-white opacity-70' : darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                                                    <div className={`text-xs ${message.role === 'user' ? 'text-white opacity-70' : darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                                                         {formatTimestamp(message.timestamp)}
                                                     </div>
                                                     {message.role === 'user' && (
@@ -946,21 +953,21 @@ const Chatbot = () => {
                                                     <div className="flex mt-2 space-x-2">
                                                         <button
                                                             onClick={() => handleReaction(message.id, 'like')}
-                                                            className={`text-xs ${likedMessageIds.has(message.id) ? 'text-indigo-600' : darkMode ? 'text-gray-400 hover:text-indigo-400' : 'text-gray-500 hover:text-indigo-600'} transition-colors`}
+                                                            className={`text-xs ${likedMessageIds.has(message.id) ? 'text-blue-600' : darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
                                                             title="Like"
                                                         >
                                                             <ThumbsUp className="w-4 h-4" />
                                                         </button>
                                                         <button
                                                             onClick={() => copyMessage(message.id, message.content)}
-                                                            className={`text-xs ${darkMode ? 'text-gray-400 hover:text-indigo-400' : 'text-gray-500 hover:text-indigo-600'} transition-colors`}
+                                                            className={`text-xs ${darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
                                                             title="Copy"
                                                         >
                                                             {copiedMessageId === message.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                                         </button>
                                                         <button
                                                             onClick={() => shareMessage(message.content)}
-                                                            className={`text-xs ${darkMode ? 'text-gray-400 hover:text-indigo-400' : 'text-gray-500 hover:text-indigo-600'} transition-colors`}
+                                                            className={`text-xs ${darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
                                                             title="Share"
                                                         >
                                                             <Share2 className="w-4 h-4" />
@@ -974,8 +981,8 @@ const Chatbot = () => {
 
                                 {showQuickActions && messages.length === 1 && (
                                     <div className="mt-6 animate-fadeIn">
-                                        <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'} mb-4 font-medium flex items-center justify-center`}>
-                                            <Star className="w-4 h-4 mr-2 text-yellow-500" />
+                                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-4 font-medium flex items-center justify-center`}>
+                                            <Star className="w-4 h-4 mr-2 text-amber-500" />
                                             Popular questions:
                                         </p>
                                         <div className={`grid ${isFullscreen ? 'grid-cols-3' : windowSize.width < 640 ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
@@ -983,9 +990,14 @@ const Chatbot = () => {
                                                 <button
                                                     key={index}
                                                     onClick={() => handleQuickAction(action.query)}
-                                                    className={`flex items-center text-sm ${darkMode ? 'bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-indigo-500' : 'bg-white hover:bg-indigo-50 border-gray-200 hover:border-indigo-300'} border rounded-xl p-4 transition-all duration-200 transform hover:scale-105 hover:shadow-md`}
+                                                    className={`flex items-center text-sm ${darkMode ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 hover:border-blue-500' : 'bg-white hover:bg-blue-50 border-slate-200 hover:border-blue-300'} border rounded-xl p-4 transition-all duration-200 transform hover:scale-105 hover:shadow-md`}
                                                 >
-                                                    <span className={`mr-3 bg-gradient-to-r ${action.gradient} text-white rounded-lg p-2`}>
+                                                    <span className={`mr-3 ${action.color === 'blue' ? 'bg-blue-100 text-blue-600' :
+                                                        action.color === 'purple' ? 'bg-purple-100 text-purple-600' :
+                                                            action.color === 'green' ? 'bg-green-100 text-green-600' :
+                                                                action.color === 'red' ? 'bg-red-100 text-red-600' :
+                                                                    action.color === 'yellow' ? 'bg-amber-100 text-amber-600' :
+                                                                        'bg-indigo-100 text-indigo-600'} rounded-lg p-2`}>
                                                         {action.icon}
                                                     </span>
                                                     <span className="text-left font-medium">{action.text}</span>
@@ -997,13 +1009,13 @@ const Chatbot = () => {
 
                                 {isLoading && (
                                     <div className="flex justify-start animate-fadeIn">
-                                        <div className={`${darkMode ? 'bg-gray-800 text-white border-gray-700' : 'bg-white text-gray-800 border-gray-100'} rounded-2xl px-4 py-3 shadow-sm border`}>
+                                        <div className={`${darkMode ? 'bg-slate-800 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'} rounded-2xl px-4 py-3 shadow-sm border`}>
                                             <div className="flex items-center">
-                                                <Bot className="w-5 h-5 mr-2 text-indigo-600" />
+                                                <Bot className="w-5 h-5 mr-2 text-blue-600" />
                                                 <div className="flex space-x-1">
-                                                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"></div>
-                                                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1028,7 +1040,7 @@ const Chatbot = () => {
                                                         </button>
                                                         <button
                                                             onClick={resetChat}
-                                                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md px-3 py-1.5 transition-colors font-medium"
+                                                            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md px-3 py-1.5 transition-colors font-medium"
                                                         >
                                                             Reset chat
                                                         </button>
@@ -1045,17 +1057,17 @@ const Chatbot = () => {
                             {showScrollToBottom && (
                                 <button
                                     onClick={scrollToBottom}
-                                    className={`absolute bottom-20 right-6 ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-800'} rounded-full p-2 shadow-lg border ${darkMode ? 'border-gray-700' : 'border-gray-200'} transition-all duration-200 hover:scale-110 animate-bounce`}
+                                    className={`absolute bottom-20 right-6 ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-full p-2 shadow-lg border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-200 hover:scale-110 animate-bounce`}
                                     title="Scroll to bottom"
                                 >
                                     <ChevronDown className="w-4 h-4" />
                                 </button>
                             )}
 
-                            <div className={`border-t ${darkMode ? 'border-gray-700 bg-gray-800' : 'border-gray-100 bg-white'} p-4`}>
+                            <div className={`border-t ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'} p-4`}>
                                 <div className="flex items-center">
                                     <button
-                                        className={`mr-2 p-2 rounded-full ${darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'} transition-colors`}
+                                        className={`mr-2 p-2 rounded-full ${darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'} transition-colors`}
                                         title="Attach file"
                                     >
                                         <Paperclip className="w-5 h-5" />
@@ -1067,20 +1079,20 @@ const Chatbot = () => {
                                             onChange={handleInputChange}
                                             onKeyDown={handleKeyDown}
                                             placeholder="Ask about our services"
-                                            className={`w-full border ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-gray-50 text-gray-800 border-gray-200'} rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 resize-none transition-all duration-200`}
+                                            className={`w-full border ${darkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-slate-50 text-slate-800 border-slate-200'} rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none transition-all duration-200`}
                                             disabled={isLoading}
                                             rows={1}
                                             style={{ minHeight: '44px', maxHeight: '120px' }}
                                         />
                                         {input.trim() === '' && (
-                                            <div className={`absolute right-3 top-3 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                            <div className={`absolute right-3 top-3 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                                                 <Sparkles className="w-5 h-5" />
                                             </div>
                                         )}
                                     </div>
                                     <button
                                         onClick={toggleRecording}
-                                        className={`ml-2 p-2 rounded-full ${isRecording ? 'bg-red-500 text-white animate-pulse' : darkMode ? 'hover:bg-gray-700 text-gray-400' : 'hover:bg-gray-100 text-gray-500'} transition-colors`}
+                                        className={`ml-2 p-2 rounded-full ${isRecording ? 'bg-red-500 text-white animate-pulse' : darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'} transition-colors`}
                                         title={isRecording ? "Stop recording" : "Start voice input"}
                                     >
                                         {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -1088,7 +1100,7 @@ const Chatbot = () => {
                                     <button
                                         onClick={() => handleSendMessage()}
                                         disabled={isLoading || input.trim() === ''}
-                                        className="ml-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl p-3 hover:shadow-lg transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed transform hover:scale-105 flex items-center justify-center"
+                                        className="ml-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-3 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed transform hover:scale-105 flex items-center justify-center"
                                     >
                                         {isLoading ? (
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -1097,8 +1109,8 @@ const Chatbot = () => {
                                         )}
                                     </button>
                                 </div>
-                                <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} mt-2 text-center flex items-center justify-center`}>
-                                    <Zap className="w-3 h-3 mr-1 text-yellow-500" />
+                                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'} mt-2 text-center flex items-center justify-center`}>
+                                    <Zap className="w-3 h-3 mr-1 text-amber-500" />
                                     booleanforce Assistant typically responds instantly
                                 </p>
                             </div>
@@ -1110,16 +1122,17 @@ const Chatbot = () => {
             {/* Chat button */}
             <button
                 onClick={toggleChat}
-                className="relative bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className={`relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group ${pulseAnimation ? 'animate-pulse' : ''}`}
             >
-                <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 animate-pulse opacity-75"></div>
+                <div className={`absolute inset-0 rounded-full bg-white opacity-0 ${isHovering ? 'opacity-20' : ''} transition-opacity duration-300`}></div>
                 {isOpen ? (
                     <X className="w-6 h-6 relative z-10" />
                 ) : (
                     <>
                         <MessageCircle className="w-6 h-6 relative z-10" />
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></div>
+                        <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
                     </>
                 )}
             </button>
@@ -1136,21 +1149,8 @@ const Chatbot = () => {
                     }
                 }
                 
-                @keyframes shimmer {
-                    0% {
-                        transform: -skew-x-12 -translate-x-full;
-                    }
-                    100% {
-                        transform: -skew-x-12 translate-x-full;
-                    }
-                }
-                
                 .animate-fadeIn {
                     animation: fadeIn 0.3s ease-out;
-                }
-                
-                .animate-shimmer {
-                    animation: shimmer 2s infinite;
                 }
             `}</style>
         </div>

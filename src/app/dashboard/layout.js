@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
     Home,
     Users,
@@ -61,6 +61,7 @@ import {
     PanelLeftOpen,
     ChevronRight as ChevronRightIcon
 } from 'lucide-react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -72,6 +73,8 @@ export default function AdminLayout({ children }) {
     const [profileOpen, setProfileOpen] = useState(false);
     const [screenSize, setScreenSize] = useState('lg');
     const [isHovering, setIsHovering] = useState(false);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const pathname = usePathname();
 
     // Refs for dropdowns to handle clicks outside
@@ -118,13 +121,110 @@ export default function AdminLayout({ children }) {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setProfileOpen(false);
             }
+            if (showLogoutConfirm && !event.target.closest('.logout-confirm-dialog')) {
+                setShowLogoutConfirm(false);
+            }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, []);
+    }, [showLogoutConfirm]);
+
+    const { data: session, status } = useSession();
+    const router = useRouter();
+
+    // Check authentication and role
+    useEffect(() => {
+        if (status === "loading") return; // Still loading
+
+        if (!session) {
+            router.push("/login");
+            return;
+        }
+
+        // Save user role to localStorage for persistence
+        if (session.user?.role) {
+            localStorage.setItem('userRole', session.user.role);
+            localStorage.setItem('userName', session.user.name || '');
+            localStorage.setItem('userEmail', session.user.email || '');
+        }
+
+        if (session.user.role !== "admin") {
+            router.push("/unauthorized");
+            return;
+        }
+    }, [session, status, router]);
+
+    // Load user data from localStorage if session is not available yet
+    useEffect(() => {
+        if (status !== "loading" && !session) {
+            const savedRole = localStorage.getItem('userRole');
+            if (savedRole && savedRole !== "admin") {
+                router.push("/unauthorized");
+            }
+        }
+    }, [session, status, router]);
+
+    if (status === "loading") {
+        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+    }
+
+    if (!session || session.user.role !== "admin") {
+        return null; // Will redirect
+    }
+
+    // Get user initials for avatar
+    const getUserInitials = () => {
+        if (session?.user?.name) {
+            return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+        return 'AD'; // Default for admin
+    };
+
+    // Handle logout with confirmation
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        try {
+            // Sign out from NextAuth
+            await signOut({ redirect: false });
+
+            // Clear all localStorage items
+            localStorage.removeItem('userRole');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+
+            // Clear any session storage items
+            sessionStorage.clear();
+
+            // Reset all state
+            setSidebarOpen(true);
+            setSidebarCollapsed(false);
+            setActiveSubmenu('');
+            setSearchQuery('');
+            setNotificationsOpen(false);
+            setProfileOpen(false);
+
+            // Close logout confirmation dialog
+            setShowLogoutConfirm(false);
+
+            // Redirect to login page
+            router.push('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Even if there's an error, try to redirect to login
+            router.push('/login');
+        } finally {
+            setIsLoggingOut(false);
+        }
+    };
+
+    // Show logout confirmation dialog
+    const showLogoutConfirmation = () => {
+        setShowLogoutConfirm(true);
+        setProfileOpen(false);
+    };
 
     const menuItems = [
         {
@@ -168,7 +268,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Analytics',
             icon: <BarChart3 className="w-5 h-5" />,
-            href: '/dashboard/analytics',
+            href: 'manage-analytics',
             badge: null,
             color: 'orange',
             gradient: 'from-orange-500 to-orange-600'
@@ -176,7 +276,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Orders',
             icon: <ShoppingCart className="w-5 h-5" />,
-            href: '/dashboard/orders',
+            href: 'manage-orders',
             badge: '5',
             color: 'pink',
             gradient: 'from-pink-500 to-pink-600'
@@ -184,7 +284,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Messages',
             icon: <MessageSquare className="w-5 h-5" />,
-            href: '/dashboard/messages',
+            href: 'manage-contacts',
             badge: '3',
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600'
@@ -192,15 +292,15 @@ export default function AdminLayout({ children }) {
         {
             title: 'Settings',
             icon: <Settings className="w-5 h-5" />,
-            href: '/dashboard/settings',
+            href: 'manage-settings',
             badge: null,
             color: 'gray',
             gradient: 'from-gray-500 to-gray-600',
             submenu: [
-                { title: 'General', href: '/dashboard/settings/general' },
-                { title: 'Security', href: '/dashboard/settings/security' },
-                { title: 'API', href: '/dashboard/settings/api' },
-                { title: 'Billing', href: '/dashboard/settings/billing' }
+                { title: 'General', href: '/settings/general' },
+                { title: 'Security', href: '/settings/security' },
+                { title: 'API', href: '/settings/api' },
+                { title: 'Billing', href: '/settings/billing' }
             ]
         }
     ];
@@ -263,24 +363,24 @@ export default function AdminLayout({ children }) {
         if (pathname.startsWith('/dashboard/manage-services/')) return 'Service Details';
         if (pathname === '/dashboard/manage-pricing-card') return 'Pricing Plans';
         if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
-        if (pathname === '/dashboard/analytics') return 'Analytics';
-        if (pathname === '/dashboard/orders') return 'Order Management';
-        if (pathname === '/dashboard/messages') return 'Messages';
-        if (pathname === '/dashboard/settings') return 'Settings';
+        if (pathname === 'dashboard/manage-analytics') return 'Analytics';
+        if (pathname === 'dashboard/manage-orders') return 'Order Management';
+        if (pathname === 'dashboard/manage-messages') return 'Messages';
+        if (pathname === 'dashboard/manage-settings') return 'Settings';
         return 'Dashboard';
     };
 
     const getBreadcrumbs = () => {
         const paths = pathname.split('/').filter(Boolean);
         const breadcrumbs = [{ name: 'Dashboard', href: '/dashboard' }];
-        
+
         if (paths.length > 1) {
-            const pageName = paths[paths.length - 1].split('-').map(word => 
+            const pageName = paths[paths.length - 1].split('-').map(word =>
                 word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' ');
             breadcrumbs.push({ name: pageName, href: pathname });
         }
-        
+
         return breadcrumbs;
     };
 
@@ -299,11 +399,10 @@ export default function AdminLayout({ children }) {
                 <div className={`fixed top-4 z-50 transition-all duration-500 ease-in-out ${sidebarCollapsed ? 'left-16' : 'left-72'}`}>
                     <button
                         onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                        className={`group relative flex items-center justify-center w-11 h-11 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl ${
-                            sidebarCollapsed
-                                ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 hover:from-blue-400 hover:via-blue-500 hover:to-purple-500'
-                                : 'bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 hover:from-purple-400 hover:via-purple-500 hover:to-pink-500'
-                        } text-white border-2 border-white/20 backdrop-blur-sm`}
+                        className={`group relative flex items-center justify-center w-11 h-11 rounded-xl shadow-xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl ${sidebarCollapsed
+                            ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 hover:from-blue-400 hover:via-blue-500 hover:to-purple-500'
+                            : 'bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 hover:from-purple-400 hover:via-purple-500 hover:to-pink-500'
+                            } text-white border-2 border-white/20 backdrop-blur-sm`}
                         title={sidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
                     >
                         <div className={`transition-transform duration-300 ${sidebarCollapsed ? 'rotate-0' : 'rotate-180'}`}>
@@ -350,16 +449,15 @@ export default function AdminLayout({ children }) {
                                 <div>
                                     <Link
                                         href={item.href}
-                                        className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${
-                                            isActive(item.href)
-                                                ? `${getColorClasses(item.color, true)} border-2`
-                                                : `${getColorClasses(item.color, false)} border-transparent`
-                                        } relative overflow-hidden`}
+                                        className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${isActive(item.href)
+                                            ? `${getColorClasses(item.color, true)} border-2`
+                                            : `${getColorClasses(item.color, false)} border-transparent`
+                                            } relative overflow-hidden`}
                                         onClick={() => item.submenu && toggleSubmenu(item.title)}
                                         style={{ animationDelay: `${index * 50}ms` }}
                                     >
                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
-                                        
+
                                         <div className="flex items-center relative z-10">
                                             <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
                                                 {item.icon}
@@ -376,9 +474,8 @@ export default function AdminLayout({ children }) {
                                             )}
                                             {item.submenu && !sidebarCollapsed && (
                                                 <ChevronDown
-                                                    className={`w-4 h-4 transition-all duration-300 ${
-                                                        activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
-                                                    }`}
+                                                    className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
+                                                        }`}
                                                 />
                                             )}
                                         </div>
@@ -391,11 +488,10 @@ export default function AdminLayout({ children }) {
                                                 <li key={subitem.title}>
                                                     <Link
                                                         href={subitem.href}
-                                                        className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${
-                                                            pathname === subitem.href
-                                                                ? `${getColorClasses(item.color, true)} shadow-md`
-                                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                                                        }`}
+                                                        className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${pathname === subitem.href
+                                                            ? `${getColorClasses(item.color, true)} shadow-md`
+                                                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                                                            }`}
                                                         style={{ animationDelay: `${subIndex * 30}ms` }}
                                                     >
                                                         <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -452,11 +548,10 @@ export default function AdminLayout({ children }) {
                                         {index > 0 && <ChevronRightIcon className="w-4 h-4 text-slate-400 mx-2" />}
                                         <Link
                                             href={crumb.href}
-                                            className={`font-medium transition-colors ${
-                                                index === getBreadcrumbs().length - 1
-                                                    ? 'text-slate-900 dark:text-white'
-                                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                                            }`}
+                                            className={`font-medium transition-colors ${index === getBreadcrumbs().length - 1
+                                                ? 'text-slate-900 dark:text-white'
+                                                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                                                }`}
                                         >
                                             {crumb.name}
                                         </Link>
@@ -509,9 +604,8 @@ export default function AdminLayout({ children }) {
                                                 {notifications.map((notification) => (
                                                     <div
                                                         key={notification.id}
-                                                        className={`p-4 border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${
-                                                            !notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-                                                        }`}
+                                                        className={`p-4 border-b border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer ${!notification.read ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                                                            }`}
                                                     >
                                                         <div className="flex items-start gap-3">
                                                             <div className="mt-0.5 flex-shrink-0">
@@ -545,7 +639,7 @@ export default function AdminLayout({ children }) {
                                         className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group"
                                     >
                                         <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-500/30 group-hover:shadow-xl group-hover:shadow-purple-500/50 transition-all duration-300">
-                                            JD
+                                            {getUserInitials()}
                                         </div>
                                         <ChevronDown className={`w-4 h-4 text-slate-600 dark:text-slate-300 hidden sm:block transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
                                     </button>
@@ -556,38 +650,45 @@ export default function AdminLayout({ children }) {
                                             <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                                                        JD
+                                                        {getUserInitials()}
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-slate-900 dark:text-white">John Doe</p>
-                                                        <p className="text-xs text-slate-500 dark:text-slate-400">john.doe@example.com</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{session?.user?.name || 'Admin User'}</p>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400">{session?.user?.email || 'admin@example.com'}</p>
+                                                        <div className="flex items-center mt-1">
+                                                            <Shield className="w-3 h-3 text-purple-500 mr-1" />
+                                                            <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">{session?.user?.role || 'admin'}</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div className="p-2">
                                                 <Link
-                                                    href="/admin/profile"
+                                                    href="/profile"
                                                     className="flex items-center p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
                                                 >
                                                     <User className="w-4 h-4 mr-3 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors" />
                                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Profile</span>
                                                 </Link>
                                                 <Link
-                                                    href="/admin/settings"
+                                                    href="/settings"
                                                     className="flex items-center p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
                                                 >
                                                     <Settings className="w-4 h-4 mr-3 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors" />
                                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Settings</span>
                                                 </Link>
                                                 <Link
-                                                    href="/admin/help"
+                                                    href="/help"
                                                     className="flex items-center p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors group"
                                                 >
                                                     <HelpCircle className="w-4 h-4 mr-3 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 transition-colors" />
                                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Help & Support</span>
                                                 </Link>
                                                 <div className="my-1 h-px bg-slate-200 dark:bg-slate-700"></div>
-                                                <button className="flex items-center w-full p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group">
+                                                <button
+                                                    onClick={showLogoutConfirmation}
+                                                    className="flex items-center w-full p-3 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group"
+                                                >
                                                     <LogOut className="w-4 h-4 mr-3 text-red-600 dark:text-red-400" />
                                                     <span className="text-sm font-medium text-red-600 dark:text-red-400">Logout</span>
                                                 </button>
@@ -615,6 +716,49 @@ export default function AdminLayout({ children }) {
                     </div>
                 </main>
             </div>
+
+            {/* Logout Confirmation Dialog */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 max-w-sm w-full mx-4 logout-confirm-dialog">
+                        <div className="flex items-center justify-center w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full mx-auto mb-4">
+                            <LogOut className="w-6 h-6 text-red-600 dark:text-red-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                            Confirm Logout
+                        </h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-center mb-6">
+                            Are you sure you want to logout? Any unsaved changes will be lost.
+                        </p>
+                        <div className="flex space-x-3">
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors font-medium"
+                                disabled={isLoggingOut}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium flex items-center justify-center"
+                                disabled={isLoggingOut}
+                            >
+                                {isLoggingOut ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Logging out...
+                                    </>
+                                ) : (
+                                    'Logout'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Custom Scrollbar Styles */}
             <style jsx global>{`
