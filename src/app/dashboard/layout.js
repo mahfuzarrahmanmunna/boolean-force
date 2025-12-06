@@ -1,3 +1,4 @@
+// src/app/dashboard/layout.js
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -59,7 +60,35 @@ import {
     ArrowRight,
     PanelLeftClose,
     PanelLeftOpen,
-    ChevronRight as ChevronRightIcon
+    ChevronRight as ChevronRightIcon,
+    UserCheck,
+    UserClock,
+    UserPlus,
+    UserX,
+    UserCog,
+    Crown,
+    ClipboardList,
+    FileCheck,
+    Clock,
+    Timer,
+    Award as AwardIcon,
+    Target as TargetIcon,
+    TrendingUp as TrendingUpIcon,
+    FileText as FileTextIcon,
+    MessageSquare as MessageSquareIcon,
+    Calendar as CalendarIcon,
+    User as UserIcon,
+    Settings as SettingsIcon,
+    LogOut as LogOutIcon,
+    HelpCircle as HelpCircleIcon,
+    Bell as BellIcon,
+    Home as HomeIcon,
+    Building,
+    UserPlus as UserPlusIcon,
+    FileText as DocumentIcon,
+    BarChart as BarChartIcon,
+    Mail as MailIcon,
+    Star as StarIcon
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
@@ -76,6 +105,7 @@ export default function AdminLayout({ children }) {
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const pathname = usePathname();
+    const router = useRouter();
 
     // Refs for dropdowns to handle clicks outside
     const notificationsRef = useRef(null);
@@ -133,7 +163,6 @@ export default function AdminLayout({ children }) {
     }, [showLogoutConfirm]);
 
     const { data: session, status } = useSession();
-    const router = useRouter();
 
     // Check authentication and role
     useEffect(() => {
@@ -151,27 +180,49 @@ export default function AdminLayout({ children }) {
             localStorage.setItem('userEmail', session.user.email || '');
         }
 
-        if (session.user.role !== "admin") {
+        // Check if user is either admin or worker
+        if (session.user.role !== "admin" && session.user.role !== "worker") {
             router.push("/unauthorized");
             return;
         }
-    }, [session, status, router]);
+
+        // Redirect workers to /dashboard/workers if they're on /dashboard
+        if (session.user.role === "worker" && pathname === "/dashboard") {
+            router.push("/dashboard/workers");
+            return;
+        }
+    }, [session, status, router, pathname]);
 
     // Load user data from localStorage if session is not available yet
     useEffect(() => {
         if (status !== "loading" && !session) {
             const savedRole = localStorage.getItem('userRole');
-            if (savedRole && savedRole !== "admin") {
+            if (savedRole && savedRole !== "admin" && savedRole !== "worker") {
                 router.push("/unauthorized");
             }
         }
     }, [session, status, router]);
 
     if (status === "loading") {
-        return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
+                <div className="text-center">
+                    <div className="relative inline-flex">
+                        <div className="w-16 h-16 bg-blue-500 rounded-full opacity-75 animate-ping"></div>
+                        <div className="w-16 h-16 bg-blue-600 rounded-full relative flex items-center justify-center">
+                            <svg className="w-8 h-8 text-white animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <p className="mt-4 text-slate-600 dark:text-slate-400 font-medium">Loading your workspace...</p>
+                </div>
+            </div>
+        );
     }
 
-    if (!session || session.user.role !== "admin") {
+    if (!session || (session.user.role !== "admin" && session.user.role !== "worker")) {
         return null; // Will redirect
     }
 
@@ -180,7 +231,7 @@ export default function AdminLayout({ children }) {
         if (session?.user?.name) {
             return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         }
-        return 'AD'; // Default for admin
+        return session.user.role === "admin" ? 'AD' : 'WK'; // Default for admin/worker
     };
 
     // Handle logout with confirmation
@@ -226,7 +277,8 @@ export default function AdminLayout({ children }) {
         setProfileOpen(false);
     };
 
-    const menuItems = [
+    // Admin menu items
+    const adminMenuItems = [
         {
             title: 'Dashboard',
             icon: <LayoutDashboard className="w-5 h-5" />,
@@ -234,6 +286,20 @@ export default function AdminLayout({ children }) {
             badge: null,
             color: 'blue',
             gradient: 'from-blue-500 to-blue-600'
+        },
+        {
+            title: 'Workers',
+            icon: <UserCheck className="w-5 h-5" />,
+            href: '/dashboard/manage-workers',
+            badge: '12',
+            color: 'emerald',
+            gradient: 'from-emerald-500 to-emerald-600',
+            submenu: [
+                { title: 'All Workers', href: '/dashboard/manage-workers' },
+                { title: 'Active Workers', href: '/dashboard/manage-workers/active' },
+                { title: 'Pending Approval', href: '/dashboard/manage-workers/pending' },
+                { title: 'Worker Analytics', href: '/dashboard/manage-workers/analytics' }
+            ]
         },
         {
             title: 'Services',
@@ -305,6 +371,99 @@ export default function AdminLayout({ children }) {
         }
     ];
 
+    // Worker menu items
+    const workerMenuItems = [
+        {
+            title: 'Dashboard',
+            icon: <HomeIcon className="w-5 h-5" />,
+            href: '/dashboard/workers',
+            badge: null,
+            color: 'blue',
+            gradient: 'from-blue-500 to-blue-600'
+        },
+        {
+            title: 'My Tasks',
+            icon: <ClipboardList className="w-5 h-5" />,
+            href: '/dashboard/manage-my-tasks',
+            badge: '5',
+            color: 'emerald',
+            gradient: 'from-emerald-500 to-emerald-600',
+            submenu: [
+                { title: 'All Tasks', href: '/dashboard/manage-my-tasks' },
+                { title: 'Pending Tasks', href: '/dashboard/manage-my-tasks/pending' },
+                { title: 'In Progress', href: '/dashboard/manage-my-tasks/in-progress' },
+                { title: 'Completed', href: '/dashboard/manage-my-tasks/completed' }
+            ]
+        },
+        {
+            title: 'Submit Task',
+            icon: <FileCheck className="w-5 h-5" />,
+            href: '/dashboard/workers/manage-submit-task',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600'
+        },
+        {
+            title: 'Time Tracking',
+            icon: <Clock className="w-5 h-5" />,
+            href: '/dashboard/manage-time-tracking',
+            badge: null,
+            color: 'indigo',
+            gradient: 'from-indigo-500 to-indigo-600'
+        },
+        {
+            title: 'Performance',
+            icon: <TrendingUpIcon className="w-5 h-5" />,
+            href: '/dashboard/manage-performance',
+            badge: null,
+            color: 'orange',
+            gradient: 'from-orange-500 to-orange-600'
+        },
+        {
+            title: 'Earnings',
+            icon: <DollarSign className="w-5 h-5" />,
+            href: '/dashboard/manage-earnings',
+            badge: null,
+            color: 'green',
+            gradient: 'from-green-500 to-green-600'
+        },
+        {
+            title: 'Messages',
+            icon: <MessageSquareIcon className="w-5 h-5" />,
+            href: '/dashboard/manage-messages',
+            badge: '2',
+            color: 'teal',
+            gradient: 'from-teal-500 to-teal-600'
+        },
+        {
+            title: 'Calendar',
+            icon: <CalendarIcon className="w-5 h-5" />,
+            href: '/dashboard/manage-calendar',
+            badge: null,
+            color: 'pink',
+            gradient: 'from-pink-500 to-pink-600'
+        },
+        {
+            title: 'Profile',
+            icon: <UserIcon className="w-5 h-5" />,
+            href: '/dashboard/manage-profile',
+            badge: null,
+            color: 'gray',
+            gradient: 'from-gray-500 to-gray-600'
+        },
+        {
+            title: 'Settings',
+            icon: <SettingsIcon className="w-5 h-5" />,
+            href: '/dashboard/manage-worker-settings',
+            badge: null,
+            color: 'gray',
+            gradient: 'from-gray-500 to-gray-600'
+        }
+    ];
+
+    // Use different menu items based on user role
+    const menuItems = session.user.role === "admin" ? adminMenuItems : workerMenuItems;
+
     const toggleSubmenu = (title) => {
         if (activeSubmenu === title) {
             setActiveSubmenu('');
@@ -314,7 +473,7 @@ export default function AdminLayout({ children }) {
     };
 
     const isActive = (href) => {
-        if (href === '/dashboard') {
+        if (href === '/dashboard' || href === '/dashboard/workers') {
             return pathname === href;
         }
         return pathname.startsWith(href);
@@ -341,6 +500,7 @@ export default function AdminLayout({ children }) {
                 case 'orange': return 'text-orange-600 dark:text-orange-400 bg-gradient-to-r from-orange-50 to-orange-100/50 dark:from-orange-900/30 dark:to-orange-800/20 border-orange-200 dark:border-orange-700 shadow-lg shadow-orange-500/10';
                 case 'pink': return 'text-pink-600 dark:text-pink-400 bg-gradient-to-r from-pink-50 to-pink-100/50 dark:from-pink-900/30 dark:to-pink-800/20 border-pink-200 dark:border-pink-700 shadow-lg shadow-pink-500/10';
                 case 'indigo': return 'text-indigo-600 dark:text-indigo-400 bg-gradient-to-r from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/20 border-indigo-200 dark:border-indigo-700 shadow-lg shadow-indigo-500/10';
+                case 'emerald': return 'text-emerald-600 dark:text-emerald-400 bg-gradient-to-r from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700 shadow-lg shadow-emerald-500/10';
                 default: return 'text-gray-600 dark:text-gray-400 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-900/30 dark:to-gray-800/20 border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-500/10';
             }
         } else {
@@ -352,27 +512,49 @@ export default function AdminLayout({ children }) {
                 case 'orange': return 'text-slate-300 dark:text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 dark:hover:bg-orange-900/20 hover:border-orange-500/30 dark:hover:border-orange-700';
                 case 'pink': return 'text-slate-300 dark:text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 dark:hover:bg-pink-900/20 hover:border-pink-500/30 dark:hover:border-pink-700';
                 case 'indigo': return 'text-slate-300 dark:text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-900/20 hover:border-indigo-500/30 dark:hover:border-indigo-700';
+                case 'emerald': return 'text-slate-300 dark:text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-900/20 hover:border-emerald-500/30 dark:hover:border-emerald-700';
                 default: return 'text-slate-300 dark:text-slate-400 hover:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-900/20 hover:border-gray-500/30 dark:hover:border-gray-700';
             }
         }
     };
 
     const getPageTitle = () => {
-        if (pathname === '/dashboard') return 'Dashboard';
-        if (pathname === '/dashboard/manage-services') return 'Services Management';
-        if (pathname.startsWith('/dashboard/manage-services/')) return 'Service Details';
-        if (pathname === '/dashboard/manage-pricing-card') return 'Pricing Plans';
-        if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
-        if (pathname === 'dashboard/manage-analytics') return 'Analytics';
-        if (pathname === 'dashboard/manage-orders') return 'Order Management';
-        if (pathname === 'dashboard/manage-messages') return 'Messages';
-        if (pathname === 'dashboard/manage-settings') return 'Settings';
-        return 'Dashboard';
+        if (pathname === '/dashboard') return session.user.role === "admin" ? 'Admin Dashboard' : 'Worker Dashboard';
+        if (pathname === '/dashboard/workers') return 'Worker Dashboard';
+
+        // Admin page titles
+        if (session.user.role === "admin") {
+            if (pathname === '/dashboard/manage-workers') return 'Workers Management';
+            if (pathname.startsWith('/dashboard/manage-workers/')) return 'Worker Details';
+            if (pathname === '/dashboard/manage-services') return 'Services Management';
+            if (pathname.startsWith('/dashboard/manage-services/')) return 'Service Details';
+            if (pathname === '/dashboard/manage-pricing-card') return 'Pricing Plans';
+            if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
+            if (pathname === 'dashboard/manage-analytics') return 'Analytics';
+            if (pathname === 'dashboard/manage-orders') return 'Order Management';
+            if (pathname === 'dashboard/manage-messages') return 'Messages';
+            if (pathname === 'dashboard/manage-settings') return 'Settings';
+        }
+        // Worker page titles
+        else {
+            if (pathname === '/dashboard/manage-my-tasks') return 'My Tasks';
+            if (pathname.startsWith('/dashboard/manage-my-tasks/')) return 'Task Details';
+            if (pathname === '/dashboard/manage-submit-task') return 'Submit Task';
+            if (pathname === '/dashboard/manage-time-tracking') return 'Time Tracking';
+            if (pathname === '/dashboard/manage-performance') return 'Performance';
+            if (pathname === '/dashboard/manage-earnings') return 'Earnings';
+            if (pathname === '/dashboard/manage-messages') return 'Messages';
+            if (pathname === '/dashboard/manage-calendar') return 'Calendar';
+            if (pathname === '/dashboard/manage-profile') return 'Profile';
+            if (pathname === '/dashboard/manage-worker-settings') return 'Settings';
+        }
+
+        return session.user.role === "admin" ? 'Admin Dashboard' : 'Worker Dashboard';
     };
 
     const getBreadcrumbs = () => {
         const paths = pathname.split('/').filter(Boolean);
-        const breadcrumbs = [{ name: 'Dashboard', href: '/dashboard' }];
+        const breadcrumbs = [{ name: 'Dashboard', href: session.user.role === "worker" ? '/dashboard/workers' : '/dashboard' }];
 
         if (paths.length > 1) {
             const pageName = paths[paths.length - 1].split('-').map(word =>
@@ -426,16 +608,23 @@ export default function AdminLayout({ children }) {
                 <div className="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur-sm">
                     <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''} transition-all duration-300`}>
                         <div className="relative group">
-                            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-purple-500/50 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-purple-500/70">
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl ${session.user.role === "admin"
+                                ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/50 group-hover:shadow-purple-500/70'
+                                : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-teal-500/50 group-hover:shadow-teal-500/70'
+                                }`}>
                                 <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-pulse" />
-                                <span className="relative z-10">BF</span>
+                                <span className="relative z-10">{session.user.role === "admin" ? "AD" : "WK"}</span>
                                 <div className="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition-all duration-300"></div>
                             </div>
                         </div>
                         {!sidebarCollapsed && (
                             <div className="ml-3 transition-opacity duration-300">
-                                <span className="text-xl font-bold text-white block">Admin Panel</span>
-                                <span className="text-xs text-slate-400 font-medium">Control Center</span>
+                                <span className="text-xl font-bold text-white block">
+                                    {session.user.role === "admin" ? "Admin Panel" : "Worker Portal"}
+                                </span>
+                                <span className="text-xs text-slate-400 font-medium">
+                                    {session.user.role === "admin" ? "Control Center" : "Work Management"}
+                                </span>
                             </div>
                         )}
                     </div>
@@ -638,7 +827,10 @@ export default function AdminLayout({ children }) {
                                         onClick={() => setProfileOpen(!profileOpen)}
                                         className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group"
                                     >
-                                        <div className="w-9 h-9 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-500/30 group-hover:shadow-xl group-hover:shadow-purple-500/50 transition-all duration-300">
+                                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl group-hover:shadow-opacity-50 transition-all duration-300 ${session.user.role === "admin"
+                                            ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/30 group-hover:shadow-purple-500/50'
+                                            : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-teal-500/30 group-hover:shadow-teal-500/50'
+                                            }`}>
                                             {getUserInitials()}
                                         </div>
                                         <ChevronDown className={`w-4 h-4 text-slate-600 dark:text-slate-300 hidden sm:block transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
@@ -647,17 +839,32 @@ export default function AdminLayout({ children }) {
                                     {/* Enhanced Profile Dropdown */}
                                     {profileOpen && (
                                         <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden backdrop-blur-xl">
-                                            <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900">
+                                            <div className={`p-5 border-b border-slate-200 dark:border-slate-700 ${session.user.role === "admin"
+                                                ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900'
+                                                : 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900'
+                                                }`}>
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${session.user.role === "admin"
+                                                        ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'
+                                                        : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500'
+                                                        }`}>
                                                         {getUserInitials()}
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-slate-900 dark:text-white">{session?.user?.name || 'Admin User'}</p>
-                                                        <p className="text-xs text-slate-500 dark:text-slate-400">{session?.user?.email || 'admin@example.com'}</p>
+                                                        <p className="font-bold text-slate-900 dark:text-white">{session?.user?.name || 'User'}</p>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400">{session?.user?.email || 'user@example.com'}</p>
                                                         <div className="flex items-center mt-1">
-                                                            <Shield className="w-3 h-3 text-purple-500 mr-1" />
-                                                            <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">{session?.user?.role || 'admin'}</span>
+                                                            {session.user.role === "admin" ? (
+                                                                <>
+                                                                    <Crown className="w-3 h-3 text-amber-500 mr-1" />
+                                                                    <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">Admin</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <UserCheck className="w-3 h-3 text-emerald-500 mr-1" />
+                                                                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 capitalize">Worker</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -709,7 +916,9 @@ export default function AdminLayout({ children }) {
                                 {getPageTitle()}
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 text-sm">
-                                Manage and monitor your dashboard activities
+                                {session.user.role === "admin"
+                                    ? "Manage and monitor your dashboard activities"
+                                    : "Manage your tasks and track your performance"}
                             </p>
                         </div>
                         {children}

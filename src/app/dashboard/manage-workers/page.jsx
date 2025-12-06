@@ -1,14 +1,47 @@
-// app/admin/workers/page.jsx
 "use client";
 
+// app/dashboard/manage-workers/page.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import {
     FaPlus, FaEdit, FaTrash, FaSave, FaTimes, FaCheck, FaUser, FaTasks, FaClipboardList,
     FaHourglassHalf, FaCheckCircle, FaExclamationTriangle, FaSpinner, FaUserPlus,
     FaBriefcase, FaCalendarAlt, FaSearch, FaFilter, FaEye, FaEyeSlash, FaUserClock,
     FaUserCheck, FaUserTimes, FaExclamationCircle
 } from 'react-icons/fa';
+
+// shadcn/ui imports
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 // Constants
 const STATUS_OPTIONS = [
@@ -18,256 +51,89 @@ const STATUS_OPTIONS = [
     { value: 'inactive', label: 'Inactive' }
 ];
 
+// Form schemas
+const statusFormSchema = z.object({
+    status: z.string().min(1, "Status is required"),
+});
+
+const workFormSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    description: z.string().min(1, "Description is required"),
+    dueDate: z.string().optional(),
+});
+
 // Helper Components
 const StatusBadge = ({ status }) => {
-    const getStatusBadge = (status) => {
+    const getStatusVariant = (status) => {
         switch (status) {
             case 'pending':
-                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                return 'secondary';
             case 'approved':
-                return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
+                return 'default';
             case 'active':
-                return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
+                return 'default';
             case 'inactive':
-                return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+                return 'outline';
             default:
-                return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300';
+                return 'outline';
         }
     };
 
     const getStatusIcon = (status) => {
         switch (status) {
             case 'pending':
-                return <FaHourglassHalf className="mr-1" />;
+                return <FaHourglassHalf className="mr-1 h-3 w-3" />;
             case 'approved':
-                return <FaCheckCircle className="mr-1" />;
+                return <FaCheckCircle className="mr-1 h-3 w-3" />;
             case 'active':
-                return <FaUserCheck className="mr-1" />;
+                return <FaUserCheck className="mr-1 h-3 w-3" />;
             case 'inactive':
-                return <FaUserTimes className="mr-1" />;
+                return <FaUserTimes className="mr-1 h-3 w-3" />;
             default:
-                return <FaExclamationTriangle className="mr-1" />;
+                return <FaExclamationTriangle className="mr-1 h-3 w-3" />;
         }
     };
 
     return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(status)}`}>
+        <Badge variant={getStatusVariant(status)} className="flex items-center gap-1">
             {getStatusIcon(status)}
             {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'N/A'}
-        </span>
-    );
-};
-
-const Notification = ({ notification }) => {
-    if (!notification.show) return null;
-
-    return (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'success'
-            ? 'bg-green-500 text-white'
-            : 'bg-red-500 text-white'
-            } animate-pulse`}>
-            {notification.type === 'success' ? <FaCheckCircle className="text-xl" /> : <FaExclamationTriangle className="text-xl" />}
-            <span>{notification.message}</span>
-        </div>
+        </Badge>
     );
 };
 
 const LoadingSpinner = ({ message }) => (
     <div className="flex justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-            <p className="mt-6 text-lg font-medium text-gray-600 dark:text-gray-400">{message}</p>
-        </div>
+        <Card className="w-96">
+            <CardContent className="flex flex-col items-center justify-center p-6">
+                <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary"></div>
+                <p className="mt-6 text-lg font-medium text-muted-foreground">{message}</p>
+            </CardContent>
+        </Card>
     </div>
 );
 
 const EmptyState = ({ message, icon }) => (
-    <div className="text-center py-12">
+    <div className="flex flex-col items-center justify-center py-12">
         {icon}
-        <h3 className="mt-2 text-sm font-medium text-slate-900 dark:text-slate-200">{message}</h3>
+        <h3 className="mt-2 text-sm font-medium text-foreground">{message}</h3>
     </div>
 );
 
-const Modal = ({ isOpen, onClose, title, children }) => {
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                    <div className="absolute inset-0 bg-gray-500 opacity-75" onClick={onClose}></div>
-                </div>
-                <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div className="sm:flex sm:items-start">
-                            <div className="w-full">
-                                <h3 className="text-lg leading-6 font-medium text-slate-900 dark:text-white mb-4">
-                                    {title}
-                                </h3>
-                                {children}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const EditWorkerStatusModal = ({ isOpen, onClose, worker, onSubmit, isSubmitting }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm({
-        defaultValues: {
-            status: worker?.status || ''
-        }
-    });
-
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Update Status for ${worker?.name}`}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Status</label>
-                    <select
-                        {...register("status", { required: "Status is required" })}
-                        className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                    >
-                        {STATUS_OPTIONS.map(option => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                    </select>
-                    {errors.status && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.status.message}</p>}
-                </div>
-                <div className="flex justify-end space-x-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-slate-600 dark:text-slate-200 dark:border-slate-500 dark:hover:bg-slate-500"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                    >
-                        {isSubmitting ? <FaSpinner className="animate-spin mr-2" /> : <FaSave className="mr-2" />}
-                        Save
-                    </button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
-
-const AssignWorkModal = ({ isOpen, onClose, worker, availableWork, selectedTasks, setSelectedTasks, onAssign, isLoading }) => {
-    const handleTaskToggle = (taskId) => {
-        if (selectedTasks.includes(taskId)) {
-            setSelectedTasks(selectedTasks.filter(id => id !== taskId));
-        } else {
-            setSelectedTasks([...selectedTasks, taskId]);
-        }
-    };
-
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Assign Work to ${worker?.name}`}>
-            <div className="mb-4">
-                <div className="max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-600 rounded-lg p-2">
-                    {availableWork.length > 0 ? (
-                        availableWork.map((task) => (
-                            <label key={task._id} className="flex items-center p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    value={task._id}
-                                    checked={selectedTasks.includes(task._id)}
-                                    onChange={() => handleTaskToggle(task._id)}
-                                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
-                                />
-                                <div className="ml-3">
-                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{task.title}</div>
-                                    <div className="text-sm text-slate-500 dark:text-slate-400">{task.description}</div>
-                                </div>
-                            </label>
-                        ))
-                    ) : (
-                        <p className="text-center text-slate-500 dark:text-slate-400 py-4">No available work tasks to assign.</p>
-                    )}
-                </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-slate-600 dark:text-slate-200 dark:border-slate-500 dark:hover:bg-slate-500"
-                >
-                    Cancel
-                </button>
-                <button
-                    onClick={onAssign}
-                    disabled={isLoading || selectedTasks.length === 0}
-                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-                >
-                    {isLoading ? <FaSpinner className="animate-spin mr-2" /> : <FaTasks className="mr-2" />}
-                    Assign Selected
-                </button>
-            </div>
-        </Modal>
-    );
-};
-
-const AddWorkModal = ({ isOpen, onClose, onSubmit, isSubmitting }) => {
-    const { register, handleSubmit, formState: { errors } } = useForm();
-
-    return (
-        <Modal isOpen={isOpen} onClose={onClose} title="Create New Work Task">
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Task Title</label>
-                        <input
-                            {...register("title", { required: "Title is required" })}
-                            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                        />
-                        {errors.title && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description</label>
-                        <textarea
-                            {...register("description", { required: "Description is required" })}
-                            rows={3}
-                            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                        />
-                        {errors.description && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>}
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Due Date (Optional)</label>
-                        <input
-                            type="date"
-                            {...register("dueDate")}
-                            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                        />
-                    </div>
-                </div>
-                <div className="flex justify-end space-x-2 mt-4">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:bg-slate-600 dark:text-slate-200 dark:border-slate-500 dark:hover:bg-slate-500"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
-                    >
-                        {isSubmitting ? <FaSpinner className="animate-spin mr-2" /> : <FaPlus className="mr-2" />}
-                        Create Task
-                    </button>
-                </div>
-            </form>
-        </Modal>
-    );
-};
+// Form Field Component (without shadcn form)
+const FormField = ({ label, error, children, required = false }) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {label} {required && <span className="text-destructive">*</span>}
+        </label>
+        {children}
+        {error && (
+            <p className="text-sm font-medium text-destructive">
+                {error.message}
+            </p>
+        )}
+    </div>
+);
 
 // Main Component
 export default function ManageWorkers() {
@@ -279,9 +145,12 @@ export default function ManageWorkers() {
     const [isAddingWork, setIsAddingWork] = useState(false);
     const [assigningWorkTo, setAssigningWorkTo] = useState(null);
     const [selectedTasksToAssign, setSelectedTasksToAssign] = useState([]);
-    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+    const [selectedWorkersForNewTask, setSelectedWorkersForNewTask] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+    // Add the missing state variable for worker search in the task creation dialog
+    const [workerSearchTerm, setWorkerSearchTerm] = useState('');
 
     // Show notification function
     const showNotification = (message, type = 'success') => {
@@ -290,6 +159,23 @@ export default function ManageWorkers() {
             setNotification({ show: false, message: '', type: '' });
         }, 3000);
     };
+
+    // Forms
+    const statusForm = useForm({
+        resolver: zodResolver(statusFormSchema),
+        defaultValues: {
+            status: '',
+        },
+    });
+
+    const workForm = useForm({
+        resolver: zodResolver(workFormSchema),
+        defaultValues: {
+            title: '',
+            description: '',
+            dueDate: '',
+        },
+    });
 
     // Fetch workers and available work from API on component mount
     useEffect(() => {
@@ -328,9 +214,20 @@ export default function ManageWorkers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: data.status }),
             });
-
-            if (!response.ok) throw new Error('Failed to update worker status');
-
+    
+            if (!response.ok) {
+                // Try to get the error message from the server
+                let errorMessage = 'Failed to update worker status';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    // If we can't parse the JSON, use the status text
+                    errorMessage = response.statusText || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
+    
             const updatedWorker = await response.json();
             setWorkers(workers.map(w => w._id === editingWorker._id ? updatedWorker.data : w));
             setEditingWorker(null);
@@ -343,24 +240,106 @@ export default function ManageWorkers() {
         }
     };
 
-    // Handle adding new work task
+    // Handle adding new work task and assigning it to workers
     const handleWorkSubmit = async (data) => {
         setIsLoading(true);
         try {
+            // Create the work task
             const response = await fetch('/api/work', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
-            if (!response.ok) throw new Error('Failed to create work task');
-
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to create work task');
+            }
+    
             const newWork = await response.json();
-            setAvailableWork([...availableWork, newWork.data]);
+            
+            // If workers are selected, assign the task to them
+            if (selectedWorkersForNewTask.length > 0) {
+                // Create an array of promises for each assignment
+                const assignmentPromises = selectedWorkersForNewTask.map(workerId => 
+                    fetch(`/api/workers/${workerId}/assign`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ taskIds: [newWork.data._id] }),
+                    })
+                );
+    
+                // Wait for all promises to settle (either fulfilled or rejected)
+                const assignmentResults = await Promise.allSettled(assignmentPromises);
+                
+                const failedAssignments = [];
+                const successfulWorkerIds = [];
+    
+                // Process each result
+                for (let i = 0; i < assignmentResults.length; i++) {
+                    const result = assignmentResults[i];
+                    const workerId = selectedWorkersForNewTask[i];
+                    const worker = workers.find(w => w._id === workerId);
+                    const workerName = worker ? worker.name : `Worker ID ${workerId}`;
+    
+                    if (result.status === 'fulfilled' && result.value.ok) {
+                        successfulWorkerIds.push(workerId);
+                    } else {
+                        let errorMessage = 'Unknown error';
+                        if (result.status === 'rejected') {
+                            errorMessage = result.reason.message || 'Network or server error';
+                        } else { // The fetch was successful but the server responded with an error status
+                            try {
+                                const errorData = await result.value.json();
+                                errorMessage = errorData.error || `Server error (status: ${result.value.status})`;
+                            } catch (e) {
+                                errorMessage = `Server responded with status ${result.value.status}`;
+                            }
+                        }
+                        failedAssignments.push({ workerName, errorMessage });
+                    }
+                }
+    
+                // If there were any failures, throw a detailed error
+                if (failedAssignments.length > 0) {
+                    const failureMessages = failedAssignments.map(
+                        ({ workerName, errorMessage }) => `• ${workerName}: ${errorMessage}`
+                    ).join('<br>'); // Use <br> for HTML rendering in the notification
+                    
+                    throw new Error(`Task created, but failed to assign to some workers:<br>${failureMessages}`);
+                }
+                
+                // If all assignments were successful, fetch updated worker data to keep UI in sync
+                const updatedWorkersPromises = successfulWorkerIds.map(async (workerId) => {
+                    const res = await fetch(`/api/workers/${workerId}`);
+                    if (res.ok) return res.json();
+                    return null;
+                });
+    
+                const updatedWorkersData = await Promise.all(updatedWorkersPromises);
+    
+                setWorkers(prevWorkers => 
+                    prevWorkers.map(worker => {
+                        const updatedData = updatedWorkersData.find(data => data && data.data._id === worker._id);
+                        return updatedData ? updatedData.data : worker;
+                    })
+                );
+    
+            } else {
+                // If no workers are selected, add the task to the available work list
+                setAvailableWork(prev => [...prev, newWork.data]);
+            }
+    
+            // Reset form and show success
             setIsAddingWork(false);
-            showNotification('New work task created successfully!', 'success');
+            workForm.reset();
+            setSelectedWorkersForNewTask([]);
+            setWorkerSearchTerm('');
+            showNotification('New work task created and assigned successfully!', 'success');
+    
         } catch (error) {
-            console.error("Error creating work:", error);
+            console.error("Error in handleWorkSubmit:", error);
+            // The notification will now display the detailed, multi-line error message
             showNotification(error.message || 'Failed to create work task.', 'error');
         } finally {
             setIsLoading(false);
@@ -438,171 +417,417 @@ export default function ManageWorkers() {
             return matchesSearch && matchesStatus;
         });
     }, [workers, searchTerm, statusFilter]);
+    
+    // Filter workers for task assignment based on search term
+    const filteredWorkersForTask = useMemo(() => {
+        return workers.filter(worker => {
+            const matchesStatus = worker.status === 'active' || worker.status === 'approved';
+            const matchesSearch = worker.name.toLowerCase().includes(workerSearchTerm.toLowerCase()) ||
+                worker.email.toLowerCase().includes(workerSearchTerm.toLowerCase());
+            return matchesStatus && matchesSearch;
+        });
+    }, [workers, workerSearchTerm]);
+
+    // Update form when editingWorker changes
+    useEffect(() => {
+        if (editingWorker) {
+            statusForm.setValue('status', editingWorker.status || '');
+        }
+    }, [editingWorker, statusForm]);
 
     if (isInitialLoading) return <LoadingSpinner message="Loading worker data..." />;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-            <Notification notification={notification} />
-
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-6 backdrop-blur-lg bg-opacity-90">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center">
-                                    <FaUserClock className="mr-3 text-blue-500" />
-                                    Manage Workers
-                                </h1>
-                                <p className="mt-2 text-slate-600 dark:text-slate-400">Approve workers and assign tasks</p>
-                            </div>
-                            <div className="mt-4 sm:mt-0 flex gap-3">
-                                <button
-                                    onClick={() => setIsAddingWork(true)}
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-md transition-all duration-200 transform hover:scale-105"
-                                >
-                                    <FaBriefcase className="mr-2" />
-                                    Create New Task
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
+            {/* Notification */}
+            {notification.show && (
+                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
+                    notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                } animate-pulse`}>
+                    {notification.type === 'success' ? <FaCheckCircle className="text-xl" /> : <FaExclamationTriangle className="text-xl" />}
+                    <span>{notification.message}</span>
                 </div>
+            )}
+
+            <div className="max-w-7xl mx-auto space-y-8">
+                {/* Header */}
+                <Card className="border-0 shadow-lg bg-card/80 backdrop-blur-sm">
+                    <CardHeader className="pb-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <CardTitle className="text-3xl font-bold flex items-center gap-3">
+                                    <FaUserClock className="text-primary" />
+                                    Manage Workers
+                                </CardTitle>
+                                <CardDescription className="mt-2">
+                                    Approve workers and assign tasks
+                                </CardDescription>
+                            </div>
+                            <Button
+                                onClick={() => setIsAddingWork(true)}
+                                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                            >
+                                <FaBriefcase className="mr-2 h-4 w-4" />
+                                Create New Task
+                            </Button>
+                        </div>
+                    </CardHeader>
+                </Card>
 
                 {/* Filters */}
-                <div className="mb-6 bg-white dark:bg-slate-800 p-4 rounded-xl shadow-md border border-slate-200 dark:border-slate-700">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="flex-1 relative">
-                            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                placeholder="Search by name or email..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                            />
+                <Card className="shadow-md">
+                    <CardContent className="pt-6">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="relative flex-1">
+                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                <Input
+                                    placeholder="Search by name or email..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <FaFilter className="text-muted-foreground h-4 w-4" />
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger className="w-[180px]">
+                                        <SelectValue placeholder="Filter by status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        {STATUS_OPTIONS.map(option => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                            <FaFilter className="text-slate-500" />
-                            <select
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-slate-700 dark:text-white"
-                            >
-                                <option value="all">All Statuses</option>
-                                {STATUS_OPTIONS.map(option => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
                 {/* Worker Table */}
-                <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden border border-slate-200 dark:border-slate-700">
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-slate-50 dark:bg-slate-700">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Worker</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Assigned Tasks</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Joined</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
+                <Card className="shadow-lg overflow-hidden">
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Worker</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Assigned Tasks</TableHead>
+                                    <TableHead>Joined</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
                                 {filteredWorkers.map((worker) => (
-                                    <tr key={worker._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                                                    <FaUser />
+                                    <TableRow key={worker._id} className="hover:bg-muted/50 transition-colors">
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                    <FaUser className="h-5 w-5" />
                                                 </div>
-                                                <div className="ml-4">
-                                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{worker.name}</div>
-                                                    <div className="text-sm text-slate-500 dark:text-slate-400">{worker.email}</div>
+                                                <div>
+                                                    <div className="font-medium">{worker.name}</div>
+                                                    <div className="text-sm text-muted-foreground">{worker.email}</div>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        </TableCell>
+                                        <TableCell>
                                             <StatusBadge status={worker.status} />
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                                            {worker.assignedWork ? worker.assignedWork.length : 0}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <span>{worker.assignedWork ? worker.assignedWork.length : 0}</span>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-6 w-6 p-0"
+                                                    onClick={() => {
+                                                        setAssigningWorkTo(worker);
+                                                        setSelectedTasksToAssign([]);
+                                                    }}
+                                                >
+                                                    <FaPlus className="h-3 w-3" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
                                             {new Date(worker.createdAt).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button
-                                                onClick={() => setEditingWorker(worker)}
-                                                className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-4"
-                                                title="Edit Status"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setAssigningWorkTo(worker);
-                                                    setSelectedTasksToAssign([]);
-                                                }}
-                                                className="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300 mr-4"
-                                                title="Assign Work"
-                                            >
-                                                <FaTasks />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteWorker(worker._id)}
-                                                className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                title="Delete Worker"
-                                            >
-                                                <FaTrash />
-                                            </button>
-                                        </td>
-                                    </tr>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => setEditingWorker(worker)}
+                                                    title="Edit Status"
+                                                >
+                                                    <FaEdit className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setAssigningWorkTo(worker);
+                                                        setSelectedTasksToAssign([]);
+                                                    }}
+                                                    title="Assign Work"
+                                                >
+                                                    <FaTasks className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleDeleteWorker(worker._id)}
+                                                    title="Delete Worker"
+                                                    className="text-destructive hover:text-destructive"
+                                                >
+                                                    <FaTrash className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
                                 ))}
-                            </tbody>
-                        </table>
-                    </div>
-                    {filteredWorkers.length === 0 && (
-                        <EmptyState
-                            message="No workers found"
-                            icon={<FaUserTimes className="mx-auto h-12 w-12 text-slate-400" />}
-                        />
-                    )}
-                </div>
+                            </TableBody>
+                        </Table>
+                        {filteredWorkers.length === 0 && (
+                            <EmptyState
+                                message="No workers found"
+                                icon={<FaUserTimes className="mx-auto h-12 w-12 text-muted-foreground" />}
+                            />
+                        )}
+                    </CardContent>
+                </Card>
 
-                {/* Modals */}
-                <EditWorkerStatusModal
-                    isOpen={!!editingWorker}
-                    onClose={() => setEditingWorker(null)}
-                    worker={editingWorker}
-                    onSubmit={handleEditSubmit}
-                    isSubmitting={isLoading}
-                />
+                {/* Edit Worker Status Dialog */}
+                <Dialog open={!!editingWorker} onOpenChange={() => setEditingWorker(null)}>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Update Status</DialogTitle>
+                            <DialogDescription>
+                                Change the status for {editingWorker?.name}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={statusForm.handleSubmit(handleEditSubmit)} className="space-y-4">
+                            <FormField
+                                label="Status"
+                                error={statusForm.formState.errors.status}
+                                required
+                            >
+                                <Select
+                                    value={statusForm.watch('status')}
+                                    onValueChange={(value) => statusForm.setValue('status', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {STATUS_OPTIONS.map(option => (
+                                            <SelectItem key={option.value} value={option.value}>
+                                                {option.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </FormField>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setEditingWorker(null)}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaSave className="mr-2 h-4 w-4" />}
+                                    Save
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
 
-                <AssignWorkModal
-                    isOpen={!!assigningWorkTo}
-                    onClose={() => {
-                        setAssigningWorkTo(null);
-                        setSelectedTasksToAssign([]);
-                    }}
-                    worker={assigningWorkTo}
-                    availableWork={availableWork}
-                    selectedTasks={selectedTasksToAssign}
-                    setSelectedTasks={setSelectedTasksToAssign}
-                    onAssign={handleAssignWork}
-                    isLoading={isLoading}
-                />
+                {/* Assign Work Dialog */}
+                <Dialog open={!!assigningWorkTo} onOpenChange={() => {
+                    setAssigningWorkTo(null);
+                    setSelectedTasksToAssign([]);
+                }}>
+                    <DialogContent className="sm:max-w-[500px]">
+                        <DialogHeader>
+                            <DialogTitle>Assign Work</DialogTitle>
+                            <DialogDescription>
+                                Select tasks to assign to {assigningWorkTo?.name}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="max-h-60 overflow-y-auto border rounded-md p-2">
+                            {availableWork.length > 0 ? (
+                                <div className="space-y-2">
+                                    {availableWork.map((task) => (
+                                        <div key={task._id} className="flex items-start space-x-2 p-2 hover:bg-muted rounded-md">
+                                            <Checkbox
+                                                id={`task-${task._id}`}
+                                                checked={selectedTasksToAssign.includes(task._id)}
+                                                onCheckedChange={() => {
+                                                    if (selectedTasksToAssign.includes(task._id)) {
+                                                        setSelectedTasksToAssign(selectedTasksToAssign.filter(id => id !== task._id));
+                                                    } else {
+                                                        setSelectedTasksToAssign([...selectedTasksToAssign, task._id]);
+                                                    }
+                                                }}
+                                            />
+                                            <div className="grid gap-1.5 leading-none">
+                                                <label
+                                                    htmlFor={`task-${task._id}`}
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                                >
+                                                    {task.title}
+                                                </label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {task.description}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-center text-muted-foreground py-4">No available work tasks to assign.</p>
+                            )}
+                        </div>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => {
+                                setAssigningWorkTo(null);
+                                setSelectedTasksToAssign([]);
+                            }}>
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleAssignWork}
+                                disabled={isLoading || selectedTasksToAssign.length === 0}
+                            >
+                                {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaTasks className="mr-2 h-4 w-4" />}
+                                Assign Selected
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
 
-                <AddWorkModal
-                    isOpen={isAddingWork}
-                    onClose={() => setIsAddingWork(false)}
-                    onSubmit={handleWorkSubmit}
-                    isSubmitting={isLoading}
-                />
+                {/* Add Work Dialog */}
+                <Dialog open={isAddingWork} onOpenChange={() => {
+                    setIsAddingWork(false);
+                    setSelectedWorkersForNewTask([]);
+                    setWorkerSearchTerm('');
+                }}>
+                    <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                            <DialogTitle>Create New Work Task</DialogTitle>
+                            <DialogDescription>
+                                Add a new task and assign it to workers
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4">
+                            <FormField
+                                label="Task Title"
+                                error={workForm.formState.errors.title}
+                                required
+                            >
+                                <Input
+                                    placeholder="Enter task title"
+                                    {...workForm.register('title')}
+                                />
+                            </FormField>
+                            <FormField
+                                label="Description"
+                                error={workForm.formState.errors.description}
+                                required
+                            >
+                                <Textarea
+                                    placeholder="Enter task description"
+                                    {...workForm.register('description')}
+                                    rows={3}
+                                />
+                            </FormField>
+                            <FormField
+                                label="Due Date (Optional)"
+                                error={workForm.formState.errors.dueDate}
+                            >
+                                <Input
+                                    type="date"
+                                    {...workForm.register('dueDate')}
+                                />
+                            </FormField>
+                            
+                            {/* Worker Selection Section */}
+                            <FormField
+                                label="Assign to Workers (Optional)"
+                            >
+                                <div className="space-y-3">
+                                    {/* Worker Search Input */}
+                                    <div className="relative">
+                                        <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                                        <Input
+                                            placeholder="Search workers by name or email..."
+                                            value={workerSearchTerm}
+                                            onChange={(e) => setWorkerSearchTerm(e.target.value)}
+                                            className="pl-10"
+                                        />
+                                    </div>
+                                    
+                                    {/* Worker List */}
+                                    <div className="max-h-40 overflow-y-auto border rounded-md p-2">
+                                        {filteredWorkersForTask.length > 0 ? (
+                                            <div className="space-y-2">
+                                                {filteredWorkersForTask.map((worker) => (
+                                                    <div key={worker._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md">
+                                                        <Checkbox
+                                                            id={`worker-${worker._id}`}
+                                                            checked={selectedWorkersForNewTask.includes(worker._id)}
+                                                            onCheckedChange={() => {
+                                                                if (selectedWorkersForNewTask.includes(worker._id)) {
+                                                                    setSelectedWorkersForNewTask(selectedWorkersForNewTask.filter(id => id !== worker._id));
+                                                                } else {
+                                                                    setSelectedWorkersForNewTask([...selectedWorkersForNewTask, worker._id]);
+                                                                }
+                                                            }}
+                                                        />
+                                                        <label
+                                                            htmlFor={`worker-${worker._id}`}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2"
+                                                        >
+                                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                                <FaUser className="h-4 w-4" />
+                                                            </div>
+                                                            <div>
+                                                                <div>{worker.name}</div>
+                                                                <div className="text-xs text-muted-foreground">{worker.email}</div>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p className="text-center text-muted-foreground py-4">
+                                                {workerSearchTerm ? 'No workers match your search.' : 'No active workers available.'}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </FormField>
+                            
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => {
+                                    setIsAddingWork(false);
+                                    workForm.reset();
+                                    setSelectedWorkersForNewTask([]);
+                                    setWorkerSearchTerm('');
+                                }}>
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaPlus className="mr-2 h-4 w-4" />}
+                                    Create Task
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );
