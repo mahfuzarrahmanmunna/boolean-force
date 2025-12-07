@@ -214,7 +214,7 @@ export default function ManageWorkers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: data.status }),
             });
-    
+
             if (!response.ok) {
                 // Try to get the error message from the server
                 let errorMessage = 'Failed to update worker status';
@@ -227,7 +227,7 @@ export default function ManageWorkers() {
                 }
                 throw new Error(errorMessage);
             }
-    
+
             const updatedWorker = await response.json();
             setWorkers(workers.map(w => w._id === editingWorker._id ? updatedWorker.data : w));
             setEditingWorker(null);
@@ -250,38 +250,38 @@ export default function ManageWorkers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-    
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Failed to create work task');
             }
-    
+
             const newWork = await response.json();
-            
+
             // If workers are selected, assign the task to them
             if (selectedWorkersForNewTask.length > 0) {
                 // Create an array of promises for each assignment
-                const assignmentPromises = selectedWorkersForNewTask.map(workerId => 
+                const assignmentPromises = selectedWorkersForNewTask.map(workerId =>
                     fetch(`/api/workers/${workerId}/assign`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ taskIds: [newWork.data._id] }),
                     })
                 );
-    
+
                 // Wait for all promises to settle (either fulfilled or rejected)
                 const assignmentResults = await Promise.allSettled(assignmentPromises);
-                
+
                 const failedAssignments = [];
                 const successfulWorkerIds = [];
-    
+
                 // Process each result
                 for (let i = 0; i < assignmentResults.length; i++) {
                     const result = assignmentResults[i];
                     const workerId = selectedWorkersForNewTask[i];
                     const worker = workers.find(w => w._id === workerId);
                     const workerName = worker ? worker.name : `Worker ID ${workerId}`;
-    
+
                     if (result.status === 'fulfilled' && result.value.ok) {
                         successfulWorkerIds.push(workerId);
                     } else {
@@ -299,44 +299,44 @@ export default function ManageWorkers() {
                         failedAssignments.push({ workerName, errorMessage });
                     }
                 }
-    
+
                 // If there were any failures, throw a detailed error
                 if (failedAssignments.length > 0) {
                     const failureMessages = failedAssignments.map(
                         ({ workerName, errorMessage }) => `• ${workerName}: ${errorMessage}`
                     ).join('<br>'); // Use <br> for HTML rendering in the notification
-                    
+
                     throw new Error(`Task created, but failed to assign to some workers:<br>${failureMessages}`);
                 }
-                
+
                 // If all assignments were successful, fetch updated worker data to keep UI in sync
                 const updatedWorkersPromises = successfulWorkerIds.map(async (workerId) => {
                     const res = await fetch(`/api/workers/${workerId}`);
                     if (res.ok) return res.json();
                     return null;
                 });
-    
+
                 const updatedWorkersData = await Promise.all(updatedWorkersPromises);
-    
-                setWorkers(prevWorkers => 
+
+                setWorkers(prevWorkers =>
                     prevWorkers.map(worker => {
                         const updatedData = updatedWorkersData.find(data => data && data.data._id === worker._id);
                         return updatedData ? updatedData.data : worker;
                     })
                 );
-    
+
             } else {
                 // If no workers are selected, add the task to the available work list
                 setAvailableWork(prev => [...prev, newWork.data]);
             }
-    
+
             // Reset form and show success
             setIsAddingWork(false);
             workForm.reset();
             setSelectedWorkersForNewTask([]);
             setWorkerSearchTerm('');
             showNotification('New work task created and assigned successfully!', 'success');
-    
+
         } catch (error) {
             console.error("Error in handleWorkSubmit:", error);
             // The notification will now display the detailed, multi-line error message
@@ -417,7 +417,7 @@ export default function ManageWorkers() {
             return matchesSearch && matchesStatus;
         });
     }, [workers, searchTerm, statusFilter]);
-    
+
     // Filter workers for task assignment based on search term
     const filteredWorkersForTask = useMemo(() => {
         return workers.filter(worker => {
@@ -441,9 +441,8 @@ export default function ManageWorkers() {
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
             {/* Notification */}
             {notification.show && (
-                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${
-                    notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-                } animate-pulse`}>
+                <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                    } animate-pulse`}>
                     {notification.type === 'success' ? <FaCheckCircle className="text-xl" /> : <FaExclamationTriangle className="text-xl" />}
                     <span>{notification.message}</span>
                 </div>
@@ -465,7 +464,7 @@ export default function ManageWorkers() {
                             </div>
                             <Button
                                 onClick={() => setIsAddingWork(true)}
-                                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                                className="bg-gradient-to-r cursor-pointer from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
                             >
                                 <FaBriefcase className="mr-2 h-4 w-4" />
                                 Create New Task
@@ -563,8 +562,9 @@ export default function ManageWorkers() {
                                                     size="sm"
                                                     onClick={() => setEditingWorker(worker)}
                                                     title="Edit Status"
+                                                    className=" cursor-pointer"
                                                 >
-                                                    <FaEdit className="h-4 w-4" />
+                                                    <FaEdit className="h-4 w-4 cursor-pointer" />
                                                 </Button>
                                                 <Button
                                                     variant="ghost"
@@ -753,7 +753,7 @@ export default function ManageWorkers() {
                                     {...workForm.register('dueDate')}
                                 />
                             </FormField>
-                            
+
                             {/* Worker Selection Section */}
                             <FormField
                                 label="Assign to Workers (Optional)"
@@ -769,7 +769,7 @@ export default function ManageWorkers() {
                                             className="pl-10"
                                         />
                                     </div>
-                                    
+
                                     {/* Worker List */}
                                     <div className="max-h-40 overflow-y-auto border rounded-md p-2">
                                         {filteredWorkersForTask.length > 0 ? (
@@ -810,7 +810,7 @@ export default function ManageWorkers() {
                                     </div>
                                 </div>
                             </FormField>
-                            
+
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={() => {
                                     setIsAddingWork(false);

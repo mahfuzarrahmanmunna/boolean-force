@@ -1,4 +1,4 @@
-// src/app/dashboard/workers/manage-submit-task/page.jsx
+// src/app/dashboard/submit-task/page.jsx
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -18,6 +18,9 @@ import {
     Paperclip,
     Download,
     Eye,
+    User,
+    MapPin,
+    Briefcase,
     Target,
     Star,
     BarChart3,
@@ -26,50 +29,7 @@ import {
     Search,
     ChevronDown,
     ChevronLeft,
-    ChevronRight,
-    Shield,
-    Activity,
-    Zap,
-    Users,
-    UserCheck,
-    UserX,
-    UserPlus,
-    Edit,
-    Lock,
-    Unlock,
-    Bell,
-    Settings,
-    LogOut,
-    Home,
-    Mail,
-    Phone,
-    Globe,
-    Database,
-    Cloud,
-    Server,
-    Wifi,
-    HardDrive,
-    ShieldCheck,
-    AlertTriangle,
-    Info,
-    HelpCircle,
-    FolderOpen,
-    Folder,
-    FolderPlus,
-    Copy,
-    ExternalLink,
-    Share,
-    Link2,
-    RefreshCw,
-    CheckSquare,
-    File,
-    FolderTree,
-    Grid3X3,
-    List,
-    BarChart,
-    PieChart,
-    Link,
-    Share2
+    ChevronRight
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -85,17 +45,9 @@ export default function SubmitTaskPage() {
         priority: 'medium',
         dueDate: '',
         estimatedHours: '',
+        assignedTo: '',
         tags: [],
-        progress: 0,
-        googleDriveLink: '',
-        submittedBy: '', // Will be auto-filled with logged-in user's name
-        submittedByEmail: '', // Will be auto-filled with logged-in user's email
-        permissions: {
-            canEdit: true,
-            canDelete: false,
-            canShare: true,
-            canDownload: true
-        }
+        progress: 0
     });
 
     // File state
@@ -109,11 +61,6 @@ export default function SubmitTaskPage() {
     const [showPreview, setShowPreview] = useState(false);
     const [activeTab, setActiveTab] = useState('details');
     const [showSuccessModal, setShowSuccessModal] = useState(false);
-    const [showShareModal, setShowShareModal] = useState(false);
-    const [users, setUsers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isManager, setIsManager] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
 
     // Mock data for demonstration
     const [categories, setCategories] = useState([
@@ -126,6 +73,13 @@ export default function SubmitTaskPage() {
         'Other'
     ]);
 
+    const [employees, setEmployees] = useState([
+        { id: '1', name: 'Alice Johnson', email: 'alice@example.com' },
+        { id: '2', name: 'Bob Williams', email: 'bob@example.com' },
+        { id: '3', name: 'Charlie Brown', email: 'charlie@example.com' },
+        { id: '4', name: 'Diana Prince', email: 'diana@example.com' }
+    ]);
+
     useEffect(() => {
         if (status === 'loading') return;
 
@@ -134,49 +88,10 @@ export default function SubmitTaskPage() {
             return;
         }
 
-        // Auto-fill user information
-        setTaskData(prev => ({
-            ...prev,
-            submittedBy: session.user.name,
-            submittedByEmail: session.user.email
-        }));
-
-        // Fetch users from API (for team members display)
-        const fetchUsers = async () => {
-            try {
-                const response = await fetch('http://localhost:3000/api/users');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch users');
-                }
-                const usersData = await response.json();
-                setUsers(usersData);
-
-                // Check if current user is admin or manager
-                const currentUser = usersData.find(user => user.email === session.user.email);
-                if (currentUser) {
-                    setIsAdmin(currentUser.role === 'admin');
-                    setIsManager(currentUser.role === 'admin' || currentUser.role === 'manager');
-
-                    // Set permissions based on role
-                    setTaskData(prev => ({
-                        ...prev,
-                        permissions: {
-                            canEdit: true, // Employees can edit their own tasks
-                            canDelete: currentUser.role === 'admin',
-                            canShare: true,
-                            canDownload: true
-                        }
-                    }));
-                }
-            } catch (error) {
-                console.error('Error fetching users:', error);
-                toast.error('Failed to load users');
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchUsers();
+        // Set default assigned to current user
+        if (session?.user?.name) {
+            setTaskData(prev => ({ ...prev, assignedTo: session.user.name }));
+        }
     }, [session, status, router]);
 
     // Handle file input change
@@ -215,8 +130,7 @@ export default function SubmitTaskPage() {
             name: file.name,
             size: (file.size / 1024).toFixed(2) + ' KB',
             type: file.type,
-            uploadDate: new Date().toISOString(),
-            uploadedBy: session.user.name
+            uploadDate: new Date().toISOString()
         }));
 
         setUploadedFiles(prev => [...prev, ...newUploadedFiles]);
@@ -263,22 +177,18 @@ export default function SubmitTaskPage() {
 
         try {
             // In a real app, you would send this data to your API
-            const response = await fetch('/api/tasks', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    ...taskData,
-                    files: uploadedFiles,
-                    submittedAt: new Date().toISOString(),
-                    status: 'pending' // Initial status for new tasks
-                })
-            });
+            // const response = await fetch('/api/tasks', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         ...taskData,
+            //         files: uploadedFiles,
+            //         submittedBy: session.user.name,
+            //         submittedAt: new Date().toISOString()
+            //     })
+            // });
 
-            if (!response.ok) {
-                throw new Error('Failed to submit task');
-            }
-
-            // Mock API call for demonstration
+            // Mock API call
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             setIsSubmitting(false);
@@ -286,18 +196,17 @@ export default function SubmitTaskPage() {
             toast.success('Task submitted successfully');
 
             // Reset form after successful submission
-            setTaskData(prev => ({
-                ...prev,
+            setTaskData({
                 title: '',
                 description: '',
                 category: '',
                 priority: 'medium',
                 dueDate: '',
                 estimatedHours: '',
+                assignedTo: session?.user?.name || '',
                 tags: [],
-                progress: 0,
-                googleDriveLink: ''
-            }));
+                progress: 0
+            });
             setUploadedFiles([]);
         } catch (error) {
             console.error('Error submitting task:', error);
@@ -318,56 +227,16 @@ export default function SubmitTaskPage() {
         toast.success(`Viewing ${file.name}`);
     };
 
-    // Copy to clipboard (mock function)
-    const copyToClipboard = (text) => {
-        navigator.clipboard.writeText(text);
-        toast.success('Link copied to clipboard');
-    };
-
-    // Share Google Drive link (mock function)
-    const shareGoogleDriveLink = () => {
-        toast.success('Google Drive link shared successfully');
-    };
-
-    // Check if user can edit task
-    const canEditTask = () => {
-        return true; // Employees can edit their own tasks
-    };
-
-    // Check if user can delete task
-    const canDeleteTask = () => {
-        const currentUser = users.find(user => user.email === session.user.email);
-        return currentUser && currentUser.role === 'admin';
-    };
-
-    // Check if user can share task
-    const canShareTask = () => {
-        return true; // All users can share their tasks
-    };
-
-    // Check if user can download files
-    const canDownloadFiles = () => {
-        return true; // All users can download files
-    };
-
-    if (status === 'loading' || isLoading) {
+    if (status === 'loading') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
-                <div className="text-center">
-                    <div className="inline-flex items-center px-4 py-2 font-semibold leading-6 text-white bg-blue-600 rounded-lg shadow-md">
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018 0 0 16 0l-4 4-4 0 0 0 2-2a2 2 0 0 0 2 2 0 0 0 0 2 2"></path>
-                        </svg>
-                        Loading...
-                    </div>
-                </div>
+            <div className="flex items-center justify-center h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
             {/* Header */}
             <div className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -380,51 +249,12 @@ export default function SubmitTaskPage() {
                             <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Submit Task</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <div className="flex items-center">
-                                <button
-                                    className={`p-2 rounded-lg ${isManager || isAdmin ? 'text-blue-600' : 'text-slate-500'} hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300`}
-                                    title="Admin Panel"
-                                >
-                                    {isManager || isAdmin ? (
-                                        <Shield className="w-5 h-5" />
-                                    ) : (
-                                        <Lock className="w-5 h-5" />
-                                    )}
-                                </button>
-                                <div className="flex items-center">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-2">
-                                        {session?.user?.name?.split(' ').map(n => n[0]).join('')}
-                                    </div>
-                                    <div>
-                                        <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                            {session?.user?.name || 'User'}
-                                        </span>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            {session?.user?.email || 'user@example.com'}
-                                        </p>
-                                    </div>
-                                </div>
-                                <button
-                                    className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                                    title="Notifications"
-                                >
-                                    <Bell className="w-5 h-5" />
-                                </button>
-                                <button
-                                    className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                                    title="Settings"
-                                >
-                                    <Settings className="w-5 h-5" />
-                                </button>
-                                <button
-                                    className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                                    title="Logout"
-                                    onClick={() => {
-                                        // In a real app, you would implement logout functionality
-                                        router.push('/api/auth/signout');
-                                    }}
-                                >
-                                    <LogOut className="w-5 h-5" />
+                            <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                <Search className="w-5 h-5" />
+                            </button>
+                            <div className="relative">
+                                <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                    <Filter className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
@@ -437,67 +267,41 @@ export default function SubmitTaskPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column - Form */}
                     <div className="lg:col-span-2">
-                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
-                            {/* User Info Display */}
-                            <div className="bg-blue-50 dark:bg-blue-900/20 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-                                <div className="flex items-center">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-3">
-                                        {session?.user?.name?.split(' ').map(n => n[0]).join('')}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-slate-900 dark:text-white">
-                                            Submitting as: {session?.user?.name}
-                                        </p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            {session?.user?.email}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
                             {/* Tabs */}
-                            <div className="flex border-b border-slate-200 dark:border-slate-700">
+                            <div className="flex border-b border-slate-200 dark:border-slate-700 mb-6">
                                 <button
-                                    className={`flex-1 py-4 px-6 text-center text-sm font-medium transition-colors ${activeTab === 'details'
-                                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                    className={`pb-4 px-1 text-sm font-medium ${activeTab === 'details'
+                                        ? 'text-blue-600 border-b-2 border-blue-600'
                                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                                         }`}
                                     onClick={() => setActiveTab('details')}
                                 >
-                                    <div className="flex items-center justify-center">
-                                        <FileText className="w-5 h-5 mr-2" />
-                                        Task Details
-                                    </div>
+                                    Task Details
                                 </button>
                                 <button
-                                    className={`flex-1 py-4 px-6 text-center text-sm font-medium transition-colors ${activeTab === 'files'
-                                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                    className={`pb-4 px-1 text-sm font-medium ${activeTab === 'files'
+                                        ? 'text-blue-600 border-b-2 border-blue-600'
                                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                                         }`}
                                     onClick={() => setActiveTab('files')}
                                 >
-                                    <div className="flex items-center justify-center">
-                                        <Upload className="w-5 h-5 mr-2" />
-                                        Files
-                                    </div>
+                                    Files
                                 </button>
                                 <button
-                                    className={`flex-1 py-4 px-6 text-center text-sm font-medium transition-colors ${activeTab === 'share'
-                                        ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                    className={`pb-4 px-1 text-sm font-medium ${activeTab === 'preview'
+                                        ? 'text-blue-600 border-b-2 border-blue-600'
                                         : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                                         }`}
-                                    onClick={() => setActiveTab('share')}
+                                    onClick={() => setActiveTab('preview')}
                                 >
-                                    <div className="flex items-center justify-center">
-                                        <Share2 className="w-5 h-5 mr-2" />
-                                        Share
-                                    </div>
+                                    Preview
                                 </button>
                             </div>
 
                             {/* Task Details Tab */}
                             {activeTab === 'details' && (
-                                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                                <form onSubmit={handleSubmit} className="space-y-6">
                                     {/* Title */}
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -511,7 +315,6 @@ export default function SubmitTaskPage() {
                                             className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                             placeholder="Enter task title"
                                             required
-                                            disabled={!canEditTask()}
                                         />
                                     </div>
 
@@ -526,14 +329,13 @@ export default function SubmitTaskPage() {
                                             onChange={handleInputChange}
                                             rows={5}
                                             className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                                            placeholder="Describe task in detail"
+                                            placeholder="Describe the task in detail"
                                             required
-                                            disabled={!canEditTask()}
                                         />
                                     </div>
 
                                     {/* Category and Priority */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Category
@@ -544,14 +346,13 @@ export default function SubmitTaskPage() {
                                                     value={taskData.category}
                                                     onChange={handleInputChange}
                                                     className="w-full appearance-none px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-10"
-                                                    disabled={!canEditTask()}
                                                 >
                                                     <option value="">Select category</option>
                                                     {categories.map(category => (
                                                         <option key={category} value={category}>{category}</option>
                                                     ))}
                                                 </select>
-                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                                     <ChevronDown className="w-5 h-5 text-slate-400" />
                                                 </div>
                                             </div>
@@ -561,7 +362,7 @@ export default function SubmitTaskPage() {
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Priority
                                             </label>
-                                            <div className="grid grid-cols-3 gap-3">
+                                            <div className="grid grid-cols-3 gap-2">
                                                 <label className="flex items-center">
                                                     <input
                                                         type="radio"
@@ -569,7 +370,6 @@ export default function SubmitTaskPage() {
                                                         value="low"
                                                         checked={taskData.priority === 'low'}
                                                         onChange={handleInputChange}
-                                                        disabled={!canEditTask()}
                                                         className="mr-2"
                                                     />
                                                     <span className="text-sm">Low</span>
@@ -581,7 +381,6 @@ export default function SubmitTaskPage() {
                                                         value="medium"
                                                         checked={taskData.priority === 'medium'}
                                                         onChange={handleInputChange}
-                                                        disabled={!canEditTask()}
                                                         className="mr-2"
                                                     />
                                                     <span className="text-sm">Medium</span>
@@ -593,7 +392,6 @@ export default function SubmitTaskPage() {
                                                         value="high"
                                                         checked={taskData.priority === 'high'}
                                                         onChange={handleInputChange}
-                                                        disabled={!canEditTask()}
                                                         className="mr-2"
                                                     />
                                                     <span className="text-sm">High</span>
@@ -603,7 +401,7 @@ export default function SubmitTaskPage() {
                                     </div>
 
                                     {/* Due Date and Estimated Hours */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                                                 Due Date <span className="text-red-500">*</span>
@@ -616,9 +414,8 @@ export default function SubmitTaskPage() {
                                                     onChange={handleInputChange}
                                                     className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                                     required
-                                                    disabled={!canEditTask()}
                                                 />
-                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                                     <Calendar className="w-5 h-5 text-slate-400" />
                                                 </div>
                                             </div>
@@ -638,11 +435,32 @@ export default function SubmitTaskPage() {
                                                     step="0.5"
                                                     className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                                     placeholder="0"
-                                                    disabled={!canEditTask()}
                                                 />
-                                                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                                     <Clock className="w-5 h-5 text-slate-400" />
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Assigned To */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                            Assigned To
+                                        </label>
+                                        <div className="relative">
+                                            <select
+                                                name="assignedTo"
+                                                value={taskData.assignedTo}
+                                                onChange={handleInputChange}
+                                                className="w-full appearance-none px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-10"
+                                            >
+                                                {employees.map(employee => (
+                                                    <option key={employee.id} value={employee.name}>{employee.name}</option>
+                                                ))}
+                                            </select>
+                                            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                <ChevronDown className="w-5 h-5 text-slate-400" />
                                             </div>
                                         </div>
                                     </div>
@@ -660,7 +478,6 @@ export default function SubmitTaskPage() {
                                                         type="button"
                                                         onClick={() => removeTag(index)}
                                                         className="ml-2 text-blue-500 hover:text-blue-700"
-                                                        disabled={!canEditTask()}
                                                     >
                                                         <X className="w-3 h-3" />
                                                     </button>
@@ -672,21 +489,14 @@ export default function SubmitTaskPage() {
                                             placeholder="Add tags and press Enter"
                                             onKeyDown={handleTagsChange}
                                             className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                                            disabled={!canEditTask()}
                                         />
                                     </div>
 
                                     {/* Progress */}
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                            Initial Progress: {taskData.progress}%
+                                            Progress: {taskData.progress}%
                                         </label>
-                                        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
-                                            <div
-                                                className="bg-blue-600 h-2.5 rounded-full"
-                                                style={{ width: `${taskData.progress}%` }}
-                                            ></div>
-                                        </div>
                                         <input
                                             type="range"
                                             name="progress"
@@ -695,52 +505,44 @@ export default function SubmitTaskPage() {
                                             min="0"
                                             max="100"
                                             className="w-full"
-                                            disabled={!canEditTask()}
                                         />
                                     </div>
 
                                     {/* Submit Button */}
                                     <div className="flex justify-end">
-                                        {canEditTask() ? (
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                                            >
-                                                {isSubmitting ? (
-                                                    <>
-                                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
-                                                        Submitting...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Save className="w-4 h-4 mr-2" />
-                                                        Submit Task
-                                                    </>
-                                                )}
-                                            </button>
-                                        ) : (
-                                            <div className="flex items-center text-slate-500 dark:text-slate-400">
-                                                <Lock className="w-4 h-4 mr-2" />
-                                                <span className="ml-2">You don't have permission to edit this task</span>
-                                            </div>
-                                        )}
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting}
+                                            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                        >
+                                            {isSubmitting ? (
+                                                <>
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                                                    Submitting...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Save className="w-4 h-4 mr-2" />
+                                                    Submit Task
+                                                </>
+                                            )}
+                                        </button>
                                     </div>
                                 </form>
                             )}
 
                             {/* Files Tab */}
                             {activeTab === 'files' && (
-                                <div className="p-6 space-y-6">
+                                <div className="space-y-6">
                                     {/* File Upload Area */}
                                     <div
-                                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-300 dark:border-slate-600'
+                                        className={`border-2 border-dashed rounded-lg p-6 text-center ${isDragging ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-slate-300 dark:border-slate-600'
                                             }`}
                                         onDragOver={handleDragOver}
                                         onDragLeave={handleDragLeave}
                                         onDrop={handleDrop}
                                     >
-                                        <Cloud className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                                        <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
                                         <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">
                                             Drag and drop your files here
                                         </p>
@@ -751,7 +553,6 @@ export default function SubmitTaskPage() {
                                             type="button"
                                             onClick={() => fileInputRef.current?.click()}
                                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                            disabled={!canEditTask()}
                                         >
                                             Browse Files
                                         </button>
@@ -773,22 +574,19 @@ export default function SubmitTaskPage() {
                                             {files.map((file, index) => (
                                                 <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                                                     <div className="flex items-center">
-                                                        <FileText className="w-5 h-5 text-slate-400 mr-3" />
+                                                        <FileText className="w-5 h-5 text-slate-400 mr-2" />
                                                         <div>
                                                             <p className="text-sm font-medium text-slate-900 dark:text-white">{file.name}</p>
                                                             <p className="text-xs text-slate-500 dark:text-slate-400">{(file.size / 1024).toFixed(2)} KB</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex space-x-2">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeFile(index)}
-                                                            className="text-red-500 hover:text-red-700"
-                                                            disabled={!canEditTask()}
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeFile(index)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
                                                 </div>
                                             ))}
                                             <div className="flex justify-end mt-4">
@@ -796,7 +594,6 @@ export default function SubmitTaskPage() {
                                                     type="button"
                                                     onClick={uploadFiles}
                                                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                                                    disabled={!canEditTask()}
                                                 >
                                                     Upload Files
                                                 </button>
@@ -813,7 +610,7 @@ export default function SubmitTaskPage() {
                                             {uploadedFiles.map((file, index) => (
                                                 <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
                                                     <div className="flex items-center">
-                                                        <FileText className="w-5 h-5 text-green-500 mr-3" />
+                                                        <FileText className="w-5 h-5 text-green-500 mr-2" />
                                                         <div>
                                                             <p className="text-sm font-medium text-slate-900 dark:text-white">{file.name}</p>
                                                             <p className="text-xs text-slate-500 dark:text-slate-400">{file.size}</p>
@@ -824,7 +621,6 @@ export default function SubmitTaskPage() {
                                                             type="button"
                                                             onClick={() => viewFile(file)}
                                                             className="text-blue-500 hover:text-blue-700"
-                                                            disabled={!canEditTask()}
                                                         >
                                                             <Eye className="w-4 h-4" />
                                                         </button>
@@ -832,7 +628,6 @@ export default function SubmitTaskPage() {
                                                             type="button"
                                                             onClick={() => downloadFile(file)}
                                                             className="text-blue-500 hover:text-blue-700"
-                                                            disabled={!canEditTask()}
                                                         >
                                                             <Download className="w-4 h-4" />
                                                         </button>
@@ -844,68 +639,101 @@ export default function SubmitTaskPage() {
                                 </div>
                             )}
 
-                            {/* Share Tab */}
-                            {activeTab === 'share' && (
-                                <div className="p-6 space-y-6">
-                                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6">
-                                        <div className="flex items-center mb-4">
-                                            <Cloud className="w-8 h-8 text-blue-600 mr-3" />
-                                            <h3 className="text-lg font-medium text-slate-900 dark:text-white">Google Drive Integration</h3>
-                                        </div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                                            Share your task files via Google Drive by providing a link to your shared folder. This allows team members to access all relevant files in one place.
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                            Google Drive Link
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="url"
-                                                name="googleDriveLink"
-                                                value={taskData.googleDriveLink}
-                                                onChange={handleInputChange}
-                                                className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-10"
-                                                placeholder="https://drive.google.com/drive/folders/..."
-                                                disabled={!canEditTask()}
-                                            />
-                                            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
-                                                <Link className="w-5 h-5 text-slate-400" />
+                            {/* Preview Tab */}
+                            {activeTab === 'preview' && (
+                                <div className="space-y-6">
+                                    <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-6">
+                                        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">
+                                            Task Preview
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Title</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.title || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Description</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.description || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Category</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.category || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Priority</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.priority || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Due Date</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.dueDate ? new Date(taskData.dueDate).toLocaleDateString() : 'Not specified'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Estimated Hours</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.estimatedHours || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Assigned To</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.assignedTo || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Tags</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {taskData.tags.length > 0 ? (
+                                                        taskData.tags.map((tag, index) => (
+                                                            <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                                                {tag}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-slate-500 dark:text-slate-400">No tags</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Progress</h4>
+                                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
+                                                    <div
+                                                        className="bg-blue-600 h-2.5 rounded-full"
+                                                        style={{ width: `${taskData.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                                <p className="text-slate-900 dark:text-white mt-1">{taskData.progress}%</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Files</h4>
+                                                <div className="space-y-2">
+                                                    {uploadedFiles.length > 0 ? (
+                                                        uploadedFiles.map((file, index) => (
+                                                            <div key={index} className="flex items-center">
+                                                                <FileText className="w-4 h-4 text-green-500 mr-2" />
+                                                                <span className="text-sm text-slate-900 dark:text-white">{file.name}</span>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-slate-500 dark:text-slate-400">No files uploaded</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div className="flex items-center justify-between mt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => copyToClipboard(taskData.googleDriveLink)}
-                                            className="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center"
-                                            disabled={!canEditTask()}
-                                        >
-                                            <Paperclip className="w-4 h-4 mr-2" />
-                                            Copy Link
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={shareGoogleDriveLink}
-                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center"
-                                            disabled={!canEditTask()}
-                                        >
-                                            <Share2 className="w-4 h-4 mr-2" />
-                                            Share Link
-                                        </button>
-                                    </div>
-
-                                    {taskData.googleDriveLink && (
-                                        <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                                            <div className="flex items-center">
-                                                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                                                <span className="text-sm text-green-800 dark:text-green-400">Google Drive link added to task</span>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
@@ -914,70 +742,61 @@ export default function SubmitTaskPage() {
                     {/* Right Column - Task Statistics */}
                     <div className="lg:col-span-1">
                         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
-                                <BarChart3 className="w-5 h-5 mr-2" />
-                                Your Task Statistics
-                            </h2>
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Task Statistics</h2>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-600 dark:text-slate-400">Total Tasks</span>
-                                    <span className="text-sm font-medium text-slate-900 dark:text-white">12</span>
+                                    <span className="text-sm font-medium text-slate-900 dark:text-white">24</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-600 dark:text-slate-400">Completed</span>
-                                    <span className="text-sm font-medium text-green-600 dark:text-green-400">8</span>
+                                    <span className="text-sm font-medium text-green-600 dark:text-green-400">18</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-600 dark:text-slate-400">In Progress</span>
-                                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">3</span>
+                                    <span className="text-sm font-medium text-amber-600 dark:text-amber-400">4</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm text-slate-600 dark:text-slate-400">Pending</span>
-                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">1</span>
+                                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">2</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
-                                <Target className="w-5 h-5 mr-2" />
-                                Priority Distribution
-                            </h2>
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Priority Distribution</h2>
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
                                         <span className="text-sm text-slate-600 dark:text-slate-400">High Priority</span>
                                     </div>
-                                    <span className="text-sm font-medium text-slate-900 dark:text-white">3</span>
+                                    <span className="text-sm font-medium text-slate-900 dark:text-white">8</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 bg-amber-500 rounded-full mr-2"></div>
                                         <span className="text-sm text-slate-600 dark:text-slate-400">Medium Priority</span>
                                     </div>
-                                    <span className="text-sm font-medium text-slate-900 dark:text-white">6</span>
+                                    <span className="text-sm font-medium text-slate-900 dark:text-white">12</span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center">
                                         <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
                                         <span className="text-sm text-slate-600 dark:text-slate-400">Low Priority</span>
                                     </div>
-                                    <span className="text-sm font-medium text-slate-900 dark:text-white">3</span>
+                                    <span className="text-sm font-medium text-slate-900 dark:text-white">4</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
-                                <TrendingUp className="w-5 h-5 mr-2" />
-                                Recent Activity
-                            </h2>
+                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6">
+                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Recent Activity</h2>
                             <div className="space-y-4">
                                 <div className="flex items-start">
                                     <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-1.5 mr-3"></div>
                                     <div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">Task submitted</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400">New task submitted</p>
                                         <p className="text-xs text-slate-500 dark:text-slate-500">2 hours ago</p>
                                     </div>
                                 </div>
@@ -995,33 +814,13 @@ export default function SubmitTaskPage() {
                                         <p className="text-xs text-slate-500 dark:text-slate-500">1 day ago</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg p-6 mb-6">
-                            <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center">
-                                <Users className="w-5 h-5 mr-2" />
-                                Team Members
-                            </h2>
-                            <div className="space-y-4">
-                                {users.slice(0, 5).map((user, index) => (
-                                    <div key={index} className="flex items-center">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold mr-3">
-                                            {user.name.split(' ').map(n => n[0]).join('')}
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-slate-900 dark:text-white">{user.name}</p>
-                                            <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                                        </div>
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 w-2 h-2 bg-red-500 rounded-full mt-1.5 mr-3"></div>
+                                    <div>
+                                        <p className="text-sm text-slate-600 dark:text-slate-400">Task overdue</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-500">2 days ago</p>
                                     </div>
-                                ))}
-                                {users.length > 5 && (
-                                    <div className="text-center">
-                                        <button className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                                            View all members
-                                        </button>
-                                    </div>
-                                )}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1047,7 +846,7 @@ export default function SubmitTaskPage() {
                                         </h3>
                                         <div className="mt-2">
                                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                Your task has been submitted and is now being processed. You will be notified when it's reviewed.
+                                                Your task has been submitted and is now being processed.
                                             </p>
                                         </div>
                                     </div>
@@ -1057,7 +856,7 @@ export default function SubmitTaskPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowSuccessModal(false)}
-                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
                                 >
                                     Close
                                 </button>

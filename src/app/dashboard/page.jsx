@@ -150,7 +150,7 @@ const AdminPage = () => {
     }, []);
 
     return (
-        <div className={`min-h-screen dark:dark bg-gray-900 bg-gray-50 transition-colors duration-300`}>
+        <div className={`min-h-screen dark:dark dark:bg-gray-900 bg-gray-50 transition-colors duration-300`}>
             <div className="p-4 md:p-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 animate-fadeIn">

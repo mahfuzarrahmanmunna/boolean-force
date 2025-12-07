@@ -406,7 +406,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Time Tracking',
             icon: <Clock className="w-5 h-5" />,
-            href: '/dashboard/manage-time-tracking',
+            href: '/dashboard/workers/manage-time-tracking',
             badge: null,
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600'
