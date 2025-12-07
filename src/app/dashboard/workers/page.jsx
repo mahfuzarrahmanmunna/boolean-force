@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { Search, UserCheck, UserX, MoreHorizontal, Calendar, Mail, Shield, Star, MapPin, Briefcase, Trash2, Edit, Eye, Loader2, Users, Filter } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, UserCheck, UserX, MoreHorizontal, Calendar, Mail, Shield, Star, MapPin, Briefcase, Trash2, Edit, Eye, Loader2, Users, Filter, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 // Mock API function to fetch workers
@@ -34,6 +34,12 @@ export default function ManageWorkersPage() {
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [updating, setUpdating] = useState(false);
+
+    // Auto-suggestion states
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [suggestions, setSuggestions] = useState([]);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
+    const searchInputRef = useRef(null);
 
     useEffect(() => {
         const getWorkers = async () => {
@@ -71,14 +77,36 @@ export default function ManageWorkersPage() {
         setFilteredWorkers(result);
     }, [workers, searchQuery, statusFilter]);
 
+    // Generate suggestions based on search query
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        const filteredSuggestions = workers
+            .filter(worker =>
+                worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                worker.email.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .slice(0, 5); // Limit to 5 suggestions
+
+        setSuggestions(filteredSuggestions);
+        setShowSuggestions(filteredSuggestions.length > 0);
+        setActiveSuggestionIndex(0);
+    }, [searchQuery, workers]);
+
     const handleViewWorker = (worker) => {
         setSelectedWorker(worker);
         setIsDetailsModalOpen(true);
+        setShowSuggestions(false);
     };
 
     const handleDeleteClick = (worker) => {
         setSelectedWorker(worker);
         setIsDeleteModalOpen(true);
+        setShowSuggestions(false);
     };
 
     const confirmDeleteWorker = () => {
@@ -105,6 +133,51 @@ export default function ManageWorkersPage() {
         toast.success(`Worker status updated to ${newStatus}.`);
     };
 
+    // Handle suggestion selection
+    const selectSuggestion = (worker) => {
+        setSearchQuery(worker.name);
+        setShowSuggestions(false);
+        searchInputRef.current?.focus();
+    };
+
+    // Handle keyboard navigation for suggestions
+    const handleKeyDown = (e) => {
+        if (!showSuggestions) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev =>
+                prev < suggestions.length - 1 ? prev + 1 : 0
+            );
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setActiveSuggestionIndex(prev =>
+                prev > 0 ? prev - 1 : suggestions.length - 1
+            );
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (suggestions[activeSuggestionIndex]) {
+                selectSuggestion(suggestions[activeSuggestionIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            setShowSuggestions(false);
+        }
+    };
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchInputRef.current && !searchInputRef.current.contains(event.target)) {
+                setShowSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const getStatusBadge = (status) => {
         const styles = {
             active: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
@@ -129,15 +202,50 @@ export default function ManageWorkersPage() {
 
                 {/* Filters and Search */}
                 <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
+                    <div className="relative flex-1" ref={searchInputRef}>
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
                         <input
                             type="text"
                             placeholder="Search by name or email..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            onFocus={() => {
+                                if (searchQuery.trim() !== '' && suggestions.length > 0) {
+                                    setShowSuggestions(true);
+                                }
+                            }}
                             className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
+
+                        {/* Suggestions Dropdown */}
+                        {showSuggestions && (
+                            <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg max-h-60 overflow-auto">
+                                {suggestions.map((worker, index) => (
+                                    <div
+                                        key={worker._id}
+                                        className={`px-4 py-3 cursor-pointer flex items-center hover:bg-slate-100 dark:hover:bg-slate-700 ${index === activeSuggestionIndex ? 'bg-slate-100 dark:bg-slate-700' : ''
+                                            }`}
+                                        onClick={() => selectSuggestion(worker)}
+                                    >
+                                        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mr-3">
+                                            {worker.name.split(' ').map(n => n[0]).join('')}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                                                {worker.name}
+                                            </p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                                {worker.email}
+                                            </p>
+                                        </div>
+                                        <div className="ml-2">
+                                            {getStatusBadge(worker.status)}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -380,9 +488,9 @@ export default function ManageWorkersPage() {
             {isDeleteModalOpen && selectedWorker && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                        <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                        {/* <div className="fixed inset-0 transition-opacity" aria-hidden="true">
                             <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-                        </div>
+                        </div> */}
                         <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
                         <div className="inline-block align-bottom bg-white dark:bg-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
                             <div className="bg-white dark:bg-slate-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -396,7 +504,7 @@ export default function ManageWorkersPage() {
                                         </h3>
                                         <div className="mt-2">
                                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                Are you sure you want to delete the worker <span className="font-semibold">{selectedWorker.name}</span>? This action cannot be undone.
+                                                Are you sure you want to delete worker <span className="font-semibold">{selectedWorker.name}</span>? This action cannot be undone.
                                             </p>
                                         </div>
                                     </div>

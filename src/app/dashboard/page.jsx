@@ -154,10 +154,10 @@ const AdminPage = () => {
             <div className="p-4 md:p-6">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 animate-fadeIn">
-                    <div>
+                    {/* <div>
                         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">Admin Dashboard</h1>
                         <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back! Here's what's happening with your business today.</p>
-                    </div>
+                    </div> */}
                     <div className="flex items-center space-x-2 mt-4 md:mt-0">
                         <div className="relative">
                             <button

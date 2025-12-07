@@ -134,7 +134,7 @@ export default function AllEmployeePage() {
 
     // Handle view employee details
     const handleViewEmployee = (employee) => {
-        router.push(`/dashboard/employee-profile/${employee._id}`);
+        router.push(`/dashboard/employee-profile-details/${employee._id}`);
     };
 
     // Handle status change
