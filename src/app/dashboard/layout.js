@@ -88,9 +88,15 @@ import {
     FileText as DocumentIcon,
     BarChart as BarChartIcon,
     Mail as MailIcon,
-    Star as StarIcon
+    Star as StarIcon,
+    Key,
+    Eye,
+    EyeOff,
+    Copy,
+    Check
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
+import { toast } from 'react-hot-toast';
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -104,12 +110,23 @@ export default function AdminLayout({ children }) {
     const [isHovering, setIsHovering] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    // New states for client account management
+    const [showClientAccountModal, setShowClientAccountModal] = useState(false);
+    const [clientEmail, setClientEmail] = useState('');
+    const [clientName, setClientName] = useState('');
+    const [isCreatingClient, setIsCreatingClient] = useState(false);
+    const [generatedPassword, setGeneratedPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordCopied, setPasswordCopied] = useState(false);
+
     const pathname = usePathname();
     const router = useRouter();
 
     // Refs for dropdowns to handle clicks outside
     const notificationsRef = useRef(null);
     const profileRef = useRef(null);
+    const clientModalRef = useRef(null);
 
     // Sample notifications data
     const notifications = [
@@ -151,6 +168,9 @@ export default function AdminLayout({ children }) {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
                 setProfileOpen(false);
             }
+            if (clientModalRef.current && !clientModalRef.current.contains(event.target) && showClientAccountModal) {
+                setShowClientAccountModal(false);
+            }
             if (showLogoutConfirm && !event.target.closest('.logout-confirm-dialog')) {
                 setShowLogoutConfirm(false);
             }
@@ -160,7 +180,7 @@ export default function AdminLayout({ children }) {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [showLogoutConfirm]);
+    }, [showLogoutConfirm, showClientAccountModal]);
 
     const { data: session, status } = useSession();
 
@@ -181,16 +201,16 @@ export default function AdminLayout({ children }) {
         }
 
         // Check if user is either admin or worker
-        if (session.user.role !== "admin" && session.user.role !== "worker") {
-            router.push("/unauthorized");
-            return;
-        }
+        // if (session.user.role !== "admin" && session.user.role !== "worker") {
+        //     router.push("/unauthorized");
+        //     return;
+        // }
 
-        // Redirect workers to /dashboard/workers if they're on /dashboard
-        if (session.user.role === "worker" && pathname === "/dashboard") {
-            router.push("/dashboard/workers");
-            return;
-        }
+        // // Redirect workers to /dashboard/workers if they're on /dashboard
+        // if (session.user.role === "worker" && pathname === "/dashboard") {
+        //     router.push("/dashboard/workers");
+        //     return;
+        // }
     }, [session, status, router, pathname]);
 
     // Load user data from localStorage if session is not available yet
@@ -277,6 +297,71 @@ export default function AdminLayout({ children }) {
         setProfileOpen(false);
     };
 
+    // Generate a random password
+    const generateRandomPassword = () => {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+        let password = '';
+        for (let i = 0; i < 12; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    };
+
+    // Create client account
+    const handleCreateClientAccount = async () => {
+        if (!clientEmail || !clientName) {
+            toast.error('Please provide both client name and email');
+            return;
+        }
+
+        setIsCreatingClient(true);
+        try {
+            const tempPassword = generateRandomPassword();
+            setGeneratedPassword(tempPassword);
+
+            // Create client account in your database
+            const response = await fetch('/api/admin/create-client', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: clientName,
+                    email: clientEmail,
+                    password: tempPassword,
+                    role: 'client',
+                    // Send password reset email
+                    sendResetEmail: true
+                }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                toast.success('Client account created successfully! Password reset email sent.');
+                // Reset form
+                setClientEmail('');
+                setClientName('');
+                setShowClientAccountModal(false);
+            } else {
+                toast.error(data.message || 'Failed to create client account');
+            }
+        } catch (error) {
+            console.error('Error creating client account:', error);
+            toast.error('An error occurred while creating the client account');
+        } finally {
+            setIsCreatingClient(false);
+        }
+    };
+
+    // Copy password to clipboard
+    const copyPasswordToClipboard = () => {
+        navigator.clipboard.writeText(generatedPassword);
+        setPasswordCopied(true);
+        toast.success('Password copied to clipboard');
+        setTimeout(() => setPasswordCopied(false), 2000);
+    };
+
     // Admin menu items
     const adminMenuItems = [
         {
@@ -354,6 +439,15 @@ export default function AdminLayout({ children }) {
             badge: '3',
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600'
+        },
+        {
+            title: 'Client Accounts',
+            icon: <UserPlus className="w-5 h-5" />,
+            href: 'create-client-account',
+            badge: null,
+            color: 'amber',
+            gradient: 'from-amber-500 to-amber-600',
+            // onClick: () => setShowClientAccountModal(true)
         },
         {
             title: 'Settings',
@@ -501,6 +595,7 @@ export default function AdminLayout({ children }) {
                 case 'pink': return 'text-pink-600 dark:text-pink-400 bg-gradient-to-r from-pink-50 to-pink-100/50 dark:from-pink-900/30 dark:to-pink-800/20 border-pink-200 dark:border-pink-700 shadow-lg shadow-pink-500/10';
                 case 'indigo': return 'text-indigo-600 dark:text-indigo-400 bg-gradient-to-r from-indigo-50 to-indigo-100/50 dark:from-indigo-900/30 dark:to-indigo-800/20 border-indigo-200 dark:border-indigo-700 shadow-lg shadow-indigo-500/10';
                 case 'emerald': return 'text-emerald-600 dark:text-emerald-400 bg-gradient-to-r from-emerald-50 to-emerald-100/50 dark:from-emerald-900/30 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700 shadow-lg shadow-emerald-500/10';
+                case 'amber': return 'text-amber-600 dark:text-amber-400 bg-gradient-to-r from-amber-50 to-amber-100/50 dark:from-amber-900/30 dark:to-amber-800/20 border-amber-200 dark:border-amber-700 shadow-lg shadow-amber-500/10';
                 default: return 'text-gray-600 dark:text-gray-400 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-900/30 dark:to-gray-800/20 border-gray-200 dark:border-gray-700 shadow-lg shadow-gray-500/10';
             }
         } else {
@@ -513,6 +608,7 @@ export default function AdminLayout({ children }) {
                 case 'pink': return 'text-slate-300 dark:text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 dark:hover:bg-pink-900/20 hover:border-pink-500/30 dark:hover:border-pink-700';
                 case 'indigo': return 'text-slate-300 dark:text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-900/20 hover:border-indigo-500/30 dark:hover:border-indigo-700';
                 case 'emerald': return 'text-slate-300 dark:text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 dark:hover:bg-emerald-900/20 hover:border-emerald-500/30 dark:hover:border-emerald-700';
+                case 'amber': return 'text-slate-300 dark:text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 dark:hover:bg-amber-900/20 hover:border-amber-500/30 dark:hover:border-amber-700';
                 default: return 'text-slate-300 dark:text-slate-400 hover:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-900/20 hover:border-gray-500/30 dark:hover:border-gray-700';
             }
         }
@@ -636,39 +732,65 @@ export default function AdminLayout({ children }) {
                         {menuItems.map((item, index) => (
                             <li key={item.title}>
                                 <div>
-                                    <Link
-                                        href={item.href}
-                                        className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${isActive(item.href)
-                                            ? `${getColorClasses(item.color, true)} border-2`
-                                            : `${getColorClasses(item.color, false)} border-transparent`
-                                            } relative overflow-hidden`}
-                                        onClick={() => item.submenu && toggleSubmenu(item.title)}
-                                        style={{ animationDelay: `${index * 50}ms` }}
-                                    >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+                                    {item.onClick ? (
+                                        <button
+                                            onClick={item.onClick}
+                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
+                                            style={{ animationDelay: `${index * 50}ms` }}
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
 
-                                        <div className="flex items-center relative z-10">
-                                            <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
-                                                {item.icon}
-                                            </span>
-                                            {!sidebarCollapsed && (
-                                                <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2 relative z-10">
-                                            {item.badge && !sidebarCollapsed && (
-                                                <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
-                                                    {item.badge}
+                                            <div className="flex items-center relative z-10">
+                                                <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
+                                                    {item.icon}
                                                 </span>
-                                            )}
-                                            {item.submenu && !sidebarCollapsed && (
-                                                <ChevronDown
-                                                    className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
-                                                        }`}
-                                                />
-                                            )}
-                                        </div>
-                                    </Link>
+                                                {!sidebarCollapsed && (
+                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 relative z-10">
+                                                {item.badge && !sidebarCollapsed && (
+                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            href={item.href}
+                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${isActive(item.href)
+                                                ? `${getColorClasses(item.color, true)} border-2`
+                                                : `${getColorClasses(item.color, false)} border-transparent`
+                                                } relative overflow-hidden`}
+                                            onClick={() => item.submenu && toggleSubmenu(item.title)}
+                                            style={{ animationDelay: `${index * 50}ms` }}
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+
+                                            <div className="flex items-center relative z-10">
+                                                <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
+                                                    {item.icon}
+                                                </span>
+                                                {!sidebarCollapsed && (
+                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 relative z-10">
+                                                {item.badge && !sidebarCollapsed && (
+                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                        {item.badge}
+                                                    </span>
+                                                )}
+                                                {item.submenu && !sidebarCollapsed && (
+                                                    <ChevronDown
+                                                        className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
+                                                            }`}
+                                                    />
+                                                )}
+                                            </div>
+                                        </Link>
+                                    )}
 
                                     {/* Enhanced Submenu */}
                                     {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
@@ -925,6 +1047,116 @@ export default function AdminLayout({ children }) {
                     </div>
                 </main>
             </div>
+
+            {/* Client Account Creation Modal */}
+            {showClientAccountModal && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 max-w-md w-full mx-4 client-account-modal" ref={clientModalRef}>
+                        <div className="flex items-center justify-center w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-full mx-auto mb-4">
+                            <UserPlus className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <h3 className="text-xl font-bold text-center text-slate-900 dark:text-white mb-2">
+                            Create Client Account
+                        </h3>
+                        <p className="text-slate-600 dark:text-slate-400 text-center mb-6">
+                            Create a new account for your client. They will receive an email with instructions to set their password.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    Client Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={clientName}
+                                    onChange={(e) => setClientName(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
+                                    placeholder="Enter client name"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                    Client Email
+                                </label>
+                                <input
+                                    type="email"
+                                    value={clientEmail}
+                                    onChange={(e) => setClientEmail(e.target.value)}
+                                    className="w-full px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
+                                    placeholder="Enter client email"
+                                />
+                            </div>
+
+                            {generatedPassword && (
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                        Temporary Password
+                                    </label>
+                                    <div className="flex">
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            value={generatedPassword}
+                                            readOnly
+                                            className="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-l-xl bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-l-0 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300"
+                                        >
+                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={copyPasswordToClipboard}
+                                            className="px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-l-0 border-slate-200 dark:border-slate-700 rounded-r-xl text-slate-600 dark:text-slate-300"
+                                        >
+                                            {passwordCopied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5" />}
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                        This password will be sent to the client's email. They can change it after logging in.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex space-x-3 mt-6">
+                            <button
+                                onClick={() => {
+                                    setShowClientAccountModal(false);
+                                    setClientEmail('');
+                                    setClientName('');
+                                    setGeneratedPassword('');
+                                }}
+                                className="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors font-medium"
+                                disabled={isCreatingClient}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleCreateClientAccount}
+                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center justify-center"
+                                disabled={isCreatingClient}
+                            >
+                                {isCreatingClient ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Creating...
+                                    </>
+                                ) : (
+                                    'Create Account'
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Logout Confirmation Dialog */}
             {showLogoutConfirm && (

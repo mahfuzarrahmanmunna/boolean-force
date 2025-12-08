@@ -5,7 +5,7 @@ import clientPromise from "@/lib/mongodbAdapter";
 
 export async function POST(request) {
     try {
-        const { name, email, password } = await request.json();
+        const { name, email, password, role } = await request.json();
 
         // Validate input
         if (!name || !email || !password) {
@@ -32,13 +32,16 @@ export async function POST(request) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 12);
 
-        // Create new user with "pending" status
+        // Determine user status based on role
+        const userStatus = role === "client" ? "active" : "pending"; // Clients are active by default, workers need approval
+
+        // Create new user
         const newUser = {
             name,
             email,
             password: hashedPassword,
-            role: "worker", // Default role is worker
-            status: "pending", // New users are pending approval
+            role: role || "worker", // Default role is worker
+            status: userStatus,
             provider: "credentials",
             createdAt: new Date(),
         };
@@ -46,22 +49,28 @@ export async function POST(request) {
         // Insert user into database
         const result = await users.insertOne(newUser);
 
-        // Create notification for admin
-        await db.collection("notifications").insertOne({
-            type: "new_user_registration",
-            title: "New Worker Registration",
-            message: `${name} has registered as a worker and is waiting for approval.`,
-            userId: result.insertedId.toString(),
-            read: false,
-            createdAt: new Date(),
-        });
+        // Create notification for admin only for worker registrations
+        if (role !== "client") {
+            await db.collection("notifications").insertOne({
+                type: "new_user_registration",
+                title: "New Worker Registration",
+                message: `${name} has registered as a worker and is waiting for approval.`,
+                userId: result.insertedId.toString(),
+                read: false,
+                createdAt: new Date(),
+            });
+        }
 
         // Return success response
+        const message = role === "client"
+            ? "Client account created successfully! You can now log in."
+            : "Registration successful! Your account is pending approval by the admin.";
+
         return NextResponse.json(
             {
-                message: "Registration successful! Your account is pending approval by the admin.",
+                message,
                 userId: result.insertedId.toString(),
-                status: "pending"
+                status: userStatus
             },
             { status: 201 }
         );

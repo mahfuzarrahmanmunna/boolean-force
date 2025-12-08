@@ -92,7 +92,7 @@ export const authOptions = {
                             createdAt: new Date(),
                         });
 
-                        // Set role on the user object
+                        // Set role on user object
                         user.role = "worker";
                     } else {
                         // Set role from existing user
