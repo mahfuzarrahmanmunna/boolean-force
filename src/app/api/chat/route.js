@@ -29,7 +29,7 @@ const AVAILABLE_MODELS = [
     'meta-llama/llama-3-70b-instruct:free',
     'microsoft/wizardlm-2-8x22b:free',
     'mistralai/mistral-7b-instruct:free',
-    'google/gemma-7b-it:free',        
+    'google/gemma-7b-it:free',
     'meta-llama/llama-3-8b-instruct', // Try without :free
     'anthropic/claude-3-haiku',
     'openai/gpt-3.5-turbo'
@@ -101,7 +101,7 @@ export async function POST(request) {
                     {
                         headers: {
                             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'http://localhost:3000',
+                            'HTTP-Referer': "https://clemmie-griffinish-orlando.ngrok-free.dev/" || 'https://clemmie-griffinish-orlando.ngrok-free.dev/',
                             'X-Title': 'Booleanforce Expert Chatbot',
                             'Content-Type': 'application/json',
                         },

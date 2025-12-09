@@ -144,7 +144,7 @@ export default function SubmitTaskPage() {
         // Fetch users from API (for team members display)
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/users');
+                const response = await fetch('/api/users');
                 if (!response.ok) {
                     throw new Error('Failed to fetch users');
                 }
