@@ -93,7 +93,28 @@ import {
     Eye,
     EyeOff,
     Copy,
-    Check
+    Check,
+    Command,
+    ArrowRight as ArrowRightIcon,
+    ExternalLink,
+    Clock as ClockIcon,
+    TrendingUp as TrendingUpIcon2,
+    FileText as FileTextIcon2,
+    User as UserIcon2,
+    Settings as SettingsIcon2,
+    BarChart3 as BarChart3Icon,
+    MessageSquare as MessageSquareIcon2,
+    ShoppingCart as ShoppingCartIcon,
+    Calendar as CalendarIcon2,
+    Shield as ShieldIcon,
+    CreditCard as CreditCardIcon,
+    Zap as ZapIcon,
+    Globe as GlobeIcon,
+    Layers as LayersIcon,
+    Database as DatabaseIcon,
+    Cloud as CloudIcon,
+    Smartphone as SmartphoneIcon,
+    Monitor as MonitorIcon
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
@@ -104,6 +125,9 @@ export default function AdminLayout({ children }) {
     const [darkMode, setDarkMode] = useState(true);
     const [activeSubmenu, setActiveSubmenu] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [searchFocused, setSearchFocused] = useState(false);
+    const [searchHistory, setSearchHistory] = useState([]);
     const [notificationsOpen, setNotificationsOpen] = useState(false);
     const [profileOpen, setProfileOpen] = useState(false);
     const [screenSize, setScreenSize] = useState('lg');
@@ -127,6 +151,7 @@ export default function AdminLayout({ children }) {
     const notificationsRef = useRef(null);
     const profileRef = useRef(null);
     const clientModalRef = useRef(null);
+    const searchRef = useRef(null);
 
     // Sample notifications data
     const notifications = [
@@ -159,6 +184,18 @@ export default function AdminLayout({ children }) {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+    // Load search history from localStorage
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('searchHistory');
+        if (savedHistory) {
+            try {
+                setSearchHistory(JSON.parse(savedHistory));
+            } catch (error) {
+                console.error('Error parsing search history:', error);
+            }
+        }
+    }, []);
+
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -171,6 +208,9 @@ export default function AdminLayout({ children }) {
             if (clientModalRef.current && !clientModalRef.current.contains(event.target) && showClientAccountModal) {
                 setShowClientAccountModal(false);
             }
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setSearchFocused(false);
+            }
             if (showLogoutConfirm && !event.target.closest('.logout-confirm-dialog')) {
                 setShowLogoutConfirm(false);
             }
@@ -181,6 +221,19 @@ export default function AdminLayout({ children }) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [showLogoutConfirm, showClientAccountModal]);
+
+    // Keyboard shortcut for search (Ctrl/Cmd + K)
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+                event.preventDefault();
+                document.getElementById('global-search')?.focus();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     const { data: session, status } = useSession();
 
@@ -199,18 +252,6 @@ export default function AdminLayout({ children }) {
             localStorage.setItem('userName', session.user.name || '');
             localStorage.setItem('userEmail', session.user.email || '');
         }
-
-        // Check if user is either admin or worker
-        // if (session.user.role !== "admin" && session.user.role !== "worker") {
-        //     router.push("/unauthorized");
-        //     return;
-        // }
-
-        // // Redirect workers to /dashboard/workers if they're on /dashboard
-        // if (session.user.role === "worker" && pathname === "/dashboard") {
-        //     router.push("/dashboard/workers");
-        //     return;
-        // }
     }, [session, status, router, pathname]);
 
     // Load user data from localStorage if session is not available yet
@@ -360,6 +401,118 @@ export default function AdminLayout({ children }) {
         setPasswordCopied(true);
         toast.success('Password copied to clipboard');
         setTimeout(() => setPasswordCopied(false), 2000);
+    };
+
+    // Enhanced search functionality
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+
+        if (!query.trim()) {
+            setSearchResults([]);
+            return;
+        }
+
+        // Check if query is a URL
+        const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+        if (urlRegex.test(query.trim())) {
+            // Add protocol if missing
+            let url = query.trim();
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            setSearchResults([{
+                type: 'url',
+                title: `Navigate to: ${url}`,
+                description: 'Open this URL in a new tab',
+                icon: <ExternalLink className="w-4 h-4" />,
+                action: () => {
+                    window.open(url, '_blank');
+                    addToSearchHistory(query);
+                    setSearchQuery('');
+                    setSearchResults([]);
+                    setSearchFocused(false);
+                }
+            }]);
+            return;
+        }
+
+        // Get all menu items based on user role
+        const allMenuItems = session.user.role === "admin" ? adminMenuItems : workerMenuItems;
+
+        // Filter menu items based on query
+        const filteredItems = allMenuItems.filter(item =>
+            item.title.toLowerCase().includes(query.toLowerCase()) ||
+            (item.href && item.href.toLowerCase().includes(query.toLowerCase()))
+        );
+
+        // Flatten submenu items
+        const submenuItems = [];
+        allMenuItems.forEach(item => {
+            if (item.submenu) {
+                item.submenu.forEach(subitem => {
+                    if (subitem.title.toLowerCase().includes(query.toLowerCase()) ||
+                        subitem.href.toLowerCase().includes(query.toLowerCase())) {
+                        submenuItems.push({
+                            ...subitem,
+                            parentTitle: item.title,
+                            parentIcon: item.icon
+                        });
+                    }
+                });
+            }
+        });
+
+        // Combine results
+        const results = [
+            ...filteredItems.map(item => ({
+                type: 'menu',
+                title: item.title,
+                description: `Navigate to ${item.title}`,
+                icon: item.icon,
+                href: item.href,
+                action: () => {
+                    if (item.href) {
+                        router.push(item.href);
+                        addToSearchHistory(query);
+                        setSearchQuery('');
+                        setSearchResults([]);
+                        setSearchFocused(false);
+                    }
+                }
+            })),
+            ...submenuItems.map(item => ({
+                type: 'submenu',
+                title: item.title,
+                description: `${item.parentTitle} > ${item.title}`,
+                icon: item.parentIcon,
+                href: item.href,
+                action: () => {
+                    if (item.href) {
+                        router.push(item.href);
+                        addToSearchHistory(query);
+                        setSearchQuery('');
+                        setSearchResults([]);
+                        setSearchFocused(false);
+                    }
+                }
+            }))
+        ];
+
+        setSearchResults(results);
+    };
+
+    // Add query to search history
+    const addToSearchHistory = (query) => {
+        const newHistory = [query, ...searchHistory.filter(item => item !== query)].slice(0, 5);
+        setSearchHistory(newHistory);
+        localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+    };
+
+    // Clear search history
+    const clearSearchHistory = () => {
+        setSearchHistory([]);
+        localStorage.removeItem('searchHistory');
     };
 
     // Admin menu items
@@ -870,17 +1023,125 @@ export default function AdminLayout({ children }) {
                                 ))}
                             </div>
 
-                            {/* Search Bar */}
-                            <div className="flex items-center flex-1 max-w-lg mx-4">
+                            {/* Enhanced Search Bar */}
+                            <div className="flex items-center flex-1 max-w-lg mx-4" ref={searchRef}>
                                 <div className="relative w-full group">
-                                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
+                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <Search className="w-5 h-5 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                                    </div>
                                     <input
+                                        id="global-search"
                                         type="text"
-                                        placeholder="Search anything..."
+                                        placeholder="Search or type a URL..."
                                         value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200"
+                                        onChange={(e) => handleSearch(e.target.value)}
+                                        onFocus={() => setSearchFocused(true)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && searchResults.length > 0) {
+                                                searchResults[0].action();
+                                            }
+                                        }}
+                                        className="w-full pl-12 pr-10 py-3 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all duration-200 shadow-sm hover:shadow-md focus:shadow-lg"
                                     />
+                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                        <kbd className="hidden sm:inline-flex items-center justify-center px-2 py-1 text-xs font-sans font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">
+                                            <Command className="w-3 h-3 mr-1" />
+                                            K
+                                        </kbd>
+                                    </div>
+
+                                    {/* Enhanced Search Results Dropdown */}
+                                    {searchFocused && (
+                                        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden backdrop-blur-xl max-h-96 overflow-y-auto">
+                                            {/* Search History */}
+                                            {searchQuery === '' && searchHistory.length > 0 && (
+                                                <div className="p-4 border-b border-slate-200 dark:border-slate-700">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent Searches</h3>
+                                                        <button
+                                                            onClick={clearSearchHistory}
+                                                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                                        >
+                                                            Clear
+                                                        </button>
+                                                    </div>
+                                                    <ul className="space-y-1">
+                                                        {searchHistory.map((query, index) => (
+                                                            <li key={index}>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setSearchQuery(query);
+                                                                        handleSearch(query);
+                                                                    }}
+                                                                    className="flex items-center w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+                                                                >
+                                                                    <ClockIcon className="w-4 h-4 text-slate-400 mr-2" />
+                                                                    <span className="text-sm text-slate-700 dark:text-slate-300">{query}</span>
+                                                                </button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            {/* Search Results */}
+                                            {searchQuery !== '' && searchResults.length > 0 && (
+                                                <ul className="py-2">
+                                                    {searchResults.map((result, index) => (
+                                                        <li key={index}>
+                                                            <button
+                                                                onClick={result.action}
+                                                                className="flex items-center w-full p-3 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left group"
+                                                            >
+                                                                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 flex items-center justify-center mr-3 text-slate-600 dark:text-slate-300 group-hover:text-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
+                                                                    {result.icon}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{result.title}</p>
+                                                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{result.description}</p>
+                                                                </div>
+                                                                {result.type === 'url' && (
+                                                                    <ExternalLink className="w-4 h-4 text-slate-400 ml-2" />
+                                                                )}
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+
+                                            {/* No Results */}
+                                            {searchQuery !== '' && searchResults.length === 0 && (
+                                                <div className="p-6 text-center">
+                                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                        <Search className="w-6 h-6 text-slate-400" />
+                                                    </div>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">No results found for "{searchQuery}"</p>
+                                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try searching for a different term or enter a URL</p>
+                                                </div>
+                                            )}
+
+                                            {/* Search Tips */}
+                                            {searchQuery === '' && (
+                                                <div className="p-4 border-t border-slate-200 dark:border-slate-700">
+                                                    <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Search Tips</h3>
+                                                    <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                                                        <li className="flex items-start">
+                                                            <span className="text-blue-500 mr-2">•</span>
+                                                            Type a URL to navigate directly to a website
+                                                        </li>
+                                                        <li className="flex items-start">
+                                                            <span className="text-blue-500 mr-2">•</span>
+                                                            Search for pages, settings, or features
+                                                        </li>
+                                                        <li className="flex items-start">
+                                                            <span className="text-blue-500 mr-2">•</span>
+                                                            Use <kbd className="px-1 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">Ctrl+K</kbd> to quickly open search
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

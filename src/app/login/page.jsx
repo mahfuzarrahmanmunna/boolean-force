@@ -36,6 +36,8 @@ const Login = () => {
         router.push("/dashboard");
       } else if (session.user.role === "worker") {
         router.push("/worker/dashboard");
+      } else if (session.user.role === "client") {
+        router.push("/client-dashboard");
       } else {
         // Default redirect
         router.push("/dashboard");
