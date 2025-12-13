@@ -476,9 +476,9 @@ const Chatbot = () => {
     };
 
     return (
-        <div className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 ${darkMode ? 'dark' : ''}`}>
+        <div className={`fixed bottom-4 -right-2 md:right-4 sm:bottom-6 sm:right-6 z-50 px-4 ${darkMode ? 'dark' : ''}`}>
             {isOpen && (
-                <div className={`mb-4 ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800 text-white' : 'bg-gradient-to-b from-white to-slate-50 text-slate-800'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-500 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
+                <div className={`mb-4  ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800 text-white' : 'bg-gradient-to-b from-white to-slate-50 text-slate-800'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-500 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
                     {/* Header */}
                     <div className={`${darkMode ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} text-white p-4 flex justify-between items-center rounded-t-2xl`}>
                         <div className="flex items-center">
@@ -513,14 +513,14 @@ const Chatbot = () => {
                         <div className="flex items-center">
                             <button
                                 onClick={toggleFullscreen}
-                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
                                 title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                             >
                                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                             </button>
                             <button
                                 onClick={toggleDarkMode}
-                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
                                 title="Toggle dark mode"
                             >
                                 {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -530,7 +530,7 @@ const Chatbot = () => {
                                     setShowSearch(!showSearch);
                                     setShowOptionsMenu(false);
                                 }}
-                                className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
                                 title="Search messages"
                             >
                                 <Search className="w-4 h-4" />
@@ -538,7 +538,7 @@ const Chatbot = () => {
                             <div className="relative" ref={optionsMenuRef}>
                                 <button
                                     onClick={() => setShowOptionsMenu(!showOptionsMenu)}
-                                    className="p-2 rounded-full hover:bg-white/20 transition-colors mr-1"
+                                    className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
                                     title="More options"
                                 >
                                     <MoreVertical className="w-4 h-4" />
@@ -713,7 +713,7 @@ const Chatbot = () => {
                             </div>
                             <button
                                 onClick={toggleChat}
-                                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
@@ -1126,13 +1126,13 @@ const Chatbot = () => {
                 onMouseLeave={() => setIsHovering(false)}
                 className={`relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group ${pulseAnimation ? 'animate-pulse' : ''}`}
             >
-                <div className={`absolute inset-0 rounded-full bg-white opacity-0 ${isHovering ? 'opacity-20' : ''} transition-opacity duration-300`}></div>
+                <div className={`absolute inset-0 rounded-full cursor-pointer bg-white opacity-0 ${isHovering ? 'opacity-20' : ''} transition-opacity duration-300`}></div>
                 {isOpen ? (
-                    <X className="w-6 h-6 relative z-10" />
+                    <X className="w-6 h-6 relative z-10 cursor-pointer" />
                 ) : (
                     <>
-                        <MessageCircle className="w-6 h-6 relative z-10" />
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
+                        <MessageCircle className="w-6 h-6 relative z-10 cursor-pointer" />
+                        <div className="absolute top-0 right-0 w-3 h-3 cursor-pointer bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
                     </>
                 )}
             </button>

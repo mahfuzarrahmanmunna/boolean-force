@@ -101,7 +101,7 @@ export async function POST(request) {
                     {
                         headers: {
                             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'https://clemmie-griffinish-orlando.ngrok-free.dev/',
+                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'http://localhost:3000',
                             'X-Title': 'Booleanforce Expert Chatbot',
                             'Content-Type': 'application/json',
                         },

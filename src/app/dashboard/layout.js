@@ -596,7 +596,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Client Accounts',
             icon: <UserPlus className="w-5 h-5" />,
-            href: 'create-client-account',
+            href: 'dashboard/create-client-account',
             badge: null,
             color: 'amber',
             gradient: 'from-amber-500 to-amber-600',
@@ -631,15 +631,15 @@ export default function AdminLayout({ children }) {
         {
             title: 'My Tasks',
             icon: <ClipboardList className="w-5 h-5" />,
-            href: '/dashboard/manage-my-tasks',
+            href: '/dashboard/workers/manage-my-tasks',
             badge: '5',
             color: 'emerald',
             gradient: 'from-emerald-500 to-emerald-600',
             submenu: [
-                { title: 'All Tasks', href: '/dashboard/manage-my-tasks' },
-                { title: 'Pending Tasks', href: '/dashboard/manage-my-tasks/pending' },
-                { title: 'In Progress', href: '/dashboard/manage-my-tasks/in-progress' },
-                { title: 'Completed', href: '/dashboard/manage-my-tasks/completed' }
+                { title: 'All Tasks', href: '/dashboard/workers/manage-my-tasks' },
+                { title: 'Pending Tasks', href: '/dashboard/workers/manage-my-tasks/pending' },
+                { title: 'In Progress', href: '/dashboard/workers/manage-my-tasks/in-progress' },
+                { title: 'Completed', href: '/dashboard/workers/manage-my-tasks/completed' }
             ]
         },
         {
@@ -786,8 +786,8 @@ export default function AdminLayout({ children }) {
         }
         // Worker page titles
         else {
-            if (pathname === '/dashboard/manage-my-tasks') return 'My Tasks';
-            if (pathname.startsWith('/dashboard/manage-my-tasks/')) return 'Task Details';
+            if (pathname === '/dashboard/workers/manage-my-tasks') return 'My Tasks';
+            if (pathname.startsWith('/dashboard/workers/manage-my-tasks/')) return 'Task Details';
             if (pathname === '/dashboard/manage-submit-task') return 'Submit Task';
             if (pathname === '/dashboard/manage-time-tracking') return 'Time Tracking';
             if (pathname === '/dashboard/manage-performance') return 'Performance';
@@ -1115,7 +1115,7 @@ export default function AdminLayout({ children }) {
                                                     <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-3">
                                                         <Search className="w-6 h-6 text-slate-400" />
                                                     </div>
-                                                    <p className="text-sm text-slate-500 dark:text-slate-400">No results found for "{searchQuery}"</p>
+                                                    <p className="text-sm text-slate-500 dark:text-slate-400">No results found for `{searchQuery}`</p>
                                                     <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try searching for a different term or enter a URL</p>
                                                 </div>
                                             )}
@@ -1378,7 +1378,7 @@ export default function AdminLayout({ children }) {
                                         </button>
                                     </div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        This password will be sent to the client's email. They can change it after logging in.
+                                        This password will be sent to the client&apos;s email. They can change it after logging in.
                                     </p>
                                 </div>
                             )}
