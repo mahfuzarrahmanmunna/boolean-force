@@ -1,3 +1,4 @@
+// src/app/api/workers/[id]/assign/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -9,7 +10,7 @@ export async function POST(request, { params }) {
 
         console.log(`Assigning work to worker: ${id}`);
 
-        // 1. Validate the worker ID from the URL
+        // 1. Validate worker ID from URL
         if (!ObjectId.isValid(id)) {
             console.error('Invalid worker ID format');
             return NextResponse.json(
@@ -21,7 +22,7 @@ export async function POST(request, { params }) {
         const { taskIds } = await request.json();
         console.log('Task IDs to assign:', taskIds);
 
-        // 2. Validate the incoming payload
+        // 2. Validate incoming payload
         if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
             console.error('Invalid task IDs payload');
             return NextResponse.json(
@@ -50,7 +51,7 @@ export async function POST(request, { params }) {
         const workersCollection = await dbConnect('users');
         const workCollection = await dbConnect('work');
 
-        // Check if the worker exists before proceeding
+        // 4. Check if worker exists before proceeding
         const workerExists = await workersCollection.findOne({ _id: new ObjectId(id) });
         if (!workerExists) {
             console.error('Worker not found');
@@ -60,7 +61,7 @@ export async function POST(request, { params }) {
             );
         }
 
-        // Check if all tasks exist and are not already assigned
+        // 5. Check if all tasks exist
         const existingTasks = await workCollection.find({ _id: { $in: objectTaskIds } }).toArray();
         if (existingTasks.length !== objectTaskIds.length) {
             console.error('Some tasks not found');
@@ -70,18 +71,35 @@ export async function POST(request, { params }) {
             );
         }
 
-        // Check if any tasks are already assigned
-        const alreadyAssignedTasks = existingTasks.filter(task => task.assignedTo);
-        if (alreadyAssignedTasks.length > 0) {
-            const taskTitles = alreadyAssignedTasks.map(task => task.title).join(', ');
-            console.error('Tasks already assigned:', taskTitles);
+        // 6. Check if all tasks belong to the same client
+        const uniqueClientIds = [...new Set(existingTasks.map(task => task.clientId))];
+        if (uniqueClientIds.length > 1) {
+            console.error('Tasks belong to different clients:', uniqueClientIds);
             return NextResponse.json(
-                { success: false, error: `The following tasks are already assigned: ${taskTitles}` },
+                { success: false, error: "All tasks must belong to the same client." },
                 { status: 400 }
             );
         }
 
-        // Perform the database operations
+        // 7. Check if any tasks are already assigned to this specific worker
+        const workerCurrentTasks = workerExists.assignedWork || [];
+        const alreadyAssignedToThisWorker = objectTaskIds.filter(taskId =>
+            workerCurrentTasks.includes(taskId.toString())
+        );
+
+        if (alreadyAssignedToThisWorker.length > 0) {
+            const taskTitles = alreadyAssignedToThisWorker.map(taskId => {
+                const task = existingTasks.find(t => t._id.toString() === taskId);
+                return task ? task.title : 'Unknown task';
+            }).join(', ');
+
+            return NextResponse.json(
+                { success: false, error: `Worker already has these tasks: ${taskTitles}` },
+                { status: 400 }
+            );
+        }
+
+        // 8. Perform database operations
         const updateResult = await workCollection.updateMany(
             { _id: { $in: objectTaskIds } },
             {

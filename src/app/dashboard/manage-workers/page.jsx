@@ -213,7 +213,7 @@ export default function ManageWorkers() {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-    // Add the missing state variable for worker search in the task creation dialog
+    // Add missing state variable for worker search in task creation dialog
     const [workerSearchTerm, setWorkerSearchTerm] = useState('');
     // Current date for creation timestamp
     const currentDate = new Date().toISOString().split('T')[0];
@@ -288,13 +288,13 @@ export default function ManageWorkers() {
             });
 
             if (!response.ok) {
-                // Try to get the error message from the server
+                // Try to get error message from server
                 let errorMessage = 'Failed to update worker status';
                 try {
                     const errorData = await response.json();
                     errorMessage = errorData.error || errorMessage;
                 } catch (e) {
-                    // If we can't parse the JSON, use the status text
+                    // If we can't parse JSON, use the status text
                     errorMessage = response.statusText || errorMessage;
                 }
                 throw new Error(errorMessage);
@@ -316,7 +316,7 @@ export default function ManageWorkers() {
     const handleWorkSubmit = async (data) => {
         setIsLoading(true);
         try {
-            // Add creation date to the data
+            // Add creation date to data
             const taskData = {
                 ...data,
                 createdAt: currentDate,
@@ -324,7 +324,7 @@ export default function ManageWorkers() {
                 tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : []
             };
 
-            // Create the work task
+            // Create work task
             const response = await fetch('/api/work', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -338,7 +338,7 @@ export default function ManageWorkers() {
 
             const newWork = await response.json();
 
-            // If workers are selected, assign the task to them
+            // If workers are selected, assign task to them
             if (selectedWorkersForNewTask.length > 0) {
                 // Create an array of promises for each assignment
                 const assignmentPromises = selectedWorkersForNewTask.map(workerId =>
@@ -368,7 +368,7 @@ export default function ManageWorkers() {
                         let errorMessage = 'Unknown error';
                         if (result.status === 'rejected') {
                             errorMessage = result.reason.message || 'Network or server error';
-                        } else { // The fetch was successful but the server responded with an error status
+                        } else { // The fetch was successful but server responded with an error status
                             try {
                                 const errorData = await result.value.json();
                                 errorMessage = errorData.error || `Server error (status: ${result.value.status})`;
@@ -384,7 +384,7 @@ export default function ManageWorkers() {
                 if (failedAssignments.length > 0) {
                     const failureMessages = failedAssignments.map(
                         ({ workerName, errorMessage }) => `• ${workerName}: ${errorMessage}`
-                    ).join('<br>'); // Use <br> for HTML rendering in the notification
+                    ).join('<br>'); // Use <br> for HTML rendering in notification
 
                     throw new Error(`Task created, but failed to assign to some workers:<br>${failureMessages}`);
                 }
@@ -406,7 +406,7 @@ export default function ManageWorkers() {
                 );
 
             } else {
-                // If no workers are selected, add the task to the available work list
+                // If no workers are selected, add task to available work list
                 setAvailableWork(prev => [...prev, newWork.data]);
             }
 
@@ -419,14 +419,13 @@ export default function ManageWorkers() {
 
         } catch (error) {
             console.error("Error in handleWorkSubmit:", error);
-            // The notification will now display the detailed, multi-line error message
+            // The notification will now display detailed, multi-line error message
             showNotification(error.message || 'Failed to create work task.', 'error');
         } finally {
             setIsLoading(false);
         }
     };
 
-    // Handle assigning work to a worker
     // Handle assigning work to a worker
     const handleAssignWork = async () => {
         if (selectedTasksToAssign.length === 0) {
@@ -439,6 +438,18 @@ export default function ManageWorkers() {
             console.log('Assigning tasks:', selectedTasksToAssign);
             console.log('Worker ID:', assigningWorkTo._id);
 
+            // Get task details to check which client it belongs to
+            const taskDetails = availableWork.filter(task => selectedTasksToAssign.includes(task._id));
+
+            // Check if all tasks belong to the same client
+            const uniqueClientIds = [...new Set(taskDetails.map(task => task.clientId))];
+
+            if (uniqueClientIds.length > 1) {
+                showNotification('You can only assign tasks that belong to the same client.', 'error');
+                setIsLoading(false);
+                return;
+            }
+
             const response = await fetch(`/api/workers/${assigningWorkTo._id}/assign`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -448,13 +459,13 @@ export default function ManageWorkers() {
             console.log('Response status:', response.status);
             console.log('Response ok:', response.ok);
 
-            // Parse the JSON response first
+            // Parse JSON response first
             const result = await response.json();
             console.log('Response data:', result);
 
-            // Then check if the response was successful
+            // Then check if response was successful
             if (!response.ok) {
-                // Extract the error message from the backend response
+                // Extract error message from backend response
                 const errorMessage = result.error || result.details || 'Failed to assign work';
                 console.error('Error from backend:', errorMessage);
                 throw new Error(errorMessage);
@@ -740,7 +751,7 @@ export default function ManageWorkers() {
                             <DialogHeader>
                                 <DialogTitle>Update Status</DialogTitle>
                                 <DialogDescription>
-                                    Change the status for {editingWorker?.name}
+                                    Change status for {editingWorker?.name}
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={statusForm.handleSubmit(handleEditSubmit)} className="space-y-4">
@@ -1198,6 +1209,7 @@ export default function ManageWorkers() {
                                                         })}
                                                     </div>
                                                 </div>
+
                                             )}
                                         </CardContent>
                                     </AnimatedCard>

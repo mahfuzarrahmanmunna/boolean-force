@@ -572,7 +572,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Analytics',
             icon: <BarChart3 className="w-5 h-5" />,
-            href: 'manage-analytics',
+            href: 'dashboard/manage-analytics',
             badge: null,
             color: 'orange',
             gradient: 'from-orange-500 to-orange-600'

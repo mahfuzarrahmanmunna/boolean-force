@@ -248,6 +248,118 @@
 // }
 
 // app/api/work/route.js
+// import { dbConnect } from "@/lib/dbConnect";
+// import { NextResponse } from "next/server";
+// import { ObjectId } from "mongodb";
+
+// // GET - Fetch all work tasks
+// export async function GET(request) {
+//     console.log("GET /api/work called");
+//     try {
+//         const collection = await dbConnect('work');
+
+//         if (!collection) {
+//             throw new Error("Failed to connect to work collection");
+//         }
+
+//         const { searchParams } = new URL(request.url);
+//         const assigned = searchParams.get('assigned');
+
+//         let query = {};
+
+//         if (assigned === 'false') {
+//             query.assignedTo = { $exists: false };
+//         } else if (assigned === 'true') {
+//             query.assignedTo = { $exists: true };
+//         }
+
+//         console.log("Query:", JSON.stringify(query));
+
+//         const data = await collection.find(query).toArray();
+
+//         if (!data) {
+//             console.log("No data found");
+//             return NextResponse.json([]);
+//         }
+
+//         // Serialize the data
+//         const serializedData = data.map(item => {
+//             if (!item || !item._id) {
+//                 console.log("Invalid item:", item);
+//                 return null;
+//             }
+
+//             return {
+//                 ...item,
+//                 _id: item._id.toString(),
+//                 // IMPORTANT: Serialize the assignedTo field if it's an ObjectId
+//                 assignedTo: item.assignedTo ? item.assignedTo.toString() : null,
+//             };
+//         }).filter(Boolean);
+
+//         console.log("Fetched available work:", serializedData);
+//         return NextResponse.json(serializedData);
+//     }
+//     catch (err) {
+//         console.error("Error in GET /api/work:", err);
+//         return NextResponse.json({
+//             success: false,
+//             error: "Something went wrong while fetching work. Please try again later.",
+//             details: err.message
+//         }, { status: 500 });
+//     }
+// }
+
+// // POST - Create a new work task
+// export async function POST(request) {
+//     console.log("POST /api/work called");
+//     try {
+//         const collection = await dbConnect('work');
+
+//         if (!collection) {
+//             throw new Error("Failed to connect to work collection");
+//         }
+
+//         const taskData = await request.json();
+
+//         if (taskData.tags && typeof taskData.tags === 'string') {
+//             taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+//         }
+
+//         const newTask = {
+//             ...taskData,
+//             createdAt: new Date(),
+//             updatedAt: new Date(),
+//             progress: 0
+//         };
+
+//         const result = await collection.insertOne(newTask);
+
+//         if (!result.acknowledged) {
+//             throw new Error("Failed to create work task");
+//         }
+
+//         return NextResponse.json({
+//             success: true,
+//             data: {
+//                 ...newTask,
+//                 _id: result.insertedId.toString(),
+//                 // Also serialize the assignedTo field if it exists
+//                 assignedTo: newTask.assignedTo ? newTask.assignedTo.toString() : null,
+//             }
+//         }, { status: 201 });
+//     }
+//     catch (err) {
+//         console.error("Error in POST /api/work:", err);
+//         return NextResponse.json({
+//             success: false,
+//             error: "Something went wrong while creating work task. Please try again later.",
+//             details: err.message
+//         }, { status: 500 });
+//     }
+// }
+
+// app/api/work/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -267,6 +379,7 @@ export async function GET(request) {
 
         let query = {};
 
+        // Filter by assignment status
         if (assigned === 'false') {
             query.assignedTo = { $exists: false };
         } else if (assigned === 'true') {
@@ -292,15 +405,14 @@ export async function GET(request) {
             return {
                 ...item,
                 _id: item._id.toString(),
-                // IMPORTANT: Serialize the assignedTo field if it's an ObjectId
+                // Also serialize the assignedTo field if it exists
                 assignedTo: item.assignedTo ? item.assignedTo.toString() : null,
             };
-        }).filter(Boolean);
+        }).filter(Boolean); // Filter out null values
 
-        console.log("Fetched available work:", serializedData);
+        console.log("Fetched work:", serializedData);
         return NextResponse.json(serializedData);
-    }
-    catch (err) {
+    } catch (err) {
         console.error("Error in GET /api/work:", err);
         return NextResponse.json({
             success: false,
@@ -321,11 +433,14 @@ export async function POST(request) {
         }
 
         const taskData = await request.json();
+        console.log('Task data received:', taskData);
 
+        // Parse tags if provided as a string
         if (taskData.tags && typeof taskData.tags === 'string') {
             taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
         }
 
+        // Create a new task document
         const newTask = {
             ...taskData,
             createdAt: new Date(),
@@ -339,17 +454,19 @@ export async function POST(request) {
             throw new Error("Failed to create work task");
         }
 
+        // Return the created task with string ID
+        const createdTask = {
+            ...newTask,
+            _id: result.insertedId.toString()
+        };
+
+        console.log('Task created:', createdTask);
+
         return NextResponse.json({
             success: true,
-            data: {
-                ...newTask,
-                _id: result.insertedId.toString(),
-                // Also serialize the assignedTo field if it exists
-                assignedTo: newTask.assignedTo ? newTask.assignedTo.toString() : null,
-            }
+            data: createdTask
         }, { status: 201 });
-    }
-    catch (err) {
+    } catch (err) {
         console.error("Error in POST /api/work:", err);
         return NextResponse.json({
             success: false,
