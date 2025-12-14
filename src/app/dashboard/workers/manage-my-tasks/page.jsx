@@ -245,11 +245,39 @@ export default function WorkerTasks() {
 
     // Handle task update
     const handleTaskUpdate = async (data) => {
-        if (!selectedTask) return;
+        if (!selectedTask) {
+            console.error("handleTaskUpdate called without a selectedTask.");
+            return;
+        }
+
+        // --- DEBUGGING & VALIDATION ---
+
+        // 1. Log the raw selected task object
+        console.log('Attempting to update task. Selected Task Object:', selectedTask);
+
+        // 2. Log the ID and its type directly from the object
+        console.log('Task ID from selectedTask:', selectedTask._id);
+        console.log('Task ID Type:', typeof selectedTask._id);
+
+        // 3. Force the ID to be a string, just in case it's an object
+        const taskId = String(selectedTask._id);
+        console.log('Forced String Task ID:', taskId);
+        console.log('Forced String Task ID Type:', typeof taskId);
+
+        // 4. Client-side validation: Check if it matches the 24-char hex format for a MongoDB ObjectId.
+        const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(taskId);
+        if (!isValidObjectId) {
+            console.error('CLIENT VALIDATION FAILED: The ID is not a valid ObjectId format.', taskId);
+            showNotification('Invalid task ID format. Cannot update task. Please refresh the page.', 'error');
+            return; // Stop the function here
+        }
+
+        console.log('ID is valid. Proceeding with API call to:', `/api/work/${taskId}`);
+        // --- END DEBUGGING ---
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${selectedTask._id}`, {
+            const response = await fetch(`/api/work/${taskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -257,6 +285,7 @@ export default function WorkerTasks() {
 
             if (!response.ok) {
                 const errorData = await response.json();
+                // This will now show the server's error message, which should be the same
                 throw new Error(errorData.error || 'Failed to update task');
             }
 

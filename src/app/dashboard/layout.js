@@ -578,6 +578,14 @@ export default function AdminLayout({ children }) {
             gradient: 'from-orange-500 to-orange-600'
         },
         {
+            title: 'All Projects',
+            icon: <Package className="w-5 h-5" />,
+            href: 'manage-all-projects',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600'
+        },
+        {
             title: 'Orders',
             icon: <ShoppingCart className="w-5 h-5" />,
             href: 'manage-orders',

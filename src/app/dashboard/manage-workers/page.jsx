@@ -427,6 +427,7 @@ export default function ManageWorkers() {
     };
 
     // Handle assigning work to a worker
+    // Handle assigning work to a worker
     const handleAssignWork = async () => {
         if (selectedTasksToAssign.length === 0) {
             showNotification('Please select at least one task to assign.', 'error');
@@ -435,15 +436,29 @@ export default function ManageWorkers() {
 
         setIsLoading(true);
         try {
+            console.log('Assigning tasks:', selectedTasksToAssign);
+            console.log('Worker ID:', assigningWorkTo._id);
+
             const response = await fetch(`/api/workers/${assigningWorkTo._id}/assign`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ taskIds: selectedTasksToAssign }),
             });
 
-            if (!response.ok) throw new Error('Failed to assign work');
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
 
+            // Parse the JSON response first
             const result = await response.json();
+            console.log('Response data:', result);
+
+            // Then check if the response was successful
+            if (!response.ok) {
+                // Extract the error message from the backend response
+                const errorMessage = result.error || result.details || 'Failed to assign work';
+                console.error('Error from backend:', errorMessage);
+                throw new Error(errorMessage);
+            }
 
             // Update worker's assigned work
             setWorkers(workers.map(w =>

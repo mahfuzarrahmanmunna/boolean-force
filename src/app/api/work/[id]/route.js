@@ -5,11 +5,16 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch a specific work task by ID
 export async function GET(request, { params }) {
-    console.log(`GET /api/work/${params.id} called`);
+    // Awaiting the params promise to get the id
+    const { id } = await params;
+    console.log(`GET /api/work/${id} called`);
+    console.log('ID type:', typeof id);
+    console.log('ID value:', id);
+
     try {
         // Validate the ID format
-        if (!ObjectId.isValid(params.id)) {
-            console.error(`Invalid ObjectId format: ${params.id}`);
+        if (!ObjectId.isValid(id)) {
+            console.error(`Invalid ObjectId format: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
@@ -20,10 +25,10 @@ export async function GET(request, { params }) {
         const collection = await dbConnect('work');
 
         // Find the task
-        const task = await collection.findOne({ _id: new ObjectId(params.id) });
+        const task = await collection.findOne({ _id: new ObjectId(id) });
 
         if (!task) {
-            console.error(`Task not found with ID: ${params.id}`);
+            console.error(`Task not found with ID: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Work task not found." },
                 { status: 404 }
@@ -33,7 +38,9 @@ export async function GET(request, { params }) {
         // Serialize the task
         const serializedTask = {
             ...task,
-            _id: task._id.toString()
+            _id: task._id.toString(),
+            // Also serialize the assignedTo field if it exists
+            assignedTo: task.assignedTo ? task.assignedTo.toString() : null,
         };
 
         return NextResponse.json({
@@ -42,7 +49,7 @@ export async function GET(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in GET /api/work/${params.id}:`, err);
+        console.error(`Error in GET /api/work/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while fetching work task. Please try again later.",
@@ -53,11 +60,16 @@ export async function GET(request, { params }) {
 
 // PUT - Update a work task
 export async function PUT(request, { params }) {
-    console.log(`PUT /api/work/${params.id} called`);
+    // Awaiting the params promise to get the id
+    const { id } = await params;
+    console.log(`PUT /api/work/${id} called`);
+    console.log('ID type:', typeof id);
+    console.log('ID value:', id);
+
     try {
         // Validate the ID format
-        if (!ObjectId.isValid(params.id)) {
-            console.error(`Invalid ObjectId format: ${params.id}`);
+        if (!ObjectId.isValid(id)) {
+            console.error(`Invalid ObjectId format: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
@@ -77,9 +89,9 @@ export async function PUT(request, { params }) {
         const collection = await dbConnect('work');
 
         // First, check if the task exists
-        const existingTask = await collection.findOne({ _id: new ObjectId(params.id) });
+        const existingTask = await collection.findOne({ _id: new ObjectId(id) });
         if (!existingTask) {
-            console.error(`Task not found with ID: ${params.id}`);
+            console.error(`Task not found with ID: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Work task not found." },
                 { status: 404 }
@@ -90,7 +102,7 @@ export async function PUT(request, { params }) {
 
         // Update the task
         const result = await collection.updateOne(
-            { _id: new ObjectId(params.id) },
+            { _id: new ObjectId(id) },
             {
                 $set: {
                     ...taskData,
@@ -103,7 +115,7 @@ export async function PUT(request, { params }) {
 
         // Check if the update was successful
         if (result.matchedCount === 0) {
-            console.error(`Failed to update task with ID: ${params.id}`);
+            console.error(`Failed to update task with ID: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Failed to update work task." },
                 { status: 500 }
@@ -111,13 +123,15 @@ export async function PUT(request, { params }) {
         }
 
         // Find and return the updated task
-        const updatedTask = await collection.findOne({ _id: new ObjectId(params.id) });
+        const updatedTask = await collection.findOne({ _id: new ObjectId(id) });
         console.log('Updated task:', updatedTask);
 
         // Serialize the task
         const serializedTask = {
             ...updatedTask,
-            _id: updatedTask._id.toString()
+            _id: updatedTask._id.toString(),
+            // Also serialize the assignedTo field if it exists
+            assignedTo: updatedTask.assignedTo ? updatedTask.assignedTo.toString() : null,
         };
 
         return NextResponse.json({
@@ -126,7 +140,7 @@ export async function PUT(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in PUT /api/work/${params.id}:`, err);
+        console.error(`Error in PUT /api/work/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while updating work task. Please try again later.",
@@ -137,10 +151,15 @@ export async function PUT(request, { params }) {
 
 // DELETE - Delete a work task
 export async function DELETE(request, { params }) {
-    console.log(`DELETE /api/work/${params.id} called`);
+    // Awaiting the params promise to get the id
+    const { id } = await params;
+    console.log(`DELETE /api/work/${id} called`);
+    console.log('ID type:', typeof id);
+    console.log('ID value:', id);
+
     try {
         // Validate the ID format
-        if (!ObjectId.isValid(params.id)) {
+        if (!ObjectId.isValid(id)) {
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
@@ -151,7 +170,7 @@ export async function DELETE(request, { params }) {
         const collection = await dbConnect('work');
 
         // Delete the task
-        const result = await collection.deleteOne({ _id: new ObjectId(params.id) });
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
         // Check if the deletion was successful
         if (result.deletedCount === 0) {
@@ -167,7 +186,7 @@ export async function DELETE(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in DELETE /api/work/${params.id}:`, err);
+        console.error(`Error in DELETE /api/work/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while deleting work task. Please try again later.",
