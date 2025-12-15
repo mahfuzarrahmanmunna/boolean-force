@@ -1,25 +1,38 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { MessageCircle, Send, X, Bot, User, HelpCircle, Briefcase, Palette, Globe, Cpu, ShoppingBag, AlertCircle, RefreshCw } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import {
+    MessageCircle, Send, X, Bot, User, HelpCircle, Briefcase, Palette,
+    Globe, Cpu, ShoppingBag, AlertCircle, RefreshCw, Sparkles,
+    Mic, MicOff, Search, Moon, Sun, Check, CheckCheck, Paperclip,
+    MoreVertical, ThumbsUp, Clock, Wifi, WifiOff, ChevronDown,
+    ChevronUp, Copy, Share2, Star, Zap, Maximize2, Minimize2,
+    Settings, Download, Filter, TrendingUp, Award, Users, BarChart3, Target, Lightbulb,
+    Trash2, MessageSquare, Keyboard, Star as StarIcon, Volume2, VolumeX, Bell, BellOff
+} from 'lucide-react';
 
 const QUICK_ACTIONS = [
-    { icon: <Briefcase className="w-4 h-4" />, text: "Tell me about your services", query: "What services does booleanforce offer?" },
-    { icon: <Palette className="w-4 h-4" />, text: "Brand Identity", query: "Tell me about your brand visual identity services" },
-    { icon: <Globe className="w-4 h-4" />, text: "Website Development", query: "What kind of websites do you develop?" },
-    { icon: <Cpu className="w-4 h-4" />, text: "ERP Solutions", query: "How can your ERP solutions help my business?" },
-    { icon: <ShoppingBag className="w-4 h-4" />, text: "POS Systems", query: "What features do your POS systems have?" },
-    { icon: <HelpCircle className="w-4 h-4" />, text: "How to get started?", query: "How can I get started with booleanforce services?" }
+    { icon: <Briefcase className="w-5 h-5" />, text: "Our Services", query: "What services does booleanforce offer?", color: "blue" },
+    { icon: <Palette className="w-5 h-5" />, text: "Brand Identity", query: "Tell me about your brand visual identity services", color: "purple" },
+    { icon: <Globe className="w-5 h-5" />, text: "Website Development", query: "What kind of websites do you develop?", color: "green" },
+    { icon: <Cpu className="w-5 h-5" />, text: "ERP Solutions", query: "How can your ERP solutions help my business?", color: "red" },
+    { icon: <ShoppingBag className="w-5 h-5" />, text: "POS Systems", query: "What features do your POS systems have?", color: "yellow" },
+    { icon: <HelpCircle className="w-5 h-5" />, text: "Getting Started", query: "How can I get started with booleanforce services?", color: "indigo" }
 ];
 
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [darkMode, setDarkMode] = useState(true);
+    const [isOnline, setIsOnline] = useState(true);
     const [messages, setMessages] = useState([
         {
             id: 0,
             role: 'assistant',
             content: 'Hello! I\'m here to help you learn about booleanforce services. How can I assist you today?',
-            timestamp: new Date()
+            timestamp: new Date(),
+            read: true
         }
     ]);
     const [input, setInput] = useState('');
@@ -27,19 +40,175 @@ const Chatbot = () => {
     const [showQuickActions, setShowQuickActions] = useState(true);
     const [error, setError] = useState(null);
     const [messageIdCounter, setMessageIdCounter] = useState(1);
+    const [isTyping, setIsTyping] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSearch, setShowSearch] = useState(false);
+    const [connectionStatus, setConnectionStatus] = useState('connected');
+    const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+    const [copiedMessageId, setCopiedMessageId] = useState(null);
+    const [likedMessageIds, setLikedMessageIds] = useState(new Set());
+    const [showSettings, setShowSettings] = useState(false);
+    const [soundEnabled, setSoundEnabled] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+    const [isUserScrolling, setIsUserScrolling] = useState(false);
+    const [pulseAnimation, setPulseAnimation] = useState(false);
+    const [windowSize, setWindowSize] = useState({
+        width: typeof window !== 'undefined' ? window.innerWidth : 0,
+        height: typeof window !== 'undefined' ? window.innerHeight : 0
+    });
+    const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+    const [showRatingDialog, setShowRatingDialog] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [showClearConfirmation, setShowClearConfirmation] = useState(false);
+    const [isHovering, setIsHovering] = useState(false);
+
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+    const chatContainerRef = useRef(null);
+    const scrollTimeoutRef = useRef(null);
+    const optionsMenuRef = useRef(null);
+
+    // Track window size for responsive adjustments
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Handle click outside to close options menu
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (optionsMenuRef.current && !optionsMenuRef.current.contains(event.target)) {
+                setShowOptionsMenu(false);
+            }
+        };
+
+        if (showOptionsMenu) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showOptionsMenu]);
+
+    // Handle keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Ctrl/Cmd + M to minimize
+            if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
+                e.preventDefault();
+                toggleMinimize();
+            }
+            // Ctrl/Cmd + D to toggle dark mode
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                toggleDarkMode();
+            }
+            // Ctrl/Cmd + S to export chat
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                exportChat();
+            }
+            // Ctrl/Cmd + R to reset chat
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                resetChat();
+            }
+            // Ctrl/Cmd + ? to show keyboard shortcuts
+            if ((e.ctrlKey || e.metaKey) && e.key === '?') {
+                e.preventDefault();
+                setShowKeyboardShortcuts(!showKeyboardShortcuts);
+                setShowOptionsMenu(false);
+            }
+            // Escape to close menus
+            if (e.key === 'Escape') {
+                setShowOptionsMenu(false);
+                setShowSettings(false);
+                setShowKeyboardShortcuts(false);
+                setShowRatingDialog(false);
+                setShowClearConfirmation(false);
+            }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [showKeyboardShortcuts]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+        if (autoScrollEnabled && !isUserScrolling) {
+            scrollToBottom();
+        }
+    }, [messages, autoScrollEnabled, isUserScrolling]);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (!chatContainerRef.current) return;
+
+            const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
+
+            setShowScrollToBottom(!isAtBottom);
+
+            if (scrollTimeoutRef.current) {
+                clearTimeout(scrollTimeoutRef.current);
+            }
+
+            setIsUserScrolling(true);
+
+            scrollTimeoutRef.current = setTimeout(() => {
+                setIsUserScrolling(false);
+            }, 1000);
+        };
+
+        const chatContainer = chatContainerRef.current;
+        if (chatContainer) {
+            chatContainer.addEventListener('scroll', handleScroll);
+            return () => {
+                chatContainer.removeEventListener('scroll', handleScroll);
+                if (scrollTimeoutRef.current) {
+                    clearTimeout(scrollTimeoutRef.current);
+                }
+            };
+        }
+    }, []);
+
+    useEffect(() => {
+        // Simulate connection status changes
+        const interval = setInterval(() => {
+            setConnectionStatus(prev => {
+                if (prev === 'connected') return 'connected';
+                return 'connected';
+            });
+        }, 30000);
+
+        return () => clearInterval(interval);
+    }, []);
 
     const handleInputChange = (e) => {
         setInput(e.target.value);
+        if (e.target.value && !isTyping) {
+            setIsTyping(true);
+        } else if (!e.target.value && isTyping) {
+            setIsTyping(false);
+        }
+
+        // Adjust textarea height
+        e.target.style.height = 'auto';
+        e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
     };
 
     const handleSendMessage = async (messageText) => {
@@ -47,6 +216,7 @@ const Chatbot = () => {
         if (messageToSend.trim() === '' || isLoading) return;
 
         setError(null);
+        setIsTyping(false);
 
         const messageId = messageIdCounter;
         setMessageIdCounter(prev => prev + 1);
@@ -55,18 +225,20 @@ const Chatbot = () => {
             id: messageId,
             role: 'user',
             content: messageToSend,
-            timestamp: new Date()
+            timestamp: new Date(),
+            read: false
         };
 
         setMessages(prev => [...prev, userMessage]);
         setInput('');
         setShowQuickActions(false);
         setIsLoading(true);
+        setConnectionStatus('connecting');
 
         try {
             console.log('Sending message:', messageToSend);
 
-            // Prepare messages for API (excluding system messages and only including role and content)
+            // Prepare messages for API
             const apiMessages = messages
                 .filter(msg => msg.role !== 'system')
                 .map(msg => ({
@@ -91,25 +263,34 @@ const Chatbot = () => {
             }
 
             const data = await response.json();
+            setConnectionStatus('connected');
+
+            // Mark user message as read
+            setMessages(prev => prev.map(msg =>
+                msg.id === messageId ? { ...msg, read: true } : msg
+            ));
 
             const assistantMessage = {
                 id: messageId + 1000,
                 role: 'assistant',
                 content: data.message,
-                timestamp: new Date()
+                timestamp: new Date(),
+                read: true
             };
 
             setMessages(prev => [...prev, assistantMessage]);
         } catch (error) {
             console.error('Error sending message:', error);
             setError(error.message);
+            setConnectionStatus('disconnected');
 
             const errorMessage = {
                 id: messageId + 2000,
                 role: 'assistant',
                 content: `Sorry, I encountered an error: ${error.message}. Please try again later.`,
                 timestamp: new Date(),
-                isError: true
+                isError: true,
+                read: true
             };
             setMessages(prev => [...prev, errorMessage]);
         } finally {
@@ -132,6 +313,31 @@ const Chatbot = () => {
                 inputRef.current?.focus();
             }, 300);
         }
+        // Trigger pulse animation when opening
+        if (!isOpen) {
+            setPulseAnimation(true);
+            setTimeout(() => setPulseAnimation(false), 1000);
+        }
+    };
+
+    const toggleMinimize = () => {
+        setIsMinimized(!isMinimized);
+        setShowOptionsMenu(false);
+    };
+
+    const toggleFullscreen = () => {
+        setIsFullscreen(!isFullscreen);
+        setShowOptionsMenu(false);
+    };
+
+    const toggleDarkMode = () => {
+        setDarkMode(!darkMode);
+        setShowOptionsMenu(false);
+    };
+
+    const toggleRecording = () => {
+        setIsRecording(!isRecording);
+        // In a real implementation, you would handle voice recording here
     };
 
     const handleQuickAction = (query) => {
@@ -160,181 +366,793 @@ const Chatbot = () => {
                 id: 0,
                 role: 'assistant',
                 content: 'Hello! I\'m here to help you learn about booleanforce services. How can I assist you today?',
-                timestamp: new Date()
+                timestamp: new Date(),
+                read: true
             }
         ]);
         setShowQuickActions(true);
         setError(null);
+        setShowOptionsMenu(false);
+    };
+
+    const clearChatHistory = () => {
+        setMessages([
+            {
+                id: 0,
+                role: 'assistant',
+                content: 'Hello! I\'m here to help you learn about booleanforce services. How can I assist you today?',
+                timestamp: new Date(),
+                read: true
+            }
+        ]);
+        setShowQuickActions(true);
+        setError(null);
+        setShowOptionsMenu(false);
+        setShowClearConfirmation(false);
+    };
+
+    const exportChat = () => {
+        const chatContent = messages.map(msg =>
+            `${msg.role === 'user' ? 'You' : 'Assistant'} (${formatTimestamp(msg.timestamp)}): ${msg.content}`
+        ).join('\n\n');
+
+        const blob = new Blob([chatContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `booleanforce-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setShowOptionsMenu(false);
+    };
+
+    const formatTimestamp = (date) => {
+        return date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+    const handleReaction = (messageId, reaction) => {
+        console.log(`Reacted with ${reaction} to message ${messageId}`);
+
+        if (reaction === 'like') {
+            setLikedMessageIds(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(messageId)) {
+                    newSet.delete(messageId);
+                } else {
+                    newSet.add(messageId);
+                }
+                return newSet;
+            });
+        }
+    };
+
+    const copyMessage = (messageId, content) => {
+        navigator.clipboard.writeText(content);
+        setCopiedMessageId(messageId);
+        setTimeout(() => setCopiedMessageId(null), 2000);
+    };
+
+    const shareMessage = (content) => {
+        if (navigator.share) {
+            navigator.share({
+                title: 'booleanforce Assistant Message',
+                text: content
+            });
+        }
+    };
+
+    const submitRating = () => {
+        // In a real implementation, you would send the rating to your server
+        console.log(`User rated the conversation: ${rating} stars`);
+        setShowRatingDialog(false);
+        setRating(0);
+        setShowOptionsMenu(false);
+    };
+
+    const filteredMessages = searchQuery
+        ? messages.filter(msg =>
+            msg.content.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        : messages;
+
+    // Responsive width calculation
+    const getChatWidth = () => {
+        if (isFullscreen) return 'w-full';
+        if (windowSize.width < 640) return 'w-full';
+        if (windowSize.width < 768) return 'w-11/12';
+        if (windowSize.width < 1024) return 'w-10/12 max-w-lg';
+        return 'w-96';
+    };
+
+    const getChatHeight = () => {
+        if (isFullscreen) return 'h-full';
+        if (windowSize.height < 700) return 'h-[500px]';
+        return 'h-[600px]';
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className={`fixed bottom-4 -right-2 md:right-4 sm:bottom-6 sm:right-6 z-50 px-4 ${darkMode ? 'dark' : ''}`}>
             {isOpen && (
-                <div className="mb-4 w-80 h-96 bg-white rounded-lg shadow-xl flex flex-col overflow-hidden border border-gray-200">
+                <div className={`mb-4  ${getChatWidth()} ${isMinimized ? 'h-14' : getChatHeight()} ${darkMode ? 'bg-gradient-to-b from-slate-900 to-slate-800 text-white' : 'bg-gradient-to-b from-white to-slate-50 text-slate-800'} rounded-2xl shadow-2xl flex flex-col overflow-hidden border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-500 ease-in-out transform ${pulseAnimation ? 'animate-pulse' : ''}`} ref={chatContainerRef}>
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex justify-between items-center">
+                    <div className={`${darkMode ? 'bg-gradient-to-r from-slate-800 to-slate-700' : 'bg-gradient-to-r from-blue-600 to-indigo-600'} text-white p-4 flex justify-between items-center rounded-t-2xl`}>
                         <div className="flex items-center">
-                            <Bot className="w-5 h-5 mr-2" />
-                            <h3 className="font-semibold">booleanforce Assistant</h3>
+                            <div className="relative">
+                                <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                    <Bot className="w-6 h-6 text-white" />
+                                </div>
+                                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 ${connectionStatus === 'connected' ? 'bg-emerald-500 border-white' : connectionStatus === 'connecting' ? 'bg-amber-500 border-white animate-pulse' : 'bg-red-500 border-white'}`}></div>
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="font-semibold text-lg">booleanforce Assistant</h3>
+                                <p className="text-xs opacity-75 flex items-center">
+                                    {connectionStatus === 'connected' ? (
+                                        <>
+                                            <Wifi className="w-3 h-3 mr-1" />
+                                            Online
+                                        </>
+                                    ) : connectionStatus === 'connecting' ? (
+                                        <>
+                                            <Wifi className="w-3 h-3 mr-1 animate-pulse" />
+                                            Connecting...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <WifiOff className="w-3 h-3 mr-1" />
+                                            Offline
+                                        </>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                         <div className="flex items-center">
                             <button
-                                onClick={resetChat}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors mr-2"
-                                title="Reset chat"
+                                onClick={toggleFullscreen}
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
+                                title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
                             >
-                                <RefreshCw className="w-4 h-4" />
+                                {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                             </button>
                             <button
+                                onClick={toggleDarkMode}
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
+                                title="Toggle dark mode"
+                            >
+                                {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setShowSearch(!showSearch);
+                                    setShowOptionsMenu(false);
+                                }}
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
+                                title="Search messages"
+                            >
+                                <Search className="w-4 h-4" />
+                            </button>
+                            <div className="relative" ref={optionsMenuRef}>
+                                <button
+                                    onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                                    className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer mr-1"
+                                    title="More options"
+                                >
+                                    <MoreVertical className="w-4 h-4" />
+                                </button>
+                                {showOptionsMenu && (
+                                    <div className={`absolute right-0 top-full z-40 mt-2 w-72 ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl shadow-xl border ${darkMode ? 'border-slate-700' : 'border-slate-200'} overflow-hidden z-[9999] animate-fadeIn max-h-96 overflow-y-auto`}>
+                                        {/* Chat Options Header */}
+                                        <div className={`p-4 ${darkMode ? 'bg-slate-900' : 'bg-slate-100'} border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-semibold text-lg flex items-center">
+                                                    <Settings className="w-5 h-5 mr-2" />
+                                                    Chat Options
+                                                </h3>
+                                                <button
+                                                    onClick={() => setShowOptionsMenu(false)}
+                                                    className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-200'} transition-colors`}
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Basic Options Section */}
+                                        <div className="p-2">
+                                            <div className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wider px-3 py-2`}>Basic Options</div>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleMinimize();
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    {isMinimized ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">{isMinimized ? 'Expand' : 'Minimize'}</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{isMinimized ? 'Show chat window' : 'Hide chat window'}</p>
+                                                </div>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+M</span>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowSettings(!showSettings);
+                                                    setShowOptionsMenu(false);
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Settings className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Settings</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Customize your experience</p>
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    exportChat();
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Download className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Export chat</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Download conversation</p>
+                                                </div>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+S</span>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowRatingDialog(true);
+                                                    setShowOptionsMenu(false);
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <StarIcon className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Rate conversation</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Help us improve</p>
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        {/* Advanced Options Section */}
+                                        <div className="p-2 border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'}">
+                                            <div className={`text-xs font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'} uppercase tracking-wider px-3 py-2`}>Advanced</div>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowClearConfirmation(true);
+                                                    setShowOptionsMenu(false);
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-red-900/30 group-hover:bg-red-900/50' : 'bg-red-50 group-hover:bg-red-100'} mr-3 transition-colors`}>
+                                                    <Trash2 className="w-5 h-5 text-red-500" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-red-500">Clear chat history</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Delete all messages</p>
+                                                </div>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    resetChat();
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <RefreshCw className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Reset chat</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Start new conversation</p>
+                                                </div>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+R</span>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setShowKeyboardShortcuts(true);
+                                                    setShowOptionsMenu(false);
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <Keyboard className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Keyboard shortcuts</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>View all shortcuts</p>
+                                                </div>
+                                                <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'} font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+?</span>
+                                            </button>
+
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    // In a real implementation, you would open a help page
+                                                    alert('Help & Support page would open here');
+                                                    setShowOptionsMenu(false);
+                                                }}
+                                                className={`flex items-center w-full px-4 py-3 text-left ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'} transition-colors group rounded-lg mx-1`}
+                                            >
+                                                <div className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700 group-hover:bg-slate-600' : 'bg-slate-100 group-hover:bg-slate-200'} mr-3 transition-colors`}>
+                                                    <HelpCircle className="w-5 h-5" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium">Help & Support</p>
+                                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Get assistance</p>
+                                                </div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                            <button
                                 onClick={toggleChat}
-                                className="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-1 transition-colors"
+                                className="p-2 rounded-full hover:bg-white/20 transition-colors cursor-pointer"
                             >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
                     </div>
 
-                    {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                        {messages.map((message) => (
-                            <div
-                                key={message.id}
-                                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div
-                                    className={`max-w-[80%] rounded-lg p-3 ${message.role === 'user'
-                                        ? 'bg-blue-600 text-white'
-                                        : message.isError
-                                            ? 'bg-red-50 border border-red-200 text-red-800'
-                                            : 'bg-gray-100 text-gray-800'
-                                        }`}
-                                >
-                                    <div className="flex items-start">
-                                        {message.role === 'assistant' && (
-                                            <Bot className={`w-4 h-4 mr-2 mt-0.5 flex-shrink-0 ${message.isError ? 'text-red-600' : ''}`} />
-                                        )}
-                                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                                        {message.role === 'user' && (
-                                            <User className="w-4 h-4 ml-2 mt-0.5 flex-shrink-0" />
-                                        )}
+                    {/* Settings Panel */}
+                    {showSettings && !isMinimized && (
+                        <div className={`p-4 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-slate-50'} animate-fadeIn`}>
+                            <h4 className={`font-medium mb-3 ${darkMode ? 'text-white' : 'text-slate-800'}`}>Settings</h4>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        {soundEnabled ? <Volume2 className="w-4 h-4 mr-2" /> : <VolumeX className="w-4 h-4 mr-2" />}
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Sound Effects</span>
                                     </div>
-                                    <div className="text-xs mt-1 opacity-70">
-                                        {message.timestamp.toLocaleTimeString([], {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
+                                    <button
+                                        onClick={() => setSoundEnabled(!soundEnabled)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${soundEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${soundEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center">
+                                        {notificationsEnabled ? <Bell className="w-4 h-4 mr-2" /> : <BellOff className="w-4 h-4 mr-2" />}
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Notifications</span>
+                                    </div>
+                                    <button
+                                        onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${notificationsEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${notificationsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Auto-scroll</span>
+                                    <button
+                                        onClick={() => setAutoScrollEnabled(!autoScrollEnabled)}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full ${autoScrollEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
+                                    >
+                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${autoScrollEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Keyboard Shortcuts Modal */}
+                    {showKeyboardShortcuts && (
+                        <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold">Keyboard Shortcuts</h3>
+                                    <button
+                                        onClick={() => setShowKeyboardShortcuts(false)}
+                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <div className="space-y-3">
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Minimize chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+M</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Toggle dark mode</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+D</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Export chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+S</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Reset chat</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+R</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Show shortcuts</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Ctrl+?</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>Close menus</span>
+                                        <span className={`text-xs font-mono ${darkMode ? 'bg-slate-700' : 'bg-slate-100'} px-2 py-1 rounded`}>Esc</span>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        </div>
+                    )}
 
-                        {/* Quick Actions */}
-                        {showQuickActions && messages.length === 1 && (
-                            <div className="mt-4">
-                                <p className="text-xs text-gray-500 mb-2">You can ask me about:</p>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {QUICK_ACTIONS.map((action, index) => (
+                    {/* Rating Dialog */}
+                    {showRatingDialog && (
+                        <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold">Rate this conversation</h3>
+                                    <button
+                                        onClick={() => setShowRatingDialog(false)}
+                                        className={`p-1 rounded-full ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
+                                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-4`}>How would you rate your experience with our assistant?</p>
+                                <div className="flex justify-center space-x-2 mb-6">
+                                    {[1, 2, 3, 4, 5].map((star) => (
                                         <button
-                                            key={index}
-                                            onClick={() => handleQuickAction(action.query)}
-                                            className="flex items-center text-xs bg-gray-100 hover:bg-gray-200 rounded-md p-2 transition-colors"
+                                            key={star}
+                                            onClick={() => setRating(star)}
+                                            className="transition-colors"
                                         >
-                                            <span className="mr-1 text-blue-600">{action.icon}</span>
-                                            <span className="text-left">{action.text}</span>
+                                            <StarIcon
+                                                className={`w-8 h-8 ${star <= rating ? 'text-amber-500 fill-current' : darkMode ? 'text-slate-600' : 'text-slate-300'}`}
+                                            />
                                         </button>
                                     ))}
                                 </div>
-                            </div>
-                        )}
-
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="bg-gray-100 text-gray-800 rounded-lg p-3 max-w-[80%]">
-                                    <div className="flex items-center">
-                                        <Bot className="w-4 h-4 mr-2" />
-                                        <div className="flex space-x-1">
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                                        </div>
-                                    </div>
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => setShowRatingDialog(false)}
+                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'} transition-colors`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={submitRating}
+                                        disabled={rating === 0}
+                                        className={`px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-slate-400 disabled:cursor-not-allowed`}
+                                    >
+                                        Submit
+                                    </button>
                                 </div>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {/* Error Display */}
-                        {error && (
-                            <div className="flex justify-start">
-                                <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 max-w-[80%]">
-                                    <div className="flex items-start">
-                                        <AlertCircle className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p className="text-sm font-medium">Error occurred</p>
-                                            <p className="text-xs mt-1">{error}</p>
-                                            <div className="flex gap-2 mt-2">
+                    {/* Clear Confirmation Dialog */}
+                    {showClearConfirmation && (
+                        <div className="absolute inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                            <div className={`${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-xl p-6 max-w-md w-full mx-4 animate-fadeIn`}>
+                                <div className="flex items-center mb-4">
+                                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full mr-3">
+                                        <Trash2 className="w-6 h-6 text-red-500" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold">Clear chat history?</h3>
+                                </div>
+                                <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-6`}>
+                                    This will permanently delete all messages in this conversation. This action cannot be undone.
+                                </p>
+                                <div className="flex justify-end space-x-2">
+                                    <button
+                                        onClick={() => setShowClearConfirmation(false)}
+                                        className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'} transition-colors`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={clearChatHistory}
+                                        className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                                    >
+                                        Clear History
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Search Bar */}
+                    {showSearch && !isMinimized && (
+                        <div className={`p-3 border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-slate-50'} animate-fadeIn`}>
+                            <div className="relative">
+                                <Search className={`absolute left-3 top-2.5 w-4 h-4 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+                                <input
+                                    type="text"
+                                    placeholder="Search messages..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className={`w-full pl-10 pr-4 py-2 rounded-lg ${darkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-white text-slate-800 border-slate-300'} border focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Messages */}
+                    {!isMinimized && (
+                        <>
+                            <div className={`flex-1 overflow-y-auto p-4 space-y-4 z-10 ${darkMode ? 'bg-slate-900' : 'bg-slate-50'}`}>
+                                {filteredMessages.length === 0 && searchQuery ? (
+                                    <div className="text-center py-8">
+                                        <p className={`${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>No messages found matching "{searchQuery}"</p>
+                                    </div>
+                                ) : (
+                                    filteredMessages.map((message) => (
+                                        <div
+                                            key={message.id}
+                                            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                                        >
+                                            <div
+                                                className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${message.role === 'user'
+                                                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
+                                                    : message.isError
+                                                        ? 'bg-red-50 border border-red-200 text-red-800'
+                                                        : darkMode
+                                                            ? 'bg-slate-800 text-white border border-slate-700'
+                                                            : 'bg-white text-slate-800 border border-slate-200'
+                                                    }`}
+                                            >
+                                                <div className="flex items-start">
+                                                    {message.role === 'assistant' && (
+                                                        <div className={`mr-2 mt-0.5 flex-shrink-0 ${message.isError ? 'text-red-600' : 'text-blue-600'}`}>
+                                                            <Bot className="w-5 h-5" />
+                                                        </div>
+                                                    )}
+                                                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                                                    {message.role === 'user' && (
+                                                        <div className="ml-2 mt-0.5 flex-shrink-0 text-white opacity-80">
+                                                            <User className="w-5 h-5" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className={`flex items-center justify-between mt-2 ${message.role === 'user' ? 'text-right' : ''}`}>
+                                                    <div className={`text-xs ${message.role === 'user' ? 'text-white opacity-70' : darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                        {formatTimestamp(message.timestamp)}
+                                                    </div>
+                                                    {message.role === 'user' && (
+                                                        <div className="flex items-center ml-2">
+                                                            {message.read ? (
+                                                                <CheckCheck className="w-4 h-4 text-white opacity-70" />
+                                                            ) : (
+                                                                <Check className="w-4 h-4 text-white opacity-70" />
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {!message.isError && (
+                                                    <div className="flex mt-2 space-x-2">
+                                                        <button
+                                                            onClick={() => handleReaction(message.id, 'like')}
+                                                            className={`text-xs ${likedMessageIds.has(message.id) ? 'text-blue-600' : darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
+                                                            title="Like"
+                                                        >
+                                                            <ThumbsUp className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => copyMessage(message.id, message.content)}
+                                                            className={`text-xs ${darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
+                                                            title="Copy"
+                                                        >
+                                                            {copiedMessageId === message.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => shareMessage(message.content)}
+                                                            className={`text-xs ${darkMode ? 'text-slate-400 hover:text-blue-400' : 'text-slate-500 hover:text-blue-600'} transition-colors`}
+                                                            title="Share"
+                                                        >
+                                                            <Share2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+
+                                {showQuickActions && messages.length === 1 && (
+                                    <div className="mt-6 animate-fadeIn">
+                                        <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'} mb-4 font-medium flex items-center justify-center`}>
+                                            <Star className="w-4 h-4 mr-2 text-amber-500" />
+                                            Popular questions:
+                                        </p>
+                                        <div className={`grid ${isFullscreen ? 'grid-cols-3' : windowSize.width < 640 ? 'grid-cols-1' : 'grid-cols-2'} gap-3`}>
+                                            {QUICK_ACTIONS.map((action, index) => (
                                                 <button
-                                                    onClick={retryLastMessage}
-                                                    className="text-xs text-red-600 hover:text-red-800 underline"
+                                                    key={index}
+                                                    onClick={() => handleQuickAction(action.query)}
+                                                    className={`flex items-center text-sm ${darkMode ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 hover:border-blue-500' : 'bg-white hover:bg-blue-50 border-slate-200 hover:border-blue-300'} border rounded-xl p-4 transition-all duration-200 transform hover:scale-105 hover:shadow-md`}
                                                 >
-                                                    Try again
+                                                    <span className={`mr-3 ${action.color === 'blue' ? 'bg-blue-100 text-blue-600' :
+                                                        action.color === 'purple' ? 'bg-purple-100 text-purple-600' :
+                                                            action.color === 'green' ? 'bg-green-100 text-green-600' :
+                                                                action.color === 'red' ? 'bg-red-100 text-red-600' :
+                                                                    action.color === 'yellow' ? 'bg-amber-100 text-amber-600' :
+                                                                        'bg-indigo-100 text-indigo-600'} rounded-lg p-2`}>
+                                                        {action.icon}
+                                                    </span>
+                                                    <span className="text-left font-medium">{action.text}</span>
                                                 </button>
-                                                <button
-                                                    onClick={resetChat}
-                                                    className="text-xs text-red-600 hover:text-red-800 underline"
-                                                >
-                                                    Reset chat
-                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isLoading && (
+                                    <div className="flex justify-start animate-fadeIn">
+                                        <div className={`${darkMode ? 'bg-slate-800 text-white border-slate-700' : 'bg-white text-slate-800 border-slate-200'} rounded-2xl px-4 py-3 shadow-sm border`}>
+                                            <div className="flex items-center">
+                                                <Bot className="w-5 h-5 mr-2 text-blue-600" />
+                                                <div className="flex space-x-1">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                )}
+
+                                {error && (
+                                    <div className="flex justify-start animate-fadeIn">
+                                        <div className="bg-red-50 border border-red-200 text-red-800 rounded-2xl px-4 py-3 shadow-sm max-w-[85%]">
+                                            <div className="flex items-start">
+                                                <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Something went wrong</p>
+                                                    <p className="text-xs mt-1 opacity-90">{error}</p>
+                                                    <div className="flex gap-3 mt-3">
+                                                        <button
+                                                            onClick={retryLastMessage}
+                                                            className="text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded-md px-3 py-1.5 transition-colors font-medium flex items-center"
+                                                        >
+                                                            <RefreshCw className="w-3 h-3 mr-1" />
+                                                            Try again
+                                                        </button>
+                                                        <button
+                                                            onClick={resetChat}
+                                                            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-md px-3 py-1.5 transition-colors font-medium"
+                                                        >
+                                                            Reset chat
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div ref={messagesEndRef} />
                             </div>
-                        )}
 
-                        <div ref={messagesEndRef} />
-                    </div>
+                            {showScrollToBottom && (
+                                <button
+                                    onClick={scrollToBottom}
+                                    className={`absolute bottom-20 right-6 ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-800'} rounded-full p-2 shadow-lg border ${darkMode ? 'border-slate-700' : 'border-slate-200'} transition-all duration-200 hover:scale-110 animate-bounce`}
+                                    title="Scroll to bottom"
+                                >
+                                    <ChevronDown className="w-4 h-4" />
+                                </button>
+                            )}
 
-                    {/* Input */}
-                    <div className="border-t border-gray-200 p-3">
-                        <div className="flex items-center">
-                            <textarea
-                                ref={inputRef}
-                                value={input}
-                                onChange={handleInputChange}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Ask about our services..."
-                                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 resize-none"
-                                disabled={isLoading}
-                                rows={1}
-                                style={{ minHeight: '36px', maxHeight: '120px' }}
-                                onInput={(e) => {
-                                    e.target.style.height = 'auto';
-                                    e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                                }}
-                            />
-                            <button
-                                onClick={() => handleSendMessage()}
-                                disabled={isLoading || input.trim() === ''}
-                                className="ml-2 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                            >
-                                <Send className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
+                            <div className={`border-t ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white'} p-4`}>
+                                <div className="flex items-center">
+                                    <button
+                                        className={`mr-2 p-2 rounded-full ${darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'} transition-colors`}
+                                        title="Attach file"
+                                    >
+                                        <Paperclip className="w-5 h-5" />
+                                    </button>
+                                    <div className="relative">
+                                        <textarea
+                                            ref={inputRef}
+                                            value={input}
+                                            onChange={handleInputChange}
+                                            onKeyDown={handleKeyDown}
+                                            placeholder="Ask about our services"
+                                            className={`w-full border ${darkMode ? 'bg-slate-700 text-white border-slate-600' : 'bg-slate-50 text-slate-800 border-slate-200'} rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none transition-all duration-200`}
+                                            disabled={isLoading}
+                                            rows={1}
+                                            style={{ minHeight: '44px', maxHeight: '120px' }}
+                                        />
+                                        {input.trim() === '' && (
+                                            <div className={`absolute right-3 top-3 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                                                <Sparkles className="w-5 h-5" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={toggleRecording}
+                                        className={`ml-2 p-2 rounded-full ${isRecording ? 'bg-red-500 text-white animate-pulse' : darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'} transition-colors`}
+                                        title={isRecording ? "Stop recording" : "Start voice input"}
+                                    >
+                                        {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                                    </button>
+                                    <button
+                                        onClick={() => handleSendMessage()}
+                                        disabled={isLoading || input.trim() === ''}
+                                        className="ml-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl p-3 hover:from-blue-700 hover:to-blue-800 transition-all duration-200 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed transform hover:scale-105 flex items-center justify-center"
+                                    >
+                                        {isLoading ? (
+                                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        ) : (
+                                            <Send className="w-5 h-5" />
+                                        )}
+                                    </button>
+                                </div>
+                                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'} mt-2 text-center flex items-center justify-center`}>
+                                    <Zap className="w-3 h-3 mr-1 text-amber-500" />
+                                    booleanforce Assistant typically responds instantly
+                                </p>
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 
             {/* Chat button */}
             <button
                 onClick={toggleChat}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
+                onMouseEnter={() => setIsHovering(true)}
+                onMouseLeave={() => setIsHovering(false)}
+                className={`relative bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-110 group ${pulseAnimation ? 'animate-pulse' : ''}`}
             >
+                <div className={`absolute inset-0 rounded-full cursor-pointer bg-white opacity-0 ${isHovering ? 'opacity-20' : ''} transition-opacity duration-300`}></div>
                 {isOpen ? (
-                    <X className="w-6 h-6" />
+                    <X className="w-6 h-6 relative z-10 cursor-pointer" />
                 ) : (
-                    <MessageCircle className="w-6 h-6" />
+                    <>
+                        <MessageCircle className="w-6 h-6 relative z-10 cursor-pointer" />
+                        <div className="absolute top-0 right-0 w-3 h-3 cursor-pointer bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
+                    </>
                 )}
             </button>
+
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(10px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-out;
+                }
+            `}</style>
         </div>
     );
 };

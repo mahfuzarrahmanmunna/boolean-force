@@ -1,4 +1,6 @@
-import dbConnect from "@/lib/dbConnect";
+// import dbConnect from "@/lib/dbConnect";
+
+import { dbConnect } from "@/lib/dbConnect";
 
 export async function GET() {
     try {

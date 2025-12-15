@@ -146,7 +146,7 @@ const testimonials = [
     id: 1,
     name: 'Sarah Johnson',
     position: 'CEO at RetailMax',
-    image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80',
+    image: 'https://i.ibb.co.com/d04HSC8B/images.jpg',
     text: 'The POS system developed by booleanforce transformed our retail operations. We\'ve seen a 40% increase in efficiency and our customers love the new checkout experience.'
   },
   {
@@ -254,23 +254,43 @@ export default function Portfolio() {
           />
         </div>
 
-        <div className="relative z-10 text-center px-6 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
-            booleanforce
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-gray-300 max-w-2xl mx-auto">
-            Transforming businesses through innovative technology solutions
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#services" className="px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center">
-              Our Services
-              <FaArrowRight className="ml-2" />
-            </a>
-            <a href="#contact" className="px-8 py-3 bg-transparent border-2 border-white text-white rounded-full hover:bg-white hover:text-gray-900 transition-all duration-300 transform hover:scale-105 inline-flex items-center justify-center">
-              Get In Touch
-            </a>
-          </div>
-        </div>
+        <div className="relative z-10 text-center px-6 max-w-5xl mx-auto py-24">
+  {/* Background Glow */}
+  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl opacity-40 animate-pulse"></div>
+
+  {/* Glass Card Effect */}
+  <div className="relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-10 shadow-2xl">
+    {/* Animated Gradient Text */}
+    <h1 className="text-5xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent animate-gradient-x">
+      booleanforce
+    </h1>
+
+    {/* Subheading */}
+    <p className="text-lg md:text-2xl mb-10 text-gray-300 max-w-3xl mx-auto leading-relaxed">
+      Empowering innovation through next-gen digital transformation
+    </p>
+
+    {/* Buttons */}
+    <div className="flex flex-col sm:flex-row gap-5 justify-center">
+      <a
+        href="#services"
+        className="group relative px-8 py-3 rounded-full overflow-hidden text-white font-semibold bg-gradient-to-r from-blue-500 to-purple-600 hover:from-purple-600 hover:to-pink-500 transition-all duration-300 shadow-lg"
+      >
+        <span className="relative z-10 flex items-center justify-center gap-2">
+          Our Services <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
+        </span>
+      </a>
+
+      <a
+        href="#contact"
+        className="relative px-8 py-3 border-2 border-white/60 text-white rounded-full hover:bg-white hover:text-gray-900 transition-all duration-300 flex items-center justify-center gap-2"
+      >
+        Get In Touch
+      </a>
+    </div>
+  </div>
+</div>
+
 
         <div className="absolute bottom-25 left-1/2 transform -translate-x-1/2 animate-bounce">
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -281,328 +301,442 @@ export default function Portfolio() {
 
 
     {/* Portfolio Section with Slider Effect */}
-      <section id="projects" ref={portfolioRef} className="py-20 px-6 bg-gray-800 bg-opacity-50 relative overflow-hidden">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Explore our recent projects and see how we've helped businesses transform
-            </p>
-          </div>
+      <section id="projects" ref={portfolioRef} className="py-8 px-6 bg-gray-800 bg-opacity-50 -mt-8">
+      <div className="container mx-auto max-w-6xl">
+  {/* Header */}
+  <div className="text-center mb-12">
+    <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+      Our Portfolio
+    </h2>
+    <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+      Explore our recent projects and see how we've helped businesses transform
+    </p>
+  </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {portfolioCategories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full transition-all duration-300 transform hover:scale-105 ${selectedCategory === category
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-800 text-gray-300 hover:bg-blue-600 hover:text-white"
-                  }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+  {/* Category Filter */}
+  <div className="relative flex flex-wrap justify-center gap-4 mb-12">
+    {/* Background glow */}
+    <div className="absolute inset-0 flex justify-center pointer-events-none">
+      <div className="w-full max-w-4xl h-16 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-full blur-xl"></div>
+    </div>
 
-        
-           
-        
+    {portfolioCategories.map((category) => (
+      <button
+        key={category}
+        onClick={() => setSelectedCategory(category)}
+        className={`relative z-10 px-6 py-2 rounded-full transition-all duration-300 transform 
+          ${
+            selectedCategory === category
+              ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg scale-105"
+              : "bg-gray-800 text-gray-300 hover:bg-blue-600 hover:text-white hover:scale-105"
+          }`}
+      >
+        {category}
+        {/* Gradient underline for active */}
+        {selectedCategory === category && (
+          <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-2/3 h-1 rounded-full bg-gradient-to-r from-blue-400 to-purple-500"></span>
+        )}
+      </button>
+    ))}
+  </div>
+  
+</div>
 
-   </div>
 
-       
+       <ScrollStack></ScrollStack>
       </section>
 
 <div >
-   <ScrollStack></ScrollStack>
+   
 </div>
 
       
 
-      {/* Company Stats Section */}
-      <section className="py-16 px-6 bg-gray-800 bg-opacity-50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {companyStats.map((stat, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <h3 className="text-3xl md:text-4xl font-bold text-blue-400 mb-2">{stat.number}</h3>
-                <p className="text-gray-300">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+   {/* Company Stats Section */}
+<section className="py-14 px-6 bg-gray-900 relative overflow-hidden mb-10">
+  {/* Background soft glow */}
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[180px] opacity-30"></div>
+
+  <div className="container mx-auto max-w-6xl relative z-10">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      {companyStats.map((stat, index) => (
+        <div
+          key={index}
+          className="group p-6 rounded-2xl bg-gray-800/60 backdrop-blur-lg shadow-md hover:shadow-blue-500/20 transition-all duration-500 transform hover:-translate-y-1"
+        >
+          <h3 className="text-4xl md:text-5xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-2">
+            {stat.number}
+          </h3>
+          <p className="text-gray-300 font-medium">{stat.label}</p>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
 
       {/* Services Section */}
-      <section id="services" className="py-20 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Services</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              We offer comprehensive technology solutions tailored to meet your business needs
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {companyServices.map((service) => (
-              <div key={service.id} className="bg-gray-800 rounded-lg p-8 transform hover:scale-105 transition-all duration-300">
-                <div className={`w-16 h-16 rounded-full ${service.color} flex items-center justify-center mb-6`}>
-                  <div className="text-2xl text-white">
-                    {service.icon}
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold mb-3">{service.title}</h3>
-                <p className="text-gray-400 mb-4">{service.description}</p>
-                <ul className="space-y-2">
-                  {service.features.map((feature, index) => (
-                    <li key={index} className="flex items-center text-sm text-gray-300">
-                      <FaCheckCircle className="text-blue-400 mr-2" size={12} />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+<section id="services" className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 overflow-hidden">
+  {/* Decorative gradient orbs */}
+  <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/20 blur-[120px] rounded-full"></div>
+  <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/20 blur-[120px] rounded-full"></div>
 
-      {/* About Us Section */}
-      <section className="py-20 px-6 bg-gray-800 bg-opacity-50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-4xl font-bold mb-6">About booleanforce</h2>
-              <p className="text-lg text-gray-300 mb-6">
-                booleanforce is a leading technology company specializing in innovative solutions for businesses of all sizes. With over a decade of experience, we've helped countless organizations transform their operations through cutting-edge technology.
-              </p>
-              <p className="text-lg text-gray-300 mb-8">
-                Our team of expert developers, designers, and consultants work closely with clients to understand their unique challenges and deliver tailored solutions that drive growth and efficiency.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <FaGithub size={24} />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <FaLinkedin size={24} />
-                </a>
-                <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                  <FaEnvelope size={24} />
-                </a>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="w-full h-96 rounded-lg overflow-hidden">
-                <Image
-                  src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Our Team"
-                  fill
-                  className="object-cover"
-                  unoptimized={true}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+  <div className="container mx-auto max-w-7xl relative z-10">
+    {/* Header */}
+    <div className="text-center mb-14 -mt-8">
+      <h2 className="text-5xl font-extrabold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Our Services
+      </h2>
+      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+        We craft end-to-end technology solutions designed to help your brand thrive in the digital age.
+      </p>
+    </div>
 
-      {/* Company Values Section */}
-      <section className="py-20 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Values</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              The principles that guide everything we do
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {companyValues.map((value, index) => (
-              <div key={index} className="text-center">
-                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
-                  <div className="text-2xl text-white">
-                    {value.icon}
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold mb-3">{value.title}</h3>
-                <p className="text-gray-400">{value.description}</p>
-              </div>
-            ))}
+    {/* Services Grid */}
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+      {companyServices.map((service) => (
+        <div
+          key={service.id}
+          className="relative group rounded-3xl overflow-hidden p-[1px] bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:shadow-[0_0_25px_rgba(147,51,234,0.4)] transition-all duration-500"
+        >
+          {/* Inner glass card */}
+          <div className="relative z-10 h-full rounded-3xl bg-gray-900/90 backdrop-blur-lg p-8 transition-all duration-500 group-hover:bg-gray-800/80">
+            {/* Icon */}
+            <div
+              className={`w-16 h-16 rounded-2xl ${service.color} flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10 transition-transform duration-300 group-hover:scale-110`}
+            >
+              <div className="text-3xl text-white">{service.icon}</div>
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-semibold mb-4 text-white">{service.title}</h3>
+            <p className="text-gray-400 mb-6 leading-relaxed">{service.description}</p>
+
+            {/* Features */}
+            <ul className="space-y-3">
+              {service.features.map((feature, index) => (
+                <li key={index} className="flex items-center text-sm text-gray-300">
+                  <FaCheckCircle className="text-blue-400 mr-2" size={14} />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+
+            {/* Glow ring on hover */}
+            <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-2xl transition duration-500"></div>
           </div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+    {/* About Us Section */}
+<section className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 overflow-hidden ">
+  {/* Background glow effect */}
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-500/20 rounded-full blur-[180px] opacity-40 animate-pulse"></div>
+
+  <div className="container mx-auto max-w-6xl relative z-10">
+    <div className="grid md:grid-cols-2 gap-16 items-center">
+      {/* Text Section */}
+      <div className="space-y-6 -mt-8">
+        <h2 className="text-5xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          About <span className="text-white">booleanforce</span>
+        </h2>
+
+        <p className="text-gray-300 text-lg leading-relaxed">
+          At <span className="font-semibold text-white">booleanforce</span>, we specialize in crafting next-gen digital solutions that empower businesses to move faster, scale smarter, and innovate continuously.
+        </p>
+
+        <p className="text-gray-400 text-lg leading-relaxed">
+          With over a decade of experience, our team of developers, designers, and tech strategists work hand-in-hand with clients to build products that inspire confidence and drive measurable results.
+        </p>
+
+        <div className="flex gap-5 pt-4">
+          <a href="#" className="p-3 rounded-full bg-gray-700/50 hover:bg-blue-600 transition-all duration-300 text-white shadow-lg">
+            <FaGithub size={22} />
+          </a>
+          <a href="#" className="p-3 rounded-full bg-gray-700/50 hover:bg-blue-600 transition-all duration-300 text-white shadow-lg">
+            <FaLinkedin size={22} />
+          </a>
+          <a href="#" className="p-3 rounded-full bg-gray-700/50 hover:bg-blue-600 transition-all duration-300 text-white shadow-lg">
+            <FaEnvelope size={22} />
+          </a>
+        </div>
+      </div>
+
+      {/* Image Section */}
+      <div className="relative group">
+        <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur opacity-50 group-hover:opacity-80 transition duration-500"></div>
+        <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl backdrop-blur-lg">
+          <Image
+            src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            alt="Our Team"
+            width={800}
+            height={600}
+            className="object-cover w-full h-[400px] group-hover:scale-105 transition-transform duration-700 ease-out"
+            unoptimized={true}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    {/* Company Values Section */}
+<section className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 overflow-hidden -mt-12">
+  {/* Background effect */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.08),transparent_70%)]"></div>
+
+  <div className="container mx-auto max-w-6xl relative z-10">
+    {/* Header */}
+    <div className="text-center mb-14 -mt-8">
+      <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Our Values
+      </h2>
+      <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+        The principles that guide everything we do
+      </p>
+    </div>
+
+    {/* Value Cards */}
+    <div className="grid md:grid-cols-3 gap-10">
+      {companyValues.map((value, index) => (
+        <div
+          key={index}
+          className="group relative p-8 rounded-3xl bg-gray-800/40 border border-white/10 backdrop-blur-lg shadow-md transition-all duration-500 hover:-translate-y-2"
+        >
+          {/* Gentle hover glow */}
+          <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 blur-xl transition duration-500"></div>
+
+          <div className="relative z-10 text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-2xl text-white shadow-lg shadow-blue-500/10 transform group-hover:scale-105 transition-transform duration-300">
+              {value.icon}
+            </div>
+            <h3 className="text-2xl font-semibold text-white">{value.title}</h3>
+            <p className="text-gray-400 leading-relaxed">{value.description}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
 
     
 
       {/* Testimonials Section */}
-      <section className="py-20 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Client Testimonials</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Hear what our clients have to say about working with booleanforce
-            </p>
+<section className="relative py-24 px-6 bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 overflow-hidden -mt-12">
+  {/* Decorative glows */}
+  <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/20 blur-[120px] rounded-full"></div>
+  <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/20 blur-[120px] rounded-full"></div>
+
+  <div className="container mx-auto max-w-7xl relative z-10">
+    {/* Header */}
+    <div className="text-center mb-14 -mt-8">
+      <h2 className="text-5xl font-extrabold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Client Testimonials
+      </h2>
+      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+        What our amazing clients say about working with <span className="text-blue-400 font-semibold">booleanforce</span>
+      </p>
+    </div>
+
+    {/* Testimonials Grid */}
+    <div className="grid md:grid-cols-3 gap-10">
+      {testimonials.map((testimonial) => (
+        <div
+          key={testimonial.id}
+          className="relative group bg-gray-900/70 backdrop-blur-lg rounded-3xl p-8 border border-gray-700 hover:border-blue-500/50 hover:shadow-[0_0_40px_rgba(59,130,246,0.15)] transition-all duration-500 transform hover:-translate-y-2"
+        >
+          {/* Quotation Mark */}
+          <div className="absolute -top-4 -left-4 text-6xl text-blue-500/20 select-none">“</div>
+
+          {/* Testimonial Text */}
+          <p className="text-gray-300 italic mb-6 leading-relaxed relative z-10">
+            "{testimonial.text}"
+          </p>
+
+          {/* Profile Info */}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-blue-500/40 shadow-lg">
+              <Image
+                src={testimonial.image}
+                alt={testimonial.name}
+                width={56}
+                height={56}
+                className="object-cover"
+                unoptimized={true}
+              />
+            </div>
+            <div>
+              <h3 className="font-semibold text-white text-lg">{testimonial.name}</h3>
+              <p className="text-sm text-gray-400">{testimonial.position}</p>
+            </div>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial) => (
-              <div key={testimonial.id} className="bg-gray-800 rounded-lg p-6">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
-                    <Image
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      width={48}
-                      height={48}
-                      className="object-cover"
-                      unoptimized={true}
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{testimonial.name}</h3>
-                    <p className="text-sm text-gray-400">{testimonial.position}</p>
-                  </div>
-                </div>
-                <p className="text-gray-300 italic">"{testimonial.text}"</p>
-              </div>
-            ))}
-          </div>
+
+          {/* Glow effect on hover */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-2xl transition duration-500 rounded-3xl"></div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
 
       {/* Why Choose Us Section */}
-      <section className="py-20 px-6 bg-gray-800 bg-opacity-50">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Why Choose booleanforce</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              We're not just another tech company - we're your strategic partner
-            </p>
+<section className="relative py-24 px-6 bg-gray-900 overflow-hidden -mt-12">
+  {/* Background glow */}
+  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-blue-500/10 rounded-full blur-[180px] opacity-40"></div>
+
+  <div className="container mx-auto max-w-6xl relative z-10">
+    {/* Header */}
+    <div className="text-center mb-14 -mt-8">
+      <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Why Choose <span className="text-white">booleanforce</span>
+      </h2>
+      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+        We're not just another tech company we are your strategic partner in digital transformation.
+      </p>
+    </div>
+
+    {/* Cards Grid */}
+    <div className="grid md:grid-cols-3 gap-10">
+      {[
+        {
+          icon: <FaUsers />,
+          title: "Expert Team",
+          description:
+            "Our team consists of highly skilled professionals with years of experience in their respective fields.",
+        },
+        {
+          icon: <FaAward />,
+          title: "Proven Track Record",
+          description:
+            "We have a proven track record of delivering successful projects for clients across various industries.",
+        },
+        {
+          icon: <FaHandshake />,
+          title: "Client-Centric Approach",
+          description:
+            "We prioritize our clients' needs and work closely with them to ensure their satisfaction.",
+        },
+      ].map((item, index) => (
+        <div
+          key={index}
+          className="group relative p-8 rounded-3xl bg-gray-800/70 backdrop-blur-lg shadow-lg hover:shadow-blue-500/20 transition-all duration-500 transform hover:-translate-y-2"
+        >
+          {/* Icon */}
+          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-3xl text-white shadow-md group-hover:scale-110 transition-transform duration-300">
+            {item.icon}
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
-                <FaUsers className="text-2xl text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Expert Team</h3>
-              <p className="text-gray-400">Our team consists of highly skilled professionals with years of experience in their respective fields.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
-                <FaAward className="text-2xl text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Proven Track Record</h3>
-              <p className="text-gray-400">We have a proven track record of delivering successful projects for clients across various industries.</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center mx-auto mb-4">
-                <FaHandshake className="text-2xl text-white" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Client-Centric Approach</h3>
-              <p className="text-gray-400">We prioritize our clients' needs and work closely with them to ensure their satisfaction.</p>
-            </div>
-          </div>
+
+          {/* Title & Description */}
+          <h3 className="text-2xl font-semibold text-white mt-4">{item.title}</h3>
+          <p className="text-gray-400 mt-2 leading-relaxed">{item.description}</p>
+
+          {/* Gentle hover glow */}
+          <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-xl transition duration-500"></div>
         </div>
-      </section>
+      ))}
+    </div>
+  </div>
+</section>
+
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-6">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Get In Touch</h2>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Ready to transform your business? Let's discuss how we can help
-            </p>
-          </div>
-          <div className="bg-gray-800 rounded-lg p-8">
-            <form className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-2">Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                    placeholder="Your Name"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-2">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                    placeholder="Your Email"
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="company" className="block text-sm font-medium mb-2">Company</label>
-                <input
-                  type="text"
-                  id="company"
-                  className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                  placeholder="Your Company"
-                />
-              </div>
-              <div>
-                <label htmlFor="service" className="block text-sm font-medium mb-2">Service Interested In</label>
-                <select
-                  id="service"
-                  className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                >
-                  <option value="">Select a Service</option>
-                  {companyServices.map((service) => (
-                    <option key={service.id} value={service.title}>{service.title}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium mb-2">Message</label>
-                <textarea
-                  id="message"
-                  rows={5}
-                  className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
-                  placeholder="Tell us about your project"
-                ></textarea>
-              </div>
-              <div className="text-center">
-                <button
-                  type="submit"
-                  className="px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
-                >
-                  Send Message
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+<section id="contact" className="relative py-24 px-6 bg-gray-900 overflow-hidden -mt-12">
+  {/* Background glow orbs */}
+  <div className="absolute top-0 left-0 w-72 h-72 bg-blue-500/10 blur-[120px] rounded-full"></div>
+  <div className="absolute bottom-0 right-0 w-72 h-72 bg-purple-500/10 blur-[120px] rounded-full"></div>
 
-      {/* Footer */}
-      {/* <footer className="py-8 px-6 bg-gray-800">
-        <div className="container mx-auto max-w-6xl">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-2xl font-bold text-blue-400 mb-2">booleanforce</h3>
-              <p className="text-gray-400">Transforming businesses through innovative technology solutions</p>
-            </div>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FaGithub size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FaLinkedin size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FaEnvelope size={20} />
-              </a>
-            </div>
+  <div className="container mx-auto max-w-4xl relative z-10">
+    {/* Header */}
+    <div className="text-center mb-14 -mt-8">
+      <h2 className="text-5xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Get In Touch
+      </h2>
+      <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+        Ready to transform your business? Let's discuss how we can help.
+      </p>
+    </div>
+
+    {/* Glass Card Form */}
+    <div className="relative group p-8 rounded-3xl bg-gray-800/60 backdrop-blur-lg shadow-lg hover:shadow-blue-500/20 transition-all duration-500 transform hover:-translate-y-2">
+      <form className="space-y-6">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-2 text-gray-200">Name</label>
+            <input
+              type="text"
+              id="name"
+              className="w-full px-4 py-3 bg-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all duration-300"
+              placeholder="Your Name"
+            />
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-700 text-center">
-            <p className="text-gray-400">© {new Date().getFullYear()} booleanforce. All rights reserved.</p>
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium mb-2 text-gray-200">Email</label>
+            <input
+              type="email"
+              id="email"
+              className="w-full px-4 py-3 bg-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all duration-300"
+              placeholder="Your Email"
+            />
           </div>
         </div>
-      </footer> */}
+
+        <div>
+          <label htmlFor="company" className="block text-sm font-medium mb-2 text-gray-200">Company</label>
+          <input
+            type="text"
+            id="company"
+            className="w-full px-4 py-3 bg-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all duration-300"
+            placeholder="Your Company"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="service" className="block text-sm font-medium mb-2 text-gray-200">Service Interested In</label>
+          <select
+            id="service"
+            className="w-full px-4 py-3 bg-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all duration-300"
+          >
+            <option value="">Select a Service</option>
+            {companyServices.map((service) => (
+              <option key={service.id} value={service.title}>{service.title}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="message" className="block text-sm font-medium mb-2 text-gray-200">Message</label>
+          <textarea
+            id="message"
+            rows={5}
+            className="w-full px-4 py-3 bg-gray-700/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white transition-all duration-300"
+            placeholder="Tell us about your project"
+          ></textarea>
+        </div>
+
+        <div className="text-center">
+          <button
+            type="submit"
+            className="px-8 py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-full hover:scale-105 transition-transform duration-300 shadow-lg"
+          >
+            Send Message
+          </button>
+        </div>
+      </form>
+
+      {/* Soft glow behind card */}
+      <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-2xl transition duration-500"></div>
+    </div>
+  </div>
+</section>
+
+
+    
     </div>
   );
 }

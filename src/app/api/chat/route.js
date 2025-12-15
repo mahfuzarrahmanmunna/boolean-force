@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
 import axios from 'axios';
+import { NextResponse } from 'next/server';
+
 
 // System prompt for the AI assistant
 const OPENROUTER_SYSTEM_PROMPT = `
