@@ -474,12 +474,17 @@ export default function ManageWorkers() {
             // Update worker's assigned work
             setWorkers(workers.map(w =>
                 w._id === assigningWorkTo._id
-                    ? { ...w, assignedWork: [...(w.assignedWork || []), ...result.data.assignedTasks] }
+                    ? { ...w, assignedWork: [...(w.assignedWork || []), ...result.data.assignedTasks.map(t => t._id)] }
                     : w
             ));
 
-            // Remove assigned tasks from available work list
-            setAvailableWork(availableWork.filter(w => !selectedTasksToAssign.includes(w._id)));
+            // Update available work list with the updated tasks
+            setAvailableWork(prev =>
+                prev.map(task => {
+                    const updatedTask = result.data.assignedTasks.find(t => t._id === task._id);
+                    return updatedTask || task;
+                })
+            );
 
             setAssigningWorkTo(null);
             setSelectedTasksToAssign([]);
@@ -838,6 +843,25 @@ export default function ManageWorkers() {
                                                     <p className="text-sm text-muted-foreground">
                                                         {task.description}
                                                     </p>
+                                                    {/* Display currently assigned workers for this task */}
+                                                    {task?.assignedTo && (
+                                                        <div className="flex flex-wrap gap-1 mt-1">
+                                                            <span className="text-xs text-muted-foreground">Assigned to:</span>
+                                                            {
+                                                                // Convert to array if it's a string (old format) or use as-is if already an array
+                                                                (Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo])
+                                                                    .filter(Boolean) // Remove any falsy values (null, undefined, empty string)
+                                                                    .map(workerId => {
+                                                                        const worker = workers.find(w => w._id === workerId);
+                                                                        return worker ? (
+                                                                            <Badge key={workerId} variant="outline" className="text-xs">
+                                                                                {worker.name}
+                                                                            </Badge>
+                                                                        ) : null;
+                                                                    })
+                                                            }
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}

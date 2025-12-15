@@ -580,7 +580,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'All Projects',
             icon: <Package className="w-5 h-5" />,
-            href: 'manage-all-projects',
+            href: '/dashboard/manage-all-projects',
             badge: null,
             color: 'purple',
             gradient: 'from-purple-500 to-purple-600'
