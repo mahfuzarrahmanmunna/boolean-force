@@ -108,7 +108,7 @@ function TechBanner() {
 
                 {/* Tech buttons */}
                 <div className="flex flex-wrap justify-center gap-4 mb-12">
-                    <button className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
+                    <button classname=" cursor-pointerpx-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
                             <path fillRule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 100 4h2a2 2 0 100 4h2a1 1 0 100 2 2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clipRule="evenodd"></path>
@@ -116,21 +116,21 @@ function TechBanner() {
                         Official Partner
                     </button>
 
-                    <button className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
+                    <button classname=" cursor-pointerpx-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd"></path>
                         </svg>
                         Selectel
                     </button>
 
-                    <button className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
+                    <button classname=" cursor-pointerpx-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"></path>
                         </svg>
                         per.py
                     </button>
 
-                    <button className="px-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
+                    <button classname=" cursor-pointerpx-6 py-3 bg-white/10 backdrop-blur-md rounded-full flex items-center gap-2 hover:bg-white/20 transition-all duration-300">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd"></path>
                         </svg>
@@ -139,7 +139,7 @@ function TechBanner() {
                 </div>
 
                 {/* CTA Button */}
-                <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105">
+                <button classname=" cursor-pointerpx-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105">
                     Start your project today
                 </button>
             </div>

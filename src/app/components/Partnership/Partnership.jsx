@@ -140,12 +140,12 @@ const Partnership = () => {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <button className="bg-gradient-to-r from-[#A9DBDC] to-[#3B85FE] hover:from-opacity-90 hover:to-opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg relative overflow-hidden group">
+                            <button classname=" cursor-pointerbg-gradient-to-r from-[#A9DBDC] to-[#3B85FE] hover:from-opacity-90 hover:to-opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg relative overflow-hidden group">
                                 <span className="relative z-10">Get in Touch</span>
                                 <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                             </button>
 
-                            <button className="bg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1">
+                            <button classname=" cursor-pointerbg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1">
                                 Download Partnership Guide
                             </button>
                         </div>

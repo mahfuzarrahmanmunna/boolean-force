@@ -1723,7 +1723,7 @@ export default function SubmitTaskPage() {
                                 ))}
                                 {users.length > 5 && (
                                     <div className="text-center">
-                                        <button className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                                        <button classname=" cursor-pointertext-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
                                             View all members
                                         </button>
                                     </div>

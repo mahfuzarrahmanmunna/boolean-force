@@ -101,7 +101,7 @@ export async function POST(request) {
                     {
                         headers: {
                             'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'http://localhost:3000',
+                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'https://boolean-force.vercel.app',
                             'X-Title': 'Booleanforce Expert Chatbot',
                             'Content-Type': 'application/json',
                         },

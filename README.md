@@ -14,7 +14,7 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [https://boolean-force.vercel.app](https://boolean-force.vercel.app) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
@@ -54,7 +54,7 @@ DB_NAME=boolean_force
 OPENROUTER_API_KEY=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
 
 # Next.js Configuration
-NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_URL=https://boolean-force.vercel.app
 NEXTAUTH_SECRET=your_nextauth_secret_here
 
 # Optional: Node environment

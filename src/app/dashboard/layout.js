@@ -118,6 +118,8 @@ import {
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
+import { UserPenIcon } from 'lucide-react';
+import { UserPlus2Icon } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -604,11 +606,27 @@ export default function AdminLayout({ children }) {
         {
             title: 'Client Accounts',
             icon: <UserPlus className="w-5 h-5" />,
-            href: 'dashboard/create-client-account',
+            href: '/dashboard/create-client-account',
             badge: null,
             color: 'amber',
             gradient: 'from-amber-500 to-amber-600',
             // onClick: () => setShowClientAccountModal(true)
+        },
+        {
+            title: 'Manage Clients',
+            icon: <UserPenIcon className='w-5 h-5' />,
+            href: "/dashboard/manage-clients",
+            budge: null,
+            color: 'cyan',
+            gradient: 'from-cyan-500 to-cyan-600',
+        },
+        {
+            title: "All Employee",
+            icon: <UserPlus2Icon/>,
+            href: "/dashboard/all-emplyee",
+            budge: null,
+            color: 'gray',
+            gradient: 'from-gray-500 to-gray-600',
         },
         {
             title: 'Settings',
@@ -1204,7 +1222,7 @@ export default function AdminLayout({ children }) {
                                                 ))}
                                             </div>
                                             <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                                                <button className="w-full text-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                                <button classname=" cursor-pointerw-full text-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                                                     View all notifications
                                                 </button>
                                             </div>

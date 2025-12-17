@@ -202,10 +202,10 @@ const PartnershipPage = () => {
                                 className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
                                 variants={itemVariants}
                             >
-                                <button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
+                                <button classname=" cursor-pointerbg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg">
                                     Explore Partnerships
                                 </button>
-                                <button className="bg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                <button classname=" cursor-pointerbg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
                                     Schedule a Call
                                 </button>
                             </motion.div>
@@ -623,7 +623,7 @@ const PartnershipPage = () => {
                                     className="flex flex-col sm:flex-row gap-4 justify-center items-center"
                                     variants={itemVariants}
                                 >
-                                    <button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg relative overflow-hidden group">
+                                    <button classname=" cursor-pointerbg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg relative overflow-hidden group">
                                         <span className="relative z-10 flex items-center">
                                             Get in Touch
                                             <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -633,7 +633,7 @@ const PartnershipPage = () => {
                                         <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                                     </button>
 
-                                    <button className="bg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center">
+                                    <button classname=" cursor-pointerbg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center">
                                         Download Partnership Guide
                                         <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>

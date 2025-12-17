@@ -249,11 +249,11 @@ export default function SubmitTaskPage() {
                             <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Submit Task</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                            <button classname=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                                 <Search className="w-5 h-5" />
                             </button>
                             <div className="relative">
-                                <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                <button classname=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                                     <Filter className="w-5 h-5" />
                                 </button>
                             </div>

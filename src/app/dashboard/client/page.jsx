@@ -417,13 +417,13 @@ export default function ClientDashboard() {
                                                 </div>
 
                                                 <div className="flex space-x-2">
-                                                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                                    <button classname=" cursor-pointerp-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                         <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                     </button>
-                                                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                                    <button classname=" cursor-pointerp-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                         <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                     </button>
-                                                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                                    <button classname=" cursor-pointerp-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                         <MoreHorizontal className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                     </button>
                                                 </div>
@@ -450,10 +450,10 @@ export default function ClientDashboard() {
                                                 className="pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                                             />
                                         </div>
-                                        <button className="p-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <button classname=" cursor-pointerp-2 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <Filter className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                         </button>
-                                        <button className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
+                                        <button classname=" cursor-pointerpx-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
                                             <Plus className="w-4 h-4 mr-2" />
                                             New Project
                                         </button>
@@ -513,10 +513,10 @@ export default function ClientDashboard() {
                                                 </td>
                                                 <td className="py-4 px-4">
                                                     <div className="flex items-center space-x-2">
-                                                        <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                        <button classname=" cursor-pointerp-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                                                             <Eye className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                         </button>
-                                                        <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                                                        <button classname=" cursor-pointerp-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                                                             <Edit className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                         </button>
                                                     </div>
@@ -536,7 +536,7 @@ export default function ClientDashboard() {
                                 <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                                     <div className="flex items-center justify-between">
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-white">Team Members</h3>
-                                        <button className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
+                                        <button classname=" cursor-pointerpx-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
                                             <Plus className="w-4 h-4 mr-2" />
                                             Invite Member
                                         </button>
@@ -561,10 +561,10 @@ export default function ClientDashboard() {
                                                         {member.status}
                                                     </span>
                                                     <div className="flex space-x-2">
-                                                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                                        <button classname=" cursor-pointerp-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                             <Mail className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                         </button>
-                                                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                                        <button classname=" cursor-pointerp-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                                                             <MessageSquare className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                                                         </button>
                                                     </div>
@@ -589,7 +589,7 @@ export default function ClientDashboard() {
                             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                                 <div className="flex items-center justify-between">
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">Invoices</h3>
-                                    <button className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
+                                    <button classname=" cursor-pointerpx-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
                                         <Plus className="w-4 h-4 mr-2" />
                                         Generate Invoice
                                     </button>
@@ -744,7 +744,7 @@ export default function ClientDashboard() {
                                 </div>
 
                                 <div className="flex justify-end mt-8">
-                                    <button className="px-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
+                                    <button classname=" cursor-pointerpx-6 py-2 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-lg hover:from-indigo-600 hover:to-purple-700">
                                         Save Changes
                                     </button>
                                 </div>

@@ -2,6 +2,8 @@
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import clientPromise from "@/lib/mongodbAdapter";
+
 
 // PUT - Update a worker's status
 export async function PUT(request, { params }) {
@@ -51,6 +53,29 @@ export async function DELETE(request, { params }) {
         console.error(`Error in DELETE /api/workers/${params.id}:`, err);
         return NextResponse.json(
             { success: false, error: "Failed to delete worker." },
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET(request) {
+    try {
+        // Connect to database
+        const client = await clientPromise;
+        const db = client.db(process.env.DB_NAME);
+
+        // Get all workers (users with role "user")
+        const workers = await db.collection("users")
+            .find({ role: "worker" })
+            .project({ password: 0 }) // Exclude password from response
+            .toArray();
+
+        // Return success response
+        return NextResponse.json(workers);
+    } catch (error) {
+        console.error("Error fetching workers:", error);
+        return NextResponse.json(
+            { error: "Internal server error" },
             { status: 500 }
         );
     }

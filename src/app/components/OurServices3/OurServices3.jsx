@@ -186,7 +186,7 @@ const OurServices3 = () => {
                     >
                         <h3 className="text-2xl font-bold mb-3" style={{ color: '#FFFFFF' }}>Need a custom solution?</h3>
                         <p className="mb-6 max-w-md" style={{ color: '#A9DBDC' }}>We're here to help bring your unique vision to life with tailored solutions.</p>
-                        <button className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105 flex items-center"
+                        <button classname=" cursor-pointerpx-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105 flex items-center"
                             style={{ background: `linear-gradient(135deg, ${PRIMARY_COLOR}, ${SECONDARY_COLOR})`, boxShadow: `0 10px 25px -5px ${PRIMARY_COLOR}40` }}
                         >
                             Get In Touch

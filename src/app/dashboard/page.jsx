@@ -168,14 +168,14 @@ const AdminPage = () => {
                                 <RefreshCw className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                             </button>
                         </div>
-                        <button className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
+                        <button classname=" cursor-pointerp-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
                             <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </button>
-                        <button className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
+                        <button classname=" cursor-pointerp-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
                             <Download className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         </button>
                         <div className="relative">
-                            <button className="p-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
+                            <button classname=" cursor-pointerp-2 rounded-lg bg-white dark:bg-gray-800 shadow hover:shadow-md transition-all duration-300">
                                 <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                             </button>
                             {notifications > 0 && (
@@ -422,7 +422,7 @@ const AdminPage = () => {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 animate-slideUp" style={{ animationDelay: '0.8s' }}>
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Recent Transactions</h2>
-                        <button className="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
+                        <button classname=" cursor-pointertext-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
                             View all
                             <ChevronRight className="w-4 h-4 ml-1" />
                         </button>
@@ -468,7 +468,7 @@ const AdminPage = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-slideUp" style={{ animationDelay: '0.9s' }}>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Team Members</h2>
-                            <button className="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
+                            <button classname=" cursor-pointertext-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
                                 View all
                                 <ChevronRight className="w-4 h-4 ml-1" />
                             </button>
@@ -503,7 +503,7 @@ const AdminPage = () => {
                     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-slideUp" style={{ animationDelay: '1.0s' }}>
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Project Progress</h2>
-                            <button className="text-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
+                            <button classname=" cursor-pointertext-blue-600 dark:text-blue-400 text-sm font-medium flex items-center">
                                 View all
                                 <ChevronRight className="w-4 h-4 ml-1" />
                             </button>
@@ -543,19 +543,19 @@ const AdminPage = () => {
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 animate-slideUp" style={{ animationDelay: '1.1s' }}>
                     <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-6">Quick Actions</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <button className="flex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200">
+                        <button classname=" cursor-pointerflex flex-col items-center justify-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200">
                             <UserPlus className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-2" />
                             <span className="text-sm font-medium text-gray-800 dark:text-white">Add User</span>
                         </button>
-                        <button className="flex flex-col items-center justify-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors duration-200">
+                        <button classname=" cursor-pointerflex flex-col items-center justify-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors duration-200">
                             <Package className="w-8 h-8 text-green-600 dark:text-green-400 mb-2" />
                             <span className="text-sm font-medium text-gray-800 dark:text-white">New Product</span>
                         </button>
-                        <button className="flex flex-col items-center justify-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors duration-200">
+                        <button classname=" cursor-pointerflex flex-col items-center justify-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors duration-200">
                             <FileText className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-2" />
                             <span className="text-sm font-medium text-gray-800 dark:text-white">Generate Report</span>
                         </button>
-                        <button className="flex flex-col items-center justify-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors duration-200">
+                        <button classname=" cursor-pointerflex flex-col items-center justify-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/30 transition-colors duration-200">
                             <MessageSquare className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mb-2" />
                             <span className="text-sm font-medium text-gray-800 dark:text-white">Send Message</span>
                         </button>

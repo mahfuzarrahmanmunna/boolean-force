@@ -318,7 +318,7 @@ const DesktopNav = ({
                         <div className="mt-auto">
                             <Link href="/contact" className="relative overflow-hidden group block">
                                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-300"></div>
-                                <button className="relative w-full bg-slate-700 border border-slate-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
+                                <button classname=" cursor-pointerrelative w-full bg-slate-700 border border-slate-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
                                     <span className="relative z-10 flex items-center justify-center">
                                         Let's Talk
                                         <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -528,7 +528,7 @@ const MobileMenu = ({
                             <div className="mb-6">
                                 <Link href="/contact" onClick={onClose} className="relative overflow-hidden group block">
                                     <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-300"></div>
-                                    <button className="relative w-full bg-slate-700 border border-slate-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
+                                    <button classname=" cursor-pointerrelative w-full bg-slate-700 border border-slate-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
                                         <span className="relative z-10 flex items-center justify-center">
                                             Let's Talk
                                             <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />

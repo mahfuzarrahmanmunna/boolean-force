@@ -299,7 +299,7 @@ export default function WorkerDashboardPage() {
                                 <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                                     {isDarkMode ? <Sun className="w-5 h-5 text-slate-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
                                 </button>
-                                <button className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
+                                <button classname=" cursor-pointerp-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
                                     <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                                     <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
                                 </button>
@@ -485,7 +485,7 @@ export default function WorkerDashboardPage() {
                                                 <td className="px-6 py-4 whitespace-nowrap">{getPriorityBadge(task.priority)}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(task.status)}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                                                    <button classname=" cursor-pointertext-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
                                                         <MoreHorizontal className="w-5 h-5" />
                                                     </button>
                                                 </td>

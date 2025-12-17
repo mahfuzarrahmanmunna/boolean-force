@@ -192,7 +192,7 @@ function BooleanForceBanner() {
 
                 {/* Enhanced CTA button */}
                 <div className="mb-16">
-                    <button className="px-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 hover:from-blue-600 hover:to-purple-700">
+                    <button classname=" cursor-pointerpx-8 py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 hover:from-blue-600 hover:to-purple-700">
                         Get Started Today
                     </button>
                 </div>

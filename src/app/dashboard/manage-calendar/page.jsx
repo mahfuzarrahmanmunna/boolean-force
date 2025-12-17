@@ -763,7 +763,7 @@ export default function CalendarPage() {
                                 </div>
 
                                 <div className="mt-4 flex justify-end">
-                                    <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                                    <button classname=" cursor-pointertext-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
                                         View Details →
                                     </button>
                                 </div>
