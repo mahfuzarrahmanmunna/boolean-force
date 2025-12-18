@@ -6,8 +6,15 @@ import {
     FaChartBar, FaChartPie, FaChartLine, FaUsers, FaTasks, FaClock, FaTrophy, FaArrowUp, FaArrowDown,
     FaFilter, FaSearch, FaDownload, FaUser, FaEnvelope, FaCalendar, FaBuilding, FaPhone,
     FaSpinner, FaCheckCircle, FaExclamationCircle, FaTimes, FaEdit, FaEye,
-    FaPlus, FaUserTie, FaBriefcase, FaGraduationCap, FaAward, FaStar
+    FaPlus, FaUserTie, FaBriefcase, FaGraduationCap, FaAward, FaStar,
+    FaRocket, FaMedal, FaFire, FaGem, FaCrown, FaCertificate, FaLightbulb,
+    FaHandshake, FaPuzzlePiece, FaTools, FaCogs, FaFlag, FaHistory,
+    FaChartArea, FaIndustry, FaProjectDiagram, FaGlobe, FaUserClock, FaRegChartBar,
+    FaInfoCircle, FaSortAmountDown, FaSortAmountUp
 } from 'react-icons/fa';
+
+// Recharts imports
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Area, AreaChart } from 'recharts';
 
 // shadcn/ui imports
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,158 +37,150 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {  TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Progress } from '@/components/ui/progress';
 
-// Constants
+// Constants with professional color palette
 const STATUS_OPTIONS = [
-    { value: 'active', label: 'Active', color: 'bg-green-500', lightColor: 'bg-green-100', textColor: 'text-green-800' },
-    { value: 'inactive', label: 'Inactive', color: 'bg-gray-500', lightColor: 'bg-gray-100', textColor: 'text-gray-800' },
-    { value: 'pending', label: 'Pending', color: 'bg-yellow-500', lightColor: 'bg-yellow-100', textColor: 'text-yellow-800' },
-    { value: 'suspended', label: 'Suspended', color: 'bg-red-500', lightColor: 'bg-red-100', textColor: 'text-red-800' }
+    { value: 'active', label: 'Active', color: '#10b981', lightColor: 'bg-emerald-100', textColor: 'text-emerald-800', icon: FaCheckCircle },
+    { value: 'inactive', label: 'Inactive', color: '#64748b', lightColor: 'bg-slate-100', textColor: 'text-slate-800', icon: FaTimes },
+    { value: 'pending', label: 'Pending', color: '#f59e0b', lightColor: 'bg-amber-100', textColor: 'text-amber-800', icon: FaClock },
+    { value: 'suspended', label: 'Suspended', color: '#ef4444', lightColor: 'bg-red-100', textColor: 'text-red-800', icon: FaExclamationCircle }
 ];
 
 const JOB_TITLE_OPTIONS = [
-    { value: 'full-stack-developer', label: 'Full Stack Developer', icon: '💻', color: 'bg-blue-500' },
-    { value: 'devops-engineer', label: 'DevOps Engineer', icon: '🔧', color: 'bg-purple-500' },
-    { value: 'graphics-designer', label: 'Graphics Designer', icon: '🎨', color: 'bg-pink-500' },
-    { value: 'ui-ux-designer', label: 'UI/UX Designer', icon: '🎨', color: 'bg-indigo-500' },
-    { value: 'backend-developer', label: 'Backend Developer', icon: '💻', color: 'bg-cyan-500' },
-    { value: 'frontend-developer', label: 'Frontend Developer', icon: '💻', color: 'bg-emerald-500' },
-    { value: 'mobile-developer', label: 'Mobile Developer', icon: '📱', color: 'bg-orange-500' },
-    { value: 'qa-engineer', label: 'QA Engineer', icon: '🔍', color: 'bg-teal-500' },
-    { value: 'data-scientist', label: 'Data Scientist', icon: '📊', color: 'bg-violet-500' },
-    { value: 'product-manager', label: 'Product Manager', icon: '📋', color: 'bg-amber-500' },
-    { value: 'other', label: 'Other', icon: '👤', color: 'bg-slate-500' }
+    { value: 'full-stack-developer', label: 'Full Stack Developer', icon: '💻', color: '#3b82f6', level: 'high' },
+    { value: 'devops-engineer', label: 'DevOps Engineer', icon: '🔧', color: '#8b5cf6', level: 'high' },
+    { value: 'graphics-designer', label: 'Graphics Designer', icon: '🎨', color: '#ec4899', level: 'medium' },
+    { value: 'ui-ux-designer', label: 'UI/UX Designer', icon: '🎨', color: '#6366f1', level: 'medium' },
+    { value: 'backend-developer', label: 'Backend Developer', icon: '💻', color: '#06b6d4', level: 'high' },
+    { value: 'frontend-developer', label: 'Frontend Developer', icon: '💻', color: '#10b981', level: 'high' },
+    { value: 'mobile-developer', label: 'Mobile Developer', icon: '📱', color: '#f97316', level: 'high' },
+    { value: 'qa-engineer', label: 'QA Engineer', icon: '🔍', color: '#14b8a6', level: 'medium' },
+    { value: 'data-scientist', label: 'Data Scientist', icon: '📊', color: '#8b5cf6', level: 'high' },
+    { value: 'product-manager', label: 'Product Manager', icon: '📋', color: '#f59e0b', level: 'high' },
+    { value: 'other', label: 'Other', icon: '👤', color: '#64748b', level: 'low' }
 ];
 
 const CATEGORY_OPTIONS = [
-    { value: 'development', label: 'Development', icon: '💻', color: 'bg-blue-500' },
-    { value: 'design', label: 'Design', icon: '🎨', color: 'bg-pink-500' },
-    { value: 'marketing', label: 'Marketing', icon: '📢', color: 'bg-orange-500' },
-    { value: 'research', label: 'Research', icon: '🔍', color: 'bg-purple-500' },
-    { value: 'maintenance', label: 'Maintenance', icon: '🔧', color: 'bg-gray-500' },
-    { value: 'testing', label: 'Testing', icon: '🧪', color: 'bg-teal-500' },
-    { value: 'documentation', label: 'Documentation', icon: '📝', color: 'bg-indigo-500' },
-    { value: 'other', label: 'Other', icon: '📌', color: 'bg-slate-500' }
+    { value: 'development', label: 'Development', icon: '💻', color: '#3b82f6' },
+    { value: 'design', label: 'Design', icon: '🎨', color: '#ec4899' },
+    { value: 'marketing', label: 'Marketing', icon: '📢', color: '#f97316' },
+    { value: 'research', label: 'Research', icon: '🔍', color: '#8b5cf6' },
+    { value: 'maintenance', label: 'Maintenance', icon: '🔧', color: '#6b7280' },
+    { value: 'testing', label: 'Testing', icon: '🧪', color: '#14b8a6' },
+    { value: 'documentation', label: 'Documentation', icon: '📝', color: '#6366f1' },
+    { value: 'other', label: 'Other', icon: '📌', color: '#64748b' }
 ];
 
 const PRIORITY_OPTIONS = [
-    { value: 'low', label: 'Low', color: 'bg-green-500' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-500' },
-    { value: 'high', label: 'High', color: 'bg-orange-500' },
-    { value: 'urgent', label: 'Urgent', color: 'bg-red-500' }
+    { value: 'low', label: 'Low', color: '#10b981', lightColor: 'bg-green-100', textColor: 'text-green-800', icon: FaFlag },
+    { value: 'medium', label: 'Medium', color: '#f59e0b', lightColor: 'bg-yellow-100', textColor: 'text-yellow-800', icon: FaFlag },
+    { value: 'high', label: 'High', color: '#f97316', lightColor: 'bg-orange-100', textColor: 'text-orange-800', icon: FaFlag },
+    { value: 'urgent', label: 'Urgent', color: '#ef4444', lightColor: 'bg-red-100', textColor: 'text-red-800', icon: FaFlag }
 ];
 
 // Helper Components
 const StatusBadge = ({ status }) => {
     const statusOption = STATUS_OPTIONS.find(option => option.value === status);
+    const Icon = statusOption?.icon || FaCheckCircle;
+    
     return (
-        <Badge className={`px-2 py-1 text-xs font-medium text-white ${statusOption?.color || 'bg-gray-500'}`}>
+        <Badge className={`px-3 py-1.5 text-xs font-medium text-white flex items-center gap-1`} style={{ backgroundColor: statusOption?.color || '#64748b' }}>
+            <Icon className="h-3 w-3" />
             {statusOption?.label || status}
         </Badge>
     );
 };
 
 const LoadingSpinner = ({ message }) => (
-    <div className="flex justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
-        <div className="w-96 text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mx-auto"></div>
-            <p className="mt-6 text-lg font-medium text-center">{message}</p>
+    <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+        <div className="relative">
+            <div className="w-16 h-16 border-4 border-slate-200 dark:border-slate-700 rounded-full"></div>
+            <div className="absolute top-0 left-0 w-16 h-16 border-4 border-t-blue-500 border-r-transparent border-b-transparent border-l-transparent rounded-full animate-spin"></div>
         </div>
+        <p className="mt-6 text-lg font-medium text-slate-700 dark:text-slate-300">{message}</p>
     </div>
 );
 
-// Donut Chart Component
+// Enhanced Chart Components using Recharts with professional styling
 const DonutChart = ({ data, colors, labels, title }) => {
     const total = data.reduce((sum, value) => sum + value, 0);
-    const [hoveredSegment, setHoveredSegment] = useState(null);
+    
+    // Transform data for Recharts
+    const chartData = labels.map((label, index) => ({
+        name: label,
+        value: data[index],
+        percentage: total > 0 ? Math.round((data[index] / total) * 100) : 0
+    }));
+    
+    // Custom label for the pie chart
+    const renderCustomizedLabel = ({
+        cx, cy, midAngle, innerRadius, outerRadius, percent
+    }) => {
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+        
+        if (percent < 0.05) return null; // Don't show label if percentage is less than 5%
+        
+        return (
+            <text 
+                x={x} 
+                y={y} 
+                fill="white" 
+                textAnchor={x > cx ? 'start' : 'end'} 
+                dominantBaseline="central"
+                className="text-sm font-medium"
+            >
+                {`${(percent * 100).toFixed(0)}%`}
+            </text>
+        );
+    };
     
     return (
-        <div className="h-64 flex flex-col items-center justify-center">
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">{title}</h3>
-            <div className="relative">
-                <svg width="200" height="200" viewBox="0 0 200 200" className="transform -rotate-90">
-                    {data.map((value, index) => {
-                        const percentage = total > 0 ? (value / total) * 100 : 0;
-                        const strokeWidth = hoveredSegment === index ? 40 : 30;
-                        const radius = 100 - strokeWidth / 2;
-                        const circumference = 2 * Math.PI * radius;
-                        const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-                        const previousPercentages = data.slice(0, index).reduce((sum, val) => sum + (total > 0 ? (val / total) * 100 : 0), 0);
-                        const strokeDashoffset = circumference * (previousPercentages / 100);
-                        
-                        return (
-                            <circle
-                                key={index}
-                                cx="100"
-                                cy="100"
-                                r={radius}
-                                stroke={colors[index]}
-                                strokeWidth={strokeWidth}
-                                fill="none"
-                                strokeDasharray={strokeDasharray}
-                                strokeDashoffset={strokeDashoffset}
-                                className="transition-all duration-300 cursor-pointer"
-                                onMouseEnter={() => setHoveredSegment(index)}
-                                onMouseLeave={() => setHoveredSegment(null)}
-                            />
-                        );
-                    })}
-                    <circle
-                        cx="100"
-                        cy="100"
-                        r="70"
-                        fill="white"
+        <div className="h-80 flex flex-col">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 text-center">{title}</h3>
+            <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                    <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={renderCustomizedLabel}
+                        outerRadius={80}
+                        innerRadius={40}
+                        fill="#8884d8"
+                        dataKey="value"
+                    >
+                        {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={colors[index]} />
+                        ))}
+                    </Pie>
+                    <Tooltip 
+                        formatter={(value, name, props) => [
+                            `${value} (${props.payload.percentage}%)`, 
+                            props.payload.name
+                        ]}
+                        contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                        }}
                     />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center transform rotate-90">
-                        <div className="text-2xl font-bold text-slate-900 dark:text-white">{total}</div>
-                        <div className="text-sm text-slate-600 dark:text-slate-400">Total</div>
-                    </div>
-                </div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2 w-full">
-                {labels.map((label, index) => (
-                    <div key={index} className="flex items-center">
-                        <div className={`h-3 w-3 rounded-full mr-2 ${colors[index]}`}></div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400">{label}: {data[index]}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-// Bar Chart Component
-const BarChart = ({ data, labels, title, colors }) => {
-    const maxValue = Math.max(...data, 1);
-    const [hoveredBar, setHoveredBar] = useState(null);
-    
-    return (
-        <div className="h-64 flex flex-col">
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">{title}</h3>
-            <div className="flex-1 flex items-end justify-between px-2">
-                {data.map((value, index) => (
-                    <div key={index} className="flex flex-col items-center flex-1 mx-1">
-                        <div className="w-full flex flex-col items-center">
-                            <span className={`text-sm font-medium mb-1 transition-opacity duration-200 ${hoveredBar === index ? 'opacity-100' : 'opacity-0'}`}>
-                                {value}
-                            </span>
-                            <div
-                                className={`w-full rounded-t-md transition-all duration-300 cursor-pointer ${colors[index]}`}
-                                style={{ 
-                                    height: `${(value / maxValue) * 100}%`,
-                                    opacity: hoveredBar === null || hoveredBar === index ? 1 : 0.5
-                                }}
-                                onMouseEnter={() => setHoveredBar(index)}
-                                onMouseLeave={() => setHoveredBar(null)}
-                            ></div>
+                </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+                {chartData.map((item, index) => (
+                    <div key={index} className="flex items-center p-2 rounded-lg bg-slate-50 dark:bg-slate-700">
+                        <div className="h-3 w-3 rounded-full mr-2" style={{ backgroundColor: colors[index] }}></div>
+                        <div className="text-xs">
+                            <div className="font-medium text-slate-800 dark:text-white truncate">{item.name}</div>
+                            <div className="text-slate-600 dark:text-slate-400">{item.value} ({item.percentage}%)</div>
                         </div>
-                        <span className="text-xs text-slate-600 dark:text-slate-400 mt-2 text-center truncate w-full">
-                            {labels[index].length > 10 ? `${labels[index].substring(0, 10)}...` : labels[index]}
-                        </span>
                     </div>
                 ))}
             </div>
@@ -189,90 +188,266 @@ const BarChart = ({ data, labels, title, colors }) => {
     );
 };
 
-// Line Chart Component
-const LineChart = ({ data, labels, title }) => {
-    const maxValue = Math.max(...data, 1);
-    const points = data.map((value, index) => {
-        const x = (index / (data.length - 1)) * 100;
-        const y = 100 - (value / maxValue) * 100;
-        return `${x},${y}`;
-    }).join(' ');
+const BarChartComponent = ({ data, labels, title, colors }) => {
+    // Transform data for Recharts
+    const chartData = labels.map((label, index) => ({
+        name: label,
+        value: data[index],
+        fill: colors[index]
+    }));
     
     return (
-        <div className="h-64 flex flex-col">
-            <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">{title}</h3>
-            <div className="flex-1 relative">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {/* Grid lines */}
-                    {[...Array(5)].map((_, i) => (
-                        <line
-                            key={`h-${i}`}
-                            x1="0"
-                            y1={i * 25}
-                            x2="100"
-                            y2={i * 25}
-                            stroke="#e2e8f0"
-                            strokeWidth="0.5"
-                        />
-                    ))}
-                    {[...Array(5)].map((_, i) => (
-                        <line
-                            key={`v-${i}`}
-                            x1={i * 25}
-                            y1="0"
-                            x2={i * 25}
-                            y2="100"
-                            stroke="#e2e8f0"
-                            strokeWidth="0.5"
-                        />
-                    ))}
-                    {/* Line */}
-                    <polyline
-                        points={points}
-                        fill="none"
-                        stroke="#3b82f6"
-                        strokeWidth="2"
+        <div className="h-80 flex flex-col">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 text-center">{title}</h3>
+            <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
                     />
-                    {/* Area under the line */}
-                    <polygon
-                        points={`${points}, 100,0 100,100 0,100`}
-                        fill="url(#gradient)"
-                        opacity="0.3"
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip 
+                        contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                        }}
                     />
-                    {/* Gradient definition */}
+                    <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                        {chartData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                        ))}
+                    </Bar>
+                </BarChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
+
+const LineChartComponent = ({ data, labels, title, colors }) => {
+    // Transform data for Recharts
+    const chartData = labels.map((label, index) => ({
+        name: label,
+        value: data[index]
+    }));
+    
+    return (
+        <div className="h-80 flex flex-col">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 text-center">{title}</h3>
+            <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                    />
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip 
+                        contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                        }}
+                    />
+                    <Line 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke={colors[0]} 
+                        strokeWidth={3}
+                        dot={{ fill: colors[0], strokeWidth: 2, r: 6 }}
+                        activeDot={{ r: 8 }}
+                    />
+                </LineChart>
+            </ResponsiveContainer>
+        </div>
+    );
+};
+
+const AreaChartComponent = ({ data, labels, title, colors }) => {
+    // Transform data for Recharts
+    const chartData = labels.map((label, index) => ({
+        name: label,
+        value: data[index]
+    }));
+    
+    return (
+        <div className="h-80 flex flex-col">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-white mb-4 text-center">{title}</h3>
+            <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
                     <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.5" />
-                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={colors[0]} stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor={colors[0]} stopOpacity={0.1}/>
                         </linearGradient>
                     </defs>
-                    {/* Data points */}
-                    {data.map((value, index) => {
-                        const x = (index / (data.length - 1)) * 100;
-                        const y = 100 - (value / maxValue) * 100;
-                        return (
-                            <circle
-                                key={index}
-                                cx={x}
-                                cy={y}
-                                r="2"
-                                fill="#3b82f6"
-                            />
-                        );
-                    })}
-                </svg>
-                {/* X-axis labels */}
-                <div className="flex justify-between mt-2">
-                    {labels.map((label, index) => (
-                        <span key={index} className="text-xs text-slate-600 dark:text-slate-400">
-                            {label}
-                        </span>
-                    ))}
-                </div>
-            </div>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                    <XAxis 
+                        dataKey="name" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={100}
+                    />
+                    <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                    <Tooltip 
+                        contentStyle={{ 
+                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                            borderRadius: '8px',
+                            border: '1px solid #e2e8f0',
+                            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                        }}
+                    />
+                    <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke={colors[0]} 
+                        strokeWidth={2}
+                        fillOpacity={1} 
+                        fill="url(#colorValue)" 
+                    />
+                </AreaChart>
+            </ResponsiveContainer>
         </div>
     );
 };
+
+// Advanced Distribution Card Component with professional design
+const DistributionCard = ({ title, data, labels, colors, icon: Icon, type }) => {
+    const total = data.reduce((sum, value) => sum + value, 0);
+    const [viewMode, setViewMode] = useState('chart'); // 'chart' or 'list'
+    
+    // Transform data for list view
+    const listData = labels.map((label, index) => ({
+        name: label,
+        value: data[index],
+        percentage: total > 0 ? Math.round((data[index] / total) * 100) : 0,
+        color: colors[index]
+    }));
+    
+    return (
+        <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+            <CardHeader className="pb-3 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-slate-900 dark:text-white flex items-center">
+                        <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white mr-3">
+                            <Icon className="h-5 w-5" />
+                        </div>
+                        {title}
+                    </CardTitle>
+                    <div className="flex items-center space-x-2">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={() => setViewMode(viewMode === 'chart' ? 'list' : 'chart')}
+                                    className={`p-2 rounded-lg transition-colors ${viewMode === 'chart' ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}`}
+                                >
+                                    {viewMode === 'chart' ? <FaRegChartBar className="h-4 w-4" /> : <FaChartBar className="h-4 w-4" />}
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{viewMode === 'chart' ? 'Switch to list view' : 'Switch to chart view'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button className="p-2 rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+                                    <FaInfoCircle className="h-4 w-4" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>More information</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-6">
+                {viewMode === 'chart' ? (
+                    <BarChartComponent
+                        data={data}
+                        labels={labels}
+                        title=""
+                        colors={colors}
+                    />
+                ) : (
+                    <div className="space-y-3">
+                        {listData.map((item, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
+                                <div className="flex items-center">
+                                    <div className="h-4 w-4 rounded-full mr-3" style={{ backgroundColor: item.color }}></div>
+                                    <div>
+                                        <div className="text-sm font-medium text-slate-900 dark:text-white">{item.name}</div>
+                                        <div className="text-xs text-slate-600 dark:text-slate-400">{item.value} items ({item.percentage}%)</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center">
+                                    <div className="w-24 bg-slate-200 dark:bg-slate-600 rounded-full h-2 mr-2">
+                                        <div 
+                                            className="h-2 rounded-full"
+                                            style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
+                                        ></div>
+                                    </div>
+                                    <div className="text-sm font-medium text-slate-900 dark:text-white">{item.value}</div>
+                                </div>
+                            </div>
+                        ))}
+                        <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-600">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Total</span>
+                                <span className="text-xl font-bold text-slate-900 dark:text-white">{total}</span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
+};
+
+// Performance Card Component with professional design
+const PerformanceCard = ({ title, value, subtitle, icon: Icon, color, trend, trendValue, bgGradient }) => (
+    <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 bg-white dark:bg-slate-800">
+        <div className={`h-1 ${bgGradient}`}></div>
+        <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400 uppercase tracking-wide">{title}</p>
+                    <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">{value}</p>
+                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{subtitle}</p>
+                </div>
+                <div className={`p-3 rounded-xl bg-opacity-10 group-hover:scale-110 transition-transform duration-300`} style={{ backgroundColor: `${color}20` }}>
+                    <Icon className={`h-8 w-8`} style={{ color }} />
+                </div>
+            </div>
+            {trend && (
+                <div className="flex items-center mt-4">
+                    {trend === 'up' ? (
+                        <div className="flex items-center text-emerald-600 dark:text-emerald-400">
+                            <FaArrowUp className="h-3 w-3 mr-1" />
+                            <span className="text-sm font-medium">{trendValue}%</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center text-red-600 dark:text-red-400">
+                            <FaArrowDown className="h-3 w-3 mr-1" />
+                            <span className="text-sm font-medium">{trendValue}%</span>
+                        </div>
+                    )}
+                    <span className="text-sm text-slate-600 dark:text-slate-400 ml-2">from last month</span>
+                </div>
+            )}
+        </CardContent>
+    </Card>
+);
 
 // Main Component
 export default function WorkerAnalytics() {
@@ -464,29 +639,35 @@ export default function WorkerAnalytics() {
 
     return (
         <TooltipProvider>
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800">
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
                 {/* Notification */}
                 {notification.show && (
-                    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-pulse ${notification.type === 'success' ? 'bg-green-500 text-white' : notification.type === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                        }`}>
-                        {notification.type === 'success' ? <FaCheckCircle className="text-xl" /> : notification.type === 'error' ? <FaExclamationCircle className="text-xl" /> : <FaSpinner className="text-xl animate-spin" />}
+                    <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg flex items-center space-x-2 animate-pulse ${
+                        notification.type === 'success' ? 'bg-emerald-500 text-white' : 
+                        notification.type === 'error' ? 'bg-red-500 text-white' : 
+                        'bg-blue-500 text-white'
+                    }`}>
+                        {notification.type === 'success' ? <FaCheckCircle className="text-xl" /> : 
+                         notification.type === 'error' ? <FaExclamationCircle className="text-xl" /> : 
+                         <FaSpinner className="text-xl animate-spin" />}
                         <span>{notification.message}</span>
                     </div>
                 )}
 
                 <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                     {/* Header */}
-                    <div className="bg-white dark:bg-slate-800 shadow-md border-b border-slate-200 dark:border-slate-700 mb-6 rounded-t-xl">
+                    <div className="bg-white dark:bg-slate-800 shadow-xl border-b border-slate-200 dark:border-slate-700 mb-8 rounded-t-2xl overflow-hidden">
+                        <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center">
-                                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white mr-3 shadow-lg">
+                                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white mr-4 shadow-lg">
                                             <FaChartBar className="h-6 w-6" />
                                         </div>
                                         Worker Analytics
                                     </h1>
-                                    <p className="mt-1 text-slate-600 dark:text-slate-400">
+                                    <p className="mt-2 text-slate-600 dark:text-slate-400">
                                         Comprehensive analytics and performance metrics for all workers
                                     </p>
                                 </div>
@@ -495,7 +676,7 @@ export default function WorkerAnalytics() {
                                         <TooltipTrigger asChild>
                                             <button
                                                 onClick={generatePDFReport}
-                                                className="inline-flex items-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                                                className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                             >
                                                 <FaDownload className="h-4 w-4 mr-2" />
                                                 Download Report
@@ -507,7 +688,7 @@ export default function WorkerAnalytics() {
                                     </Tooltip>
                                     <button
                                         onClick={() => router.push('/dashboard/all-emplyee')}
-                                        className="inline-flex items-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                                        className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                     >
                                         <FaUsers className="h-4 w-4 mr-2" />
                                         Manage Workers
@@ -515,7 +696,7 @@ export default function WorkerAnalytics() {
                                     {isAdmin && (
                                         <button
                                             onClick={() => router.push('/dashboard/add-worker')}
-                                            className="inline-flex items-center px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                                            className="inline-flex items-center px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white rounded-xl text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                                         >
                                             <FaPlus className="h-4 w-4 mr-2" />
                                             Add Worker
@@ -527,7 +708,7 @@ export default function WorkerAnalytics() {
                     </div>
 
                     {/* Filters */}
-                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden mb-6">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden mb-8">
                         <div className="p-6 border-b border-slate-200 dark:border-slate-700">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div className="relative">
@@ -539,14 +720,14 @@ export default function WorkerAnalytics() {
                                         placeholder="Search workers..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 border-0 border-b-2 border-slate-300 dark:border-slate-600 rounded-t-xl focus:ring-0 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-slate-900 dark:text-white placeholder-slate-400"
+                                        className="w-full pl-12 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400"
                                     />
                                 </div>
                                 <div>
                                     <select
                                         value={statusFilter}
                                         onChange={(e) => setStatusFilter(e.target.value)}
-                                        className="w-full px-4 py-3 border-0 border-b-2 border-slate-300 dark:border-slate-600 rounded-t-xl focus:ring-0 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-slate-900 dark:text-white"
+                                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                     >
                                         <option value="all">All Statuses</option>
                                         {STATUS_OPTIONS.map(option => (
@@ -558,7 +739,7 @@ export default function WorkerAnalytics() {
                                     <select
                                         value={jobTitleFilter}
                                         onChange={(e) => setJobTitleFilter(e.target.value)}
-                                        className="w-full px-4 py-3 border-0 border-b-2 border-slate-300 dark:border-slate-600 rounded-t-xl focus:ring-0 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-slate-900 dark:text-white"
+                                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                     >
                                         <option value="all">All Job Titles</option>
                                         {JOB_TITLE_OPTIONS.map(option => (
@@ -570,7 +751,7 @@ export default function WorkerAnalytics() {
                                     <select
                                         value={dateRange}
                                         onChange={(e) => setDateRange(e.target.value)}
-                                        className="w-full px-4 py-3 border-0 border-b-2 border-slate-300 dark:border-slate-600 rounded-t-xl focus:ring-0 focus:ring-blue-500 focus:border-blue-500 bg-transparent text-slate-900 dark:text-white"
+                                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                                     >
                                         <option value="all">All Time</option>
                                         <option value="week">Last Week</option>
@@ -584,21 +765,21 @@ export default function WorkerAnalytics() {
                     </div>
 
                     {/* Tabs */}
-                    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-                        <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-slate-800 p-1 rounded-lg shadow-md">
-                            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-8">
+                        <TabsList className="grid w-full grid-cols-4 bg-white dark:bg-slate-800 p-1 rounded-xl shadow-md">
+                            <TabsTrigger value="overview" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg cursor-pointer">
                                 <FaChartBar className="h-4 w-4" />
                                 Overview
                             </TabsTrigger>
-                            <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                            <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg cursor-pointer">
                                 <FaChartLine className="h-4 w-4" />
                                 Performance
                             </TabsTrigger>
-                            <TabsTrigger value="distribution" className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                            <TabsTrigger value="distribution" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg cursor-pointer">
                                 <FaChartPie className="h-4 w-4" />
                                 Distribution
                             </TabsTrigger>
-                            <TabsTrigger value="workers" className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white">
+                            <TabsTrigger value="workers" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg cursor-pointer">
                                 <FaUsers className="h-4 w-4" />
                                 Workers
                             </TabsTrigger>
@@ -606,80 +787,58 @@ export default function WorkerAnalytics() {
 
                         {/* Overview Tab */}
                         <TabsContent value="overview" className="mt-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                                <Card className="hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                    <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-slate-900 dark:text-white">Total Workers</CardTitle>
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                                            <FaUsers className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <div className="text-3xl font-bold text-slate-900 dark:text-white">{analytics.totalWorkers}</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            <span className="text-green-600">+{analytics.activeWorkers}</span> active
-                                        </p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                    <div className="h-2 bg-gradient-to-r from-green-500 to-green-600"></div>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-slate-900 dark:text-white">Active Workers</CardTitle>
-                                        <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                                            <div className="h-5 w-5 rounded-full bg-green-500 flex items-center justify-center text-white text-xs font-bold">
-                                                {analytics.activeWorkers}
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <div className="text-3xl font-bold text-slate-900 dark:text-white">{analytics.activeWorkers}</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            {analytics.totalWorkers > 0 ? Math.round((analytics.activeWorkers / analytics.totalWorkers) * 100) : 0}% of total
-                                        </p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                    <div className="h-2 bg-gradient-to-r from-yellow-500 to-yellow-600"></div>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-slate-900 dark:text-white">Pending Workers</CardTitle>
-                                        <div className="h-10 w-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
-                                            <div className="h-5 w-5 rounded-full bg-yellow-500 flex items-center justify-center text-white text-xs font-bold">
-                                                {analytics.pendingWorkers}
-                                            </div>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <div className="text-3xl font-bold text-slate-900 dark:text-white">{analytics.pendingWorkers}</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            {analytics.totalWorkers > 0 ? Math.round((analytics.pendingWorkers / analytics.totalWorkers) * 100) : 0}% of total
-                                        </p>
-                                    </CardContent>
-                                </Card>
-
-                                <Card className="hover:shadow-lg transition-all duration-300 overflow-hidden">
-                                    <div className="h-2 bg-gradient-to-r from-purple-500 to-purple-600"></div>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-slate-900 dark:text-white">Work Items</CardTitle>
-                                        <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                            <FaTasks className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="pt-0">
-                                        <div className="text-3xl font-bold text-slate-900 dark:text-white">{analytics.totalWorkItems}</div>
-                                        <p className="text-sm text-slate-600 dark:text-slate-400">
-                                            <span className="text-blue-600">{analytics.assignedWorkItems}</span> assigned
-                                        </p>
-                                    </CardContent>
-                                </Card>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <PerformanceCard
+                                    title="Total Workers"
+                                    value={analytics.totalWorkers}
+                                    subtitle={`${analytics.activeWorkers} active`}
+                                    icon={FaUsers}
+                                    color="#3b82f6"
+                                    bgGradient="bg-gradient-to-r from-blue-500 to-blue-600"
+                                    trend="up"
+                                    trendValue="12"
+                                />
+                                <PerformanceCard
+                                    title="Active Workers"
+                                    value={analytics.activeWorkers}
+                                    subtitle={`${analytics.totalWorkers > 0 ? Math.round((analytics.activeWorkers / analytics.totalWorkers) * 100) : 0}% of total`}
+                                    icon={FaCheckCircle}
+                                    color="#10b981"
+                                    bgGradient="bg-gradient-to-r from-emerald-500 to-emerald-600"
+                                    trend="up"
+                                    trendValue="8"
+                                />
+                                <PerformanceCard
+                                    title="Pending Workers"
+                                    value={analytics.pendingWorkers}
+                                    subtitle={`${analytics.totalWorkers > 0 ? Math.round((analytics.pendingWorkers / analytics.totalWorkers) * 100) : 0}% of total`}
+                                    icon={FaClock}
+                                    color="#f59e0b"
+                                    bgGradient="bg-gradient-to-r from-amber-500 to-amber-600"
+                                    trend="down"
+                                    trendValue="3"
+                                />
+                                <PerformanceCard
+                                    title="Work Items"
+                                    value={analytics.totalWorkItems}
+                                    subtitle={`${analytics.assignedWorkItems} assigned`}
+                                    icon={FaTasks}
+                                    color="#8b5cf6"
+                                    bgGradient="bg-gradient-to-r from-purple-500 to-purple-600"
+                                    trend="up"
+                                    trendValue="15"
+                                />
                             </div>
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-gray-300">Worker Status Distribution</CardTitle>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+                                    <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
+                                        <CardTitle className="text-slate-900 dark:text-white flex items-center">
+                                            <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 text-white mr-3">
+                                                <FaChartPie className="h-5 w-5" />
+                                            </div>
+                                            Worker Status Distribution
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <DonutChart
@@ -689,23 +848,28 @@ export default function WorkerAnalytics() {
                                                 analytics.pendingWorkers,
                                                 analytics.suspendedWorkers
                                             ]}
-                                            colors={['#10b981', '#6b7280', '#f59e0b', '#ef4444']}
+                                            colors={['#10b981', '#64748b', '#f59e0b', '#ef4444']}
                                             labels={['Active', 'Inactive', 'Pending', 'Suspended']}
                                             title="Worker Status"
                                         />
                                     </CardContent>
                                 </Card>
 
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-white">Top Performers</CardTitle>
+                                <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+                                    <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
+                                        <CardTitle className="text-slate-900 dark:text-white flex items-center">
+                                            <div className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-white mr-3">
+                                                <FaTrophy className="h-5 w-5" />
+                                            </div>
+                                            Top Performers
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="space-y-4">
                                             {analytics.topPerformers.map((worker, index) => (
-                                                <div key={worker._id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                                                <div key={worker._id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors">
                                                     <div className="flex items-center">
-                                                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                                                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
                                                             {worker.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                                         </div>
                                                         <div className="ml-4">
@@ -714,7 +878,7 @@ export default function WorkerAnalytics() {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center">
-                                                        <Badge className="bg-blue-100 text-blue-800">
+                                                        <Badge className="bg-blue-100 text-blue-800 mr-2">
                                                             <FaTasks className="h-3 w-3 mr-1" />
                                                             {worker.assignedWork ? worker.assignedWork.length : 0} tasks
                                                         </Badge>
@@ -737,23 +901,34 @@ export default function WorkerAnalytics() {
 
                         {/* Performance Tab */}
                         <TabsContent value="performance" className="mt-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-white">Monthly Completion Rate</CardTitle>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+                                    <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
+                                        <CardTitle className="text-slate-900 dark:text-white flex items-center">
+                                            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white mr-3">
+                                                <FaChartLine className="h-5 w-5" />
+                                            </div>
+                                            Monthly Completion Rate
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <LineChart
+                                        <AreaChartComponent
                                             data={analytics.monthlyCompletion}
                                             labels={analytics.months}
-                                            title="Work Completion Trend (%)"
+                                            title="Monthly Completion Rate"
+                                            colors={['#10b981']}
                                         />
                                     </CardContent>
                                 </Card>
 
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-white">Performance Metrics</CardTitle>
+                                <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+                                    <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
+                                        <CardTitle className="text-slate-900 dark:text-white flex items-center">
+                                            <div className="p-2 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 text-white mr-3">
+                                                <FaRegChartBar className="h-5 w-5" />
+                                            </div>
+                                            Performance Metrics
+                                        </CardTitle>
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div className="space-y-2">
@@ -761,28 +936,36 @@ export default function WorkerAnalytics() {
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Total Work Items</span>
                                                 <span className="text-2xl font-bold text-slate-900 dark:text-white">{analytics.totalWorkItems}</span>
                                             </div>
-                                            <Progress value={100} className="h-2" />
+                                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: '100%' }}></div>
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Assigned Work Items</span>
                                                 <span className="text-2xl font-bold text-slate-900 dark:text-white">{analytics.assignedWorkItems}</span>
                                             </div>
-                                            <Progress value={analytics.totalWorkItems > 0 ? (analytics.assignedWorkItems / analytics.totalWorkItems) * 100 : 0} className="h-2" />
+                                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                                <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${analytics.totalWorkItems > 0 ? (analytics.assignedWorkItems / analytics.totalWorkItems) * 100 : 0}%` }}></div>
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Completion Rate</span>
                                                 <span className="text-2xl font-bold text-slate-900 dark:text-white">{analytics.completionRate}%</span>
                                             </div>
-                                            <Progress value={analytics.completionRate} className="h-2" />
+                                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${analytics.completionRate}%` }}></div>
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <div className="flex items-center justify-between">
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Avg Work per Worker</span>
                                                 <span className="text-2xl font-bold text-slate-900 dark:text-white">{analytics.avgWorkPerWorker}</span>
                                             </div>
-                                            <Progress value={Math.min(analytics.avgWorkPerWorker * 10, 100)} className="h-2" />
+                                            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+                                                <div className="bg-amber-500 h-2 rounded-full" style={{ width: `${Math.min(analytics.avgWorkPerWorker * 10, 100)}%` }}></div>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -791,49 +974,39 @@ export default function WorkerAnalytics() {
 
                         {/* Distribution Tab */}
                         <TabsContent value="distribution" className="mt-6">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-white">Job Title Distribution</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <BarChart
-                                            data={Object.values(analytics.jobTitleDistribution)}
-                                            labels={Object.keys(analytics.jobTitleDistribution).map(title => 
-                                                JOB_TITLE_OPTIONS.find(opt => opt.value === title)?.label || title
-                                            )}
-                                            title="Workers by Job Title"
-                                            colors={Object.keys(analytics.jobTitleDistribution).map(title => 
-                                                JOB_TITLE_OPTIONS.find(opt => opt.value === title)?.color || 'bg-slate-500'
-                                            )}
-                                        />
-                                    </CardContent>
-                                </Card>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                                <DistributionCard
+                                    title="Job Title Distribution"
+                                    data={Object.values(analytics.jobTitleDistribution)}
+                                    labels={Object.keys(analytics.jobTitleDistribution).map(title => 
+                                        JOB_TITLE_OPTIONS.find(opt => opt.value === title)?.label || title
+                                    )}
+                                    colors={Object.keys(analytics.jobTitleDistribution).map(title => 
+                                        JOB_TITLE_OPTIONS.find(opt => opt.value === title)?.color || '#64748b'
+                                    )}
+                                    icon={FaIndustry}
+                                    type="job"
+                                />
 
-                                <Card className="hover:shadow-lg transition-all duration-300">
-                                    <CardHeader>
-                                        <CardTitle className="text-slate-900 dark:text-white">Work Category Distribution</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <BarChart
-                                            data={Object.values(analytics.workByCategory)}
-                                            labels={Object.keys(analytics.workByCategory).map(category => 
-                                                CATEGORY_OPTIONS.find(opt => opt.value === category)?.label || category
-                                            )}
-                                            title="Work by Category"
-                                            colors={Object.keys(analytics.workByCategory).map(category => 
-                                                CATEGORY_OPTIONS.find(opt => opt.value === category)?.color || 'bg-slate-500'
-                                            )}
-                                        />
-                                    </CardContent>
-                                </Card>
+                                <DistributionCard
+                                    title="Work Category Distribution"
+                                    data={Object.values(analytics.workByCategory)}
+                                    labels={Object.keys(analytics.workByCategory).map(category => 
+                                        CATEGORY_OPTIONS.find(opt => opt.value === category)?.label || category
+                                    )}
+                                    colors={Object.keys(analytics.workByCategory).map(category => 
+                                        CATEGORY_OPTIONS.find(opt => opt.value === category)?.color || '#64748b'
+                                    )}
+                                    icon={FaProjectDiagram}
+                                    type="category"
+                                />
                             </div>
                         </TabsContent>
 
                         {/* Workers Tab */}
                         <TabsContent value="workers" className="mt-6">
-                            <Card className="hover:shadow-lg transition-all duration-300">
-                                <CardHeader>
+                            <Card className="shadow-lg hover:shadow-xl transition-all duration-300 border-0 overflow-hidden bg-white dark:bg-slate-800">
+                                <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 border-b border-slate-200 dark:border-slate-700">
                                     <CardTitle className="text-slate-900 dark:text-white">Worker Details</CardTitle>
                                     <CardDescription>
                                         Showing {filteredWorkers.length} of {workers.length} workers
@@ -900,7 +1073,7 @@ export default function WorkerAnalytics() {
                                                                 <div className="flex items-center justify-end space-x-2">
                                                                     <button
                                                                         onClick={() => router.push(`/dashboard/worker-details/${worker._id}`)}
-                                                                        className="inline-flex cursor-pointer items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200"
+                                                                        className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                                                                     >
                                                                         <FaEye className="h-4 w-4 mr-1" />
                                                                         View Details
