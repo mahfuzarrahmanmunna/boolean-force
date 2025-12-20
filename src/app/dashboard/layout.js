@@ -629,12 +629,28 @@ export default function AdminLayout({ children }) {
             gradient: 'from-gray-500 to-gray-600',
         },
         {
+            title: 'Manage Teams',
+            icon: <Users className="w-5 h-5" />,
+            href: '/dashboard/manage-teams',
+            badge: null,
+            color: 'blue',
+            gradient: 'from-blue-500 to-blue-600'
+        },
+        {
             title: 'Worker Analytics',
             icon: <BarChartIcon className="w-5 h-5" />,
             href: '/dashboard/worker-analytics',
             badge: null,
             color: 'lime',
             gradient: 'from-lime-500 to-lime-600',
+        },
+        {
+            title: 'Project Analytics',
+            icon: <PieChart className="w-5 h-5" />,
+            href: '/dashboard/project-analytics',
+            badge: null,
+            color: 'cyan',
+            gradient: 'from-cyan-500 to-cyan-600',
         },
         {
             title: 'Settings',

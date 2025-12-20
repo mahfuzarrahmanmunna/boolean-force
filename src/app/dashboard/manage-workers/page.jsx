@@ -1,6 +1,6 @@
+// app/dashboard/manage-workers/page.jsx
 "use client";
 
-// app/dashboard/manage-workers/page.jsx
 import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,7 +10,7 @@ import {
     FaHourglassHalf, FaCheckCircle, FaExclamationTriangle, FaSpinner, FaUserPlus,
     FaBriefcase, FaCalendarAlt, FaSearch, FaFilter, FaEye, FaEyeSlash, FaUserClock,
     FaUserCheck, FaUserTimes, FaExclamationCircle, FaFlag, FaTag, FaInfoCircle,
-    FaPaperclip, FaStar, FaClock, FaChartLine, FaQuestionCircle, FaLightbulb
+    FaPaperclip, FaStar, FaClock, FaChartLine, FaQuestionCircle, FaLightbulb, FaUsers
 } from 'react-icons/fa';
 
 // shadcn/ui imports
@@ -87,6 +87,12 @@ const workFormSchema = z.object({
     category: z.string().default('other'),
     estimatedHours: z.string().optional(),
     tags: z.string().optional(),
+});
+
+const teamFormSchema = z.object({
+    name: z.string().min(1, "Team name is required"),
+    teamLeader: z.string().min(1, "Team leader is required"),
+    teamMembers: z.array(z.string()).optional(),
 });
 
 // Helper Components
@@ -203,10 +209,14 @@ const AnimatedButton = ({ children, className, ...props }) => (
 export default function ManageWorkers() {
     const [workers, setWorkers] = useState([]);
     const [availableWork, setAvailableWork] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [editingWorker, setEditingWorker] = useState(null);
     const [isAddingWork, setIsAddingWork] = useState(false);
+    const [isAddingTeam, setIsAddingTeam] = useState(false);
+    const [editingTeam, setEditingTeam] = useState(null);
+    const [viewingTeam, setViewingTeam] = useState(null);
     const [assigningWorkTo, setAssigningWorkTo] = useState(null);
     const [selectedTasksToAssign, setSelectedTasksToAssign] = useState([]);
     const [selectedWorkersForNewTask, setSelectedWorkersForNewTask] = useState([]);
@@ -249,23 +259,36 @@ export default function ManageWorkers() {
         },
     });
 
-    // Fetch workers and available work from API on component mount
+    const teamForm = useForm({
+        resolver: zodResolver(teamFormSchema),
+        defaultValues: {
+            name: '',
+            teamLeader: '',
+            teamMembers: [],
+        },
+    });
+
+    // Fetch workers, available work, and teams from API on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [workersResponse, workResponse] = await Promise.all([
-                    fetch('/api/users'),
-                    fetch('/api/work')
+                const [workersResponse, workResponse, teamsResponse] = await Promise.all([
+                    fetch('/api/workers'),
+                    fetch('/api/work'),
+                    fetch('/api/teams')
                 ]);
 
                 if (!workersResponse.ok) throw new Error('Failed to fetch workers');
                 if (!workResponse.ok) throw new Error('Failed to fetch work tasks');
+                if (!teamsResponse.ok) throw new Error('Failed to fetch teams');
 
                 const workersData = await workersResponse.json();
                 const workData = await workResponse.json();
+                const teamsData = await teamsResponse.json();
 
                 setWorkers(workersData);
                 setAvailableWork(workData);
+                setTeams(teamsData);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 showNotification('Failed to load data. Please try again.', 'error');
@@ -519,6 +542,78 @@ export default function ManageWorkers() {
         }
     };
 
+    // Handle team creation/update
+    const handleTeamSubmit = async (data) => {
+        setIsLoading(true);
+        try {
+            const url = editingTeam ? `/api/teams/${editingTeam._id}` : '/api/teams';
+            const method = editingTeam ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to save team');
+            }
+
+            const result = await response.json();
+
+            if (editingTeam) {
+                setTeams(teams.map(t => t._id === editingTeam._id ? result.data : t));
+                showNotification('Team updated successfully!', 'success');
+            } else {
+                setTeams([...teams, result.data]);
+                showNotification('Team created successfully!', 'success');
+            }
+
+            setIsAddingTeam(false);
+            setEditingTeam(null);
+            teamForm.reset();
+        } catch (error) {
+            console.error("Error saving team:", error);
+            showNotification(error.message || 'Failed to save team.', 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle team deletion
+    const handleDeleteTeam = async (teamId) => {
+        if (confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
+            setIsLoading(true);
+            try {
+                const response = await fetch(`/api/teams/${teamId}`, {
+                    method: 'DELETE',
+                });
+
+                if (!response.ok) throw new Error('Failed to delete team');
+
+                setTeams(teams.filter(t => t._id !== teamId));
+                showNotification('Team deleted successfully!', 'success');
+            } catch (error) {
+                console.error("Error deleting team:", error);
+                showNotification(error.message || 'Failed to delete team.', 'error');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+    // Get team member details
+    const getTeamMemberDetails = (memberIds) => {
+        return memberIds.map(id => workers.find(w => w._id === id)).filter(Boolean);
+    };
+
+    // Get tasks assigned to team members
+    const getTeamTasks = (team) => {
+        const allMemberIds = [team.teamLeader, ...(team.teamMembers || [])];
+        return availableWork.filter(task => allMemberIds.includes(task.assignedTo));
+    };
+
     // Filter workers based on search and status
     const filteredWorkers = useMemo(() => {
         return workers.filter(worker => {
@@ -545,6 +640,15 @@ export default function ManageWorkers() {
             statusForm.setValue('status', editingWorker.status || '');
         }
     }, [editingWorker, statusForm]);
+
+    // Update form when editingTeam changes
+    useEffect(() => {
+        if (editingTeam) {
+            teamForm.setValue('name', editingTeam.name || '');
+            teamForm.setValue('teamLeader', editingTeam.teamLeader || '');
+            teamForm.setValue('teamMembers', editingTeam.teamMembers || []);
+        }
+    }, [editingTeam, teamForm]);
 
     if (isInitialLoading) return <LoadingSpinner message="Loading worker data..." />;
 
@@ -574,13 +678,22 @@ export default function ManageWorkers() {
                                         Approve workers and assign tasks
                                     </CardDescription>
                                 </div>
-                                <AnimatedButton
-                                    onClick={() => setIsAddingWork(true)}
-                                    className="bg-gradient-to-r cursor-pointer from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
-                                >
-                                    <FaBriefcase className="mr-2 h-4 w-4" />
-                                    Create New Task
-                                </AnimatedButton>
+                                <div className="flex gap-2">
+                                    <AnimatedButton
+                                        onClick={() => setIsAddingTeam(true)}
+                                        className="bg-gradient-to-r cursor-pointer from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                                    >
+                                        <FaUsers className="mr-2 h-4 w-4" />
+                                        Create Team
+                                    </AnimatedButton>
+                                    <AnimatedButton
+                                        onClick={() => setIsAddingWork(true)}
+                                        className="bg-gradient-to-r cursor-pointer from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                                    >
+                                        <FaBriefcase className="mr-2 h-4 w-4" />
+                                        Create New Task
+                                    </AnimatedButton>
+                                </div>
                             </div>
                         </CardHeader>
                     </AnimatedCard>
@@ -626,6 +739,150 @@ export default function ManageWorkers() {
                             </div>
                         </CardContent>
                     </AnimatedCard>
+
+                    {/* Teams Section */}
+                    {teams.length > 0 && (
+                        <AnimatedCard className="shadow-lg overflow-hidden">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <FaUsers className="text-primary" />
+                                    Teams
+                                </CardTitle>
+                                <CardDescription>
+                                    Manage your teams and their assigned tasks
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Team Name</TableHead>
+                                            <TableHead>Team Leader</TableHead>
+                                            <TableHead>Members</TableHead>
+                                            <TableHead>Tasks</TableHead>
+                                            <TableHead className="text-right">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {teams.map((team) => {
+                                            const teamLeader = workers.find(w => w._id === team.teamLeader);
+                                            const teamMembers = getTeamMemberDetails(team.teamMembers || []);
+                                            const teamTasks = getTeamTasks(team);
+
+                                            return (
+                                                <TableRow key={team._id} className="hover:bg-muted/50 transition-all duration-200">
+                                                    <TableCell className="font-medium">{team.name}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                                <FaUser className="h-4 w-4" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium">{teamLeader?.name || 'Unknown'}</div>
+                                                                <div className="text-sm text-muted-foreground">{teamLeader?.email || 'N/A'}</div>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-1">
+                                                            <span>{teamMembers.length}</span>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                                                        <FaUsers className="h-3 w-3" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <div className="space-y-1">
+                                                                        {teamMembers.map(member => (
+                                                                            <div key={member._id}>{member.name}</div>
+                                                                        ))}
+                                                                    </div>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-1">
+                                                            <span>{teamTasks.length}</span>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                                                        <FaTasks className="h-3 w-3" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <div className="space-y-1 max-w-xs">
+                                                                        {teamTasks.slice(0, 3).map(task => (
+                                                                            <div key={task._id}>{task.title}</div>
+                                                                        ))}
+                                                                        {teamTasks.length > 3 && (
+                                                                            <div className="text-xs text-muted-foreground">
+                                                                                ...and {teamTasks.length - 3} more
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <AnimatedButton
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => setViewingTeam(team)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        <FaInfoCircle className="h-4 w-4" />
+                                                                    </AnimatedButton>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>View Team Details</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <AnimatedButton
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => setEditingTeam(team)}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        <FaEdit className="h-4 w-4" />
+                                                                    </AnimatedButton>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Edit Team</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <AnimatedButton
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => handleDeleteTeam(team._id)}
+                                                                        className="text-destructive hover:text-destructive"
+                                                                    >
+                                                                        <FaTrash className="h-4 w-4" />
+                                                                    </AnimatedButton>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Delete Team</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </AnimatedCard>
+                    )}
 
                     {/* Worker Table */}
                     <AnimatedCard className="shadow-lg overflow-hidden">
@@ -883,6 +1140,229 @@ export default function ManageWorkers() {
                                 >
                                     {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaTasks className="mr-2 h-4 w-4" />}
                                     Assign Selected
+                                </AnimatedButton>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* Create/Edit Team Dialog */}
+                    <Dialog open={isAddingTeam || !!editingTeam} onOpenChange={() => {
+                        setIsAddingTeam(false);
+                        setEditingTeam(null);
+                        teamForm.reset();
+                    }}>
+                        <DialogContent className="sm:max-w-[500px]">
+                            <DialogHeader>
+                                <DialogTitle>{editingTeam ? 'Edit Team' : 'Create New Team'}</DialogTitle>
+                                <DialogDescription>
+                                    {editingTeam ? 'Update team details' : 'Create a new team with a leader and members'}
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={teamForm.handleSubmit(handleTeamSubmit)} className="space-y-4">
+                                <div>
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Team Name <span className="text-destructive">*</span>
+                                    </label>
+                                    <Input
+                                        placeholder="Enter team name"
+                                        {...teamForm.register('name')}
+                                        className="mt-2 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                    />
+                                    {teamForm.formState.errors.name && (
+                                        <p className="text-sm font-medium text-destructive mt-1">
+                                            {teamForm.formState.errors.name.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Team Leader <span className="text-destructive">*</span>
+                                    </label>
+                                    <Select
+                                        value={teamForm.watch('teamLeader')}
+                                        onValueChange={(value) => teamForm.setValue('teamLeader', value)}
+                                    >
+                                        <SelectTrigger className="mt-2">
+                                            <SelectValue placeholder="Select team leader" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {workers.filter(w => w.status === 'active' || w.status === 'approved').map(worker => (
+                                                <SelectItem key={worker._id} value={worker._id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                            <FaUser className="h-3 w-3" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium">{worker.name}</div>
+                                                            <div className="text-xs text-muted-foreground">{worker.email}</div>
+                                                        </div>
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {teamForm.formState.errors.teamLeader && (
+                                        <p className="text-sm font-medium text-destructive mt-1">
+                                            {teamForm.formState.errors.teamLeader.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Team Members
+                                    </label>
+                                    <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                                        {workers.filter(w => 
+                                            (w.status === 'active' || w.status === 'approved') && 
+                                            w._id !== teamForm.watch('teamLeader')
+                                        ).map(worker => (
+                                            <div key={worker._id} className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={`member-${worker._id}`}
+                                                    checked={teamForm.watch('teamMembers')?.includes(worker._id)}
+                                                    onCheckedChange={(checked) => {
+                                                        const currentMembers = teamForm.watch('teamMembers') || [];
+                                                        if (checked) {
+                                                            teamForm.setValue('teamMembers', [...currentMembers, worker._id]);
+                                                        } else {
+                                                            teamForm.setValue('teamMembers', currentMembers.filter(id => id !== worker._id));
+                                                        }
+                                                    }}
+                                                />
+                                                <label
+                                                    htmlFor={`member-${worker._id}`}
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2 flex-1"
+                                                >
+                                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                        <FaUser className="h-3 w-3" />
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="font-medium">{worker.name}</div>
+                                                        <div className="text-xs text-muted-foreground">{worker.email}</div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <DialogFooter>
+                                    <AnimatedButton type="button" variant="outline" onClick={() => {
+                                        setIsAddingTeam(false);
+                                        setEditingTeam(null);
+                                        teamForm.reset();
+                                    }}>
+                                        Cancel
+                                    </AnimatedButton>
+                                    <AnimatedButton type="submit" disabled={isLoading}>
+                                        {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaSave className="mr-2 h-4 w-4" />}
+                                        {editingTeam ? 'Update' : 'Create'}
+                                    </AnimatedButton>
+                                </DialogFooter>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    {/* View Team Details Dialog */}
+                    <Dialog open={!!viewingTeam} onOpenChange={() => setViewingTeam(null)}>
+                        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    <FaUsers className="text-primary" />
+                                    {viewingTeam?.name}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Team details and assigned tasks
+                                </DialogDescription>
+                            </DialogHeader>
+                            {viewingTeam && (
+                                <div className="space-y-6">
+                                    {/* Team Leader */}
+                                    <div>
+                                        <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                                            <FaUserCheck className="text-primary" />
+                                            Team Leader
+                                        </h3>
+                                        {(() => {
+                                            const teamLeader = workers.find(w => w._id === viewingTeam.teamLeader);
+                                            return teamLeader ? (
+                                                <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-md">
+                                                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                        <FaUser className="h-5 w-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-medium">{teamLeader.name}</div>
+                                                        <div className="text-sm text-muted-foreground">{teamLeader.email}</div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">No team leader assigned</p>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {/* Team Members */}
+                                    <div>
+                                        <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                                            <FaUsers className="text-primary" />
+                                            Team Members
+                                        </h3>
+                                        {(() => {
+                                            const teamMembers = getTeamMemberDetails(viewingTeam.teamMembers || []);
+                                            return teamMembers.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {teamMembers.map(member => (
+                                                        <div key={member._id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-md">
+                                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
+                                                                <FaUser className="h-4 w-4" />
+                                                            </div>
+                                                            <div>
+                                                                <div className="font-medium">{member.name}</div>
+                                                                <div className="text-sm text-muted-foreground">{member.email}</div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">No team members assigned</p>
+                                            );
+                                        })()}
+                                    </div>
+
+                                    {/* Team Tasks */}
+                                    <div>
+                                        <h3 className="text-lg font-medium mb-3 flex items-center gap-2">
+                                            <FaTasks className="text-primary" />
+                                            Assigned Tasks
+                                        </h3>
+                                        {(() => {
+                                            const teamTasks = getTeamTasks(viewingTeam);
+                                            return teamTasks.length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {teamTasks.map(task => (
+                                                        <div key={task._id} className="p-3 border rounded-md">
+                                                            <div className="flex items-center justify-between">
+                                                                <div>
+                                                                    <div className="font-medium">{task.title}</div>
+                                                                    <div className="text-sm text-muted-foreground">{task.description}</div>
+                                                                </div>
+                                                                <Badge variant="outline">{task.status}</Badge>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-sm text-muted-foreground">No tasks assigned to team members</p>
+                                            );
+                                        })()}
+                                    </div>
+                                </div>
+                            )}
+                            <DialogFooter>
+                                <AnimatedButton onClick={() => setViewingTeam(null)}>
+                                    Close
                                 </AnimatedButton>
                             </DialogFooter>
                         </DialogContent>

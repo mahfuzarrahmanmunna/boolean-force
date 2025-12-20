@@ -1,4 +1,4 @@
-// src/app/api/workers/%5Bid%5D/route.js
+// app/api/workers/[id]/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -43,7 +43,7 @@ export async function PUT(request, { params }) {
             return NextResponse.json({ success: false, error: "Worker not found" }, { status: 404 });
         }
 
-        // Find and return the updated document
+        // Find and return updated document
         const updatedWorker = await collection.findOne({ _id: new ObjectId(id) });
         const serializedWorker = { ...updatedWorker, _id: updatedWorker._id.toString() };
 
@@ -104,7 +104,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ success: false, error: "Worker not found" }, { status: 404 });
         }
 
-        // Return the worker without password
+        // Return worker without password
         const { password, ...workerWithoutPassword } = worker;
         return NextResponse.json({ success: true, data: workerWithoutPassword });
     }

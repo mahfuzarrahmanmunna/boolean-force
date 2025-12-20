@@ -4,12 +4,12 @@ import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 export async function GET(request, { params }) {
-    // Await the params object before accessing its properties
+    // Await params object before accessing its properties
     const { id } = await params;
 
     console.log(`GET /api/workers/${id}/tasks called`);
     try {
-        // Validate the worker ID
+        // Validate worker ID
         if (!ObjectId.isValid(id)) {
             console.error(`Invalid ObjectId format: ${id}`);
             return NextResponse.json(
@@ -29,7 +29,7 @@ export async function GET(request, { params }) {
         // Find all tasks assigned to this worker
         const tasks = await collection.find({ assignedTo: id }).toArray();
 
-        // Serialize the tasks
+        // Serialize tasks
         const serializedTasks = tasks.map(task => {
             if (!task || !task._id) {
                 return null;

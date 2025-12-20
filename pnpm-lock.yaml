@@ -1488,7 +1488,7 @@ packages:
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
 
-  classNames@2.5.1:
+  classnames@2.5.1:
     resolution: {integrity: sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==}
 
   client-only@0.0.1:
@@ -4246,7 +4246,7 @@ snapshots:
     dependencies:
       clsx: 2.1.1
 
-  classNames@2.5.1: {}
+  classnames@2.5.1: {}
 
   client-only@0.0.1: {}
 
@@ -5521,13 +5521,13 @@ snapshots:
     dependencies:
       '@bedrock-layout/use-forwarded-ref': 2.0.17(react@19.1.0)
       body-scroll-lock: 3.1.5
-      classNames: 2.5.1
+      classnames: 2.5.1
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
   react-slick@0.31.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
     dependencies:
-      classNames: 2.5.1
+      classnames: 2.5.1
       json2mq: 0.2.0
       lodash.debounce: 4.0.8
       react: 19.1.0
