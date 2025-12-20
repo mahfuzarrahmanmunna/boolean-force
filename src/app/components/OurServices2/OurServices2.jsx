@@ -187,7 +187,7 @@ const OurServices2 = () => {
                     <div className="inline-flex flex-col items-center p-8 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl border border-slate-700/50">
                         <h3 className="text-2xl font-bold text-white mb-3">Need a custom solution?</h3>
                         <p className="text-gray-400 mb-6 max-w-md">We're here to help bring your unique vision to life with tailored solutions.</p>
-                        <button classname=" cursor-pointerpx-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 flex items-center">
+                        <button className=" cursor-pointerpx-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105 flex items-center">
                             Get In Touch
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </button>

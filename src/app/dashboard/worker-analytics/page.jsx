@@ -658,7 +658,7 @@ export default function WorkerAnalytics() {
                     {/* Header */}
                     <div className="bg-white dark:bg-slate-800 shadow-xl border-b border-slate-200 dark:border-slate-700 mb-8 rounded-t-2xl overflow-hidden">
                         <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 ">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center">
@@ -1073,7 +1073,7 @@ export default function WorkerAnalytics() {
                                                                 <div className="flex items-center justify-end space-x-2">
                                                                     <button
                                                                         onClick={() => router.push(`/dashboard/worker-details/${worker._id}`)}
-                                                                        className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                                                                        className="inline-flex cursor-pointer items-center px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                                                                     >
                                                                         <FaEye className="h-4 w-4 mr-1" />
                                                                         View Details

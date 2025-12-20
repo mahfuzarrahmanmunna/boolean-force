@@ -487,7 +487,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                             Learn More
                                             <ArrowRight className="w-4 h-4 ml-2" />
                                         </button>
-                                        <button classname=" cursor-pointerpx-8 py-3 text-white font-medium rounded-lg transition-all duration-300 border flex items-center justify-center hover:bg-white/10"
+                                        <button className=" cursor-pointerpx-8 py-3 text-white font-medium rounded-lg transition-all duration-300 border flex items-center justify-center hover:bg-white/10"
                                             style={{ background: 'rgba(51, 65, 85, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
                                         >
                                             Contact Us

@@ -195,7 +195,7 @@ const Footer = () => {
                 );
               })}
             </div>
-            <button classname=" cursor-pointerw-full px-2 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg text-xs font-semibold hover:scale-105 transition-all duration-300 shadow-md">
+            <button className=" cursor-pointerw-full px-2 py-1 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg text-xs font-semibold hover:scale-105 transition-all duration-300 shadow-md">
               Claim Discount
             </button>
           </div>

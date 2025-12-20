@@ -235,7 +235,7 @@ const PricingCard = () => {
                                 <div className="text-sm text-gray-400">Seconds</div>
                             </div>
                         </div>
-                        <button classname=" cursor-pointerbg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg shadow-red-500/20">
+                        <button className=" cursor-pointerbg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg shadow-red-500/20">
                             Claim Your Discount
                         </button>
                     </div>

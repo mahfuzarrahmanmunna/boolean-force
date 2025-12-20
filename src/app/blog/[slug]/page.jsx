@@ -76,10 +76,10 @@ export default function BlogPost({ params }) {
                                     <p className="text-gray-600">{blogPostDetail.author.role}</p>
                                 </div>
                                 <div className="ml-auto flex space-x-3">
-                                    <button classname=" cursor-pointerp-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors">
+                                    <button className=" cursor-pointerp-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors">
                                         <FaShare />
                                     </button>
-                                    <button classname=" cursor-pointerp-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors">
+                                    <button className=" cursor-pointerp-2 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors">
                                         <FaBookmark />
                                     </button>
                                 </div>
@@ -164,7 +164,7 @@ export default function BlogPost({ params }) {
                                                         {comment.content}
                                                     </p>
                                                 </div>
-                                                <button classname=" cursor-pointertext-sm text-blue-600 hover:text-blue-800 mt-2">Reply</button>
+                                                <button className=" cursor-pointertext-sm text-blue-600 hover:text-blue-800 mt-2">Reply</button>
                                             </div>
                                         </div>
                                     ))}

@@ -152,7 +152,7 @@ const OurServices = () => {
                     className="text-center mt-16"
                 >
                     <p className="text-gray-300 mb-6">Need a custom solution? We're here to help.</p>
-                    <button classname=" cursor-pointerpx-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105">
+                    <button className=" cursor-pointerpx-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl hover:shadow-blue-500/25 transform hover:scale-105">
                         Contact Us
                     </button>
                 </motion.div>

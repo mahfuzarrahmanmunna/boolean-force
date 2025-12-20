@@ -448,11 +448,11 @@ const ClientPage = () => {
                         <p className="text-blue-100">Here's what's happening with your projects today.</p>
                     </div>
                     <div className="mt-4 md:mt-0 flex items-center space-x-3">
-                        <button classname=" cursor-pointerpx-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center">
+                        <button className=" cursor-pointerpx-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors flex items-center">
                             <Download className="w-4 h-4 mr-2" />
                             Export Report
                         </button>
-                        <button classname=" cursor-pointerpx-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center font-medium">
+                        <button className=" cursor-pointerpx-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center font-medium">
                             <Plus className="w-4 h-4 mr-2" />
                             New Project
                         </button>
@@ -559,7 +559,7 @@ const ClientPage = () => {
                             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Your Projects</h2>
-                                    <button classname=" cursor-pointertext-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium flex items-center">
+                                    <button className=" cursor-pointertext-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium flex items-center">
                                         View All
                                         <ChevronRight className="w-4 h-4 ml-1" />
                                     </button>
@@ -602,7 +602,7 @@ const ClientPage = () => {
                                                         </div>
                                                     ))}
                                                 </div>
-                                                <button classname=" cursor-pointerpx-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-md transition-colors flex items-center">
+                                                <button className=" cursor-pointerpx-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-md transition-colors flex items-center">
                                                     <Eye className="w-3 h-3 mr-1" />
                                                     View Details
                                                 </button>
@@ -701,13 +701,13 @@ const ClientPage = () => {
                                                         <td className="py-3 px-4 text-slate-600 dark:text-slate-400">{task.dueDate || 'No deadline'}</td>
                                                         <td className="py-3 px-4">
                                                             <div className="flex items-center space-x-2">
-                                                                <button classname=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
+                                                                <button className=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
                                                                     <Eye className="w-4 h-4" />
                                                                 </button>
-                                                                <button classname=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
+                                                                <button className=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
                                                                     <Edit className="w-4 h-4" />
                                                                 </button>
-                                                                <button classname=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-red-600 dark:text-red-400">
+                                                                <button className=" cursor-pointerp-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-red-600 dark:text-red-400">
                                                                     <Trash2 className="w-4 h-4" />
                                                                 </button>
                                                             </div>
@@ -807,7 +807,7 @@ const ClientPage = () => {
                         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Your Team Members</h2>
-                                <button classname=" cursor-pointerpx-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center font-medium">
+                                <button className=" cursor-pointerpx-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center font-medium">
                                     <Plus className="w-4 h-4 mr-2" />
                                     Request Team Member
                                 </button>
@@ -854,13 +854,13 @@ const ClientPage = () => {
                                                         {memberTasks.filter(task => task.status === 'completed').length} of {memberTasks.length} completed
                                                     </span>
                                                     <div className="flex items-center space-x-2">
-                                                        <button classname=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
+                                                        <button className=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
                                                             <Mail className="w-4 h-4" />
                                                         </button>
-                                                        <button classname=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
+                                                        <button className=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
                                                             <Phone className="w-4 h-4" />
                                                         </button>
-                                                        <button classname=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
+                                                        <button className=" cursor-pointerp-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400">
                                                             <MoreHorizontal className="w-4 h-4" />
                                                         </button>
                                                     </div>
@@ -911,7 +911,7 @@ const ClientPage = () => {
                     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Notifications</h2>
-                            <button classname=" cursor-pointertext-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">
+                            <button className=" cursor-pointertext-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium">
                                 Mark all read
                             </button>
                         </div>
@@ -935,19 +935,19 @@ const ClientPage = () => {
                     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
                         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h2>
                         <div className="space-y-2">
-                            <button classname=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
+                            <button className=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
                                 <Plus className="w-4 h-4 mr-3 text-blue-600 dark:text-blue-400" />
                                 <span className="text-slate-900 dark:text-white">Create New Project</span>
                             </button>
-                            <button classname=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
+                            <button className=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
                                 <Users className="w-4 h-4 mr-3 text-green-600 dark:text-green-400" />
                                 <span className="text-slate-900 dark:text-white">Request Team Member</span>
                             </button>
-                            <button classname=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
+                            <button className=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
                                 <FileText className="w-4 h-4 mr-3 text-purple-600 dark:text-purple-400" />
                                 <span className="text-slate-900 dark:text-white">Generate Report</span>
                             </button>
-                            <button classname=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
+                            <button className=" cursor-pointerw-full text-left px-4 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex items-center">
                                 <Settings className="w-4 h-4 mr-3 text-amber-600 dark:text-amber-400" />
                                 <span className="text-slate-900 dark:text-white">Account Settings</span>
                             </button>

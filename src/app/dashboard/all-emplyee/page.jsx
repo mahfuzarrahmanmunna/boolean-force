@@ -129,7 +129,7 @@ const StatusBadge = ({ status }) => {
 
 const JobTitleBadge = ({ title }) => {
     const jobOption = JOB_TITLE_OPTIONS.find(option => option.value === title);
-    
+
     return (
         <Badge variant="outline" className="flex items-center gap-1">
             {jobOption?.icon || <FaUser className="h-3 w-3" />}
@@ -140,7 +140,7 @@ const JobTitleBadge = ({ title }) => {
 
 const SkillLevelBadge = ({ level }) => {
     const skillOption = SKILL_LEVEL_OPTIONS.find(option => option.value === level);
-    
+
     return (
         <Badge className={`flex items-center gap-1 text-white ${skillOption?.color || 'bg-gray-500'}`}>
             <FaIdBadge className="h-3 w-3" />
@@ -206,7 +206,7 @@ export default function ManageWorkers() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
     const [isAdmin, setIsAdmin] = useState(false); // State to track if current user is admin
-    
+
     // Current date for creation timestamp
     const currentDate = new Date().toISOString().split('T')[0];
     // State for tab animation
@@ -252,7 +252,7 @@ export default function ManageWorkers() {
 
                 setWorkers(workersData);
                 setAvailableWork(workData);
-                
+
                 // Check if current user is admin (you might need to adjust this based on your auth system)
                 // This is a placeholder - replace with your actual admin check logic
                 const userRole = localStorage.getItem('userRole') || 'user';
@@ -270,64 +270,64 @@ export default function ManageWorkers() {
 
     // Handle worker creation/update
     const handleWorkerSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-        // Add creation date to data
-        const workerData = {
-            ...data,
-            createdAt: currentDate,
-            updatedAt: currentDate,
-        };
+        setIsLoading(true);
+        try {
+            // Add creation date to data
+            const workerData = {
+                ...data,
+                createdAt: currentDate,
+                updatedAt: currentDate,
+            };
 
-        let response;
-        if (editingWorker) {
-            // Update existing worker - make sure we have a valid ID
-            if (!editingWorker._id) {
-                throw new Error('Invalid worker ID for update');
+            let response;
+            if (editingWorker) {
+                // Update existing worker - make sure we have a valid ID
+                if (!editingWorker._id) {
+                    throw new Error('Invalid worker ID for update');
+                }
+
+                response = await fetch(`/api/workers/${editingWorker._id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workerData),
+                });
+            } else {
+                // Create new worker
+                response = await fetch('/api/workers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workerData),
+                });
             }
-            
-            response = await fetch(`/api/workers/${editingWorker._id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(workerData),
-            });
-        } else {
-            // Create new worker
-            response = await fetch('/api/workers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(workerData),
-            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Failed to ${editingWorker ? 'update' : 'create'} worker`);
+            }
+
+            const result = await response.json();
+
+            if (editingWorker) {
+                // Update worker in the list
+                setWorkers(workers.map(w => w._id === editingWorker._id ? result.data : w));
+                showNotification('Worker updated successfully!', 'success');
+                setEditingWorker(null);
+            } else {
+                // Add the new worker to the list
+                setWorkers([...workers, result.data]);
+                showNotification('Worker created successfully!', 'success');
+                setIsAddingWorker(false);
+            }
+
+            // Reset form
+            workerForm.reset();
+        } catch (error) {
+            console.error("Error in handleWorkerSubmit:", error);
+            showNotification(error.message || `Failed to ${editingWorker ? 'update' : 'create'} worker.`, 'error');
+        } finally {
+            setIsLoading(false);
         }
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || `Failed to ${editingWorker ? 'update' : 'create'} worker`);
-        }
-
-        const result = await response.json();
-
-        if (editingWorker) {
-            // Update worker in the list
-            setWorkers(workers.map(w => w._id === editingWorker._id ? result.data : w));
-            showNotification('Worker updated successfully!', 'success');
-            setEditingWorker(null);
-        } else {
-            // Add the new worker to the list
-            setWorkers([...workers, result.data]);
-            showNotification('Worker created successfully!', 'success');
-            setIsAddingWorker(false);
-        }
-
-        // Reset form
-        workerForm.reset();
-    } catch (error) {
-        console.error("Error in handleWorkerSubmit:", error);
-        showNotification(error.message || `Failed to ${editingWorker ? 'update' : 'create'} worker.`, 'error');
-    } finally {
-        setIsLoading(false);
-    }
-};
+    };
 
     // Handle worker deletion
     const handleDeleteWorker = async (workerId) => {
@@ -367,10 +367,10 @@ export default function ManageWorkers() {
             }
 
             // Update worker in the list
-            setWorkers(workers.map(w => 
+            setWorkers(workers.map(w =>
                 w._id === worker._id ? { ...w, status: newStatus, updatedAt: new Date().toISOString() } : w
             ));
-            
+
             showNotification(`Worker status updated to ${newStatus}`, 'success');
         } catch (error) {
             console.error("Error updating status:", error);
@@ -392,7 +392,7 @@ export default function ManageWorkers() {
             const response = await fetch(`/api/workers/${worker._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ jobTitle: newJobTitle }),
+                body: JSON.stringify({ jobTitle: newJobTitle }), // Only send jobTitle, not status
             });
 
             if (!response.ok) {
@@ -401,10 +401,10 @@ export default function ManageWorkers() {
             }
 
             // Update worker in the list
-            setWorkers(workers.map(w => 
+            setWorkers(workers.map(w =>
                 w._id === worker._id ? { ...w, jobTitle: newJobTitle, updatedAt: new Date().toISOString() } : w
             ));
-            
+
             showNotification(`Worker job title updated to ${JOB_TITLE_OPTIONS.find(opt => opt.value === newJobTitle)?.label || newJobTitle}`, 'success');
         } catch (error) {
             console.error("Error updating job title:", error);
@@ -435,16 +435,16 @@ export default function ManageWorkers() {
             }
 
             const result = await response.json();
-            
+
             // Update worker's assigned work
-            setWorkers(workers.map(w => 
-                w._id === assigningWorkTo._id 
-                    ? { ...w, assignedWork: [...(w.assignedWork || []), ...selectedTasksToAssign] } 
+            setWorkers(workers.map(w =>
+                w._id === assigningWorkTo._id
+                    ? { ...w, assignedWork: [...(w.assignedWork || []), ...selectedTasksToAssign] }
                     : w
             ));
 
             // Update available work list
-            setAvailableWork(prev => 
+            setAvailableWork(prev =>
                 prev.map(work => {
                     if (selectedTasksToAssign.includes(work._id)) {
                         return { ...work, assignedTo: assigningWorkTo._id, status: 'in-progress' };
@@ -498,7 +498,7 @@ export default function ManageWorkers() {
                 <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
                     {/* Header */}
                     <div className="bg-white dark:bg-slate-800 shadow-md border-b border-slate-200 dark:border-slate-700 mb-6">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center">
@@ -733,24 +733,25 @@ export default function ManageWorkers() {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger
-                                    value="details"
-                                    className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                >
-                                    Basic Info
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="additional"
-                                    className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                >
-                                    Additional Info
-                                </TabsTrigger>
-                            </TabsList>
+                        {/* Form that wraps both tabs */}
+                        <form onSubmit={workerForm.handleSubmit(handleWorkerSubmit)} className="space-y-4">
+                            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger
+                                        value="details"
+                                        className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        Basic Info
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="additional"
+                                        className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                    >
+                                        Additional Info
+                                    </TabsTrigger>
+                                </TabsList>
 
-                            <TabsContent value="details" className="space-y-4 mt-4">
-                                <form onSubmit={workerForm.handleSubmit(handleWorkerSubmit)} className="space-y-4">
+                                <TabsContent value="details" className="space-y-4 mt-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <FormField
                                             label="Name"
@@ -864,63 +865,62 @@ export default function ManageWorkers() {
                                             </Select>
                                         </FormField>
                                     </div>
-                                </form>
-                            </TabsContent>
+                                </TabsContent>
 
-                            <TabsContent value="additional" className="space-y-4 mt-4">
-                                <FormField
-                                    label="Skills"
-                                    error={workerForm.formState.errors.skills}
-                                    tooltip="List the worker's skills and expertise"
+                                <TabsContent value="additional" className="space-y-4 mt-4">
+                                    <FormField
+                                        label="Skills"
+                                        error={workerForm.formState.errors.skills}
+                                        tooltip="List the worker's skills and expertise"
+                                    >
+                                        <Textarea
+                                            placeholder="Enter worker's skills"
+                                            {...workerForm.register('skills')}
+                                            rows={3}
+                                            className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </FormField>
+
+                                    <FormField
+                                        label="Experience"
+                                        error={workerForm.formState.errors.experience}
+                                        tooltip="Describe the worker's relevant experience"
+                                    >
+                                        <Textarea
+                                            placeholder="Enter worker's experience"
+                                            {...workerForm.register('experience')}
+                                            rows={4}
+                                            className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
+                                        />
+                                    </FormField>
+
+                                    <div className="bg-muted/30 p-3 rounded-md flex items-center gap-2">
+                                        <FaCalendarAlt className="text-primary" />
+                                        <span className="text-sm font-medium">
+                                            {editingWorker ? `Created: ${new Date(editingWorker.createdAt).toLocaleDateString()}` : `Creation Date: ${new Date(currentDate).toLocaleDateString()}`}
+                                        </span>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
+
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => {
+                                    setIsAddingWorker(false);
+                                    setEditingWorker(null);
+                                    workerForm.reset();
+                                }}>
+                                    Cancel
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="bg-blue-600 hover:bg-blue-700"
                                 >
-                                    <Textarea
-                                        placeholder="Enter worker's skills"
-                                        {...workerForm.register('skills')}
-                                        rows={3}
-                                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                </FormField>
-
-                                <FormField
-                                    label="Experience"
-                                    error={workerForm.formState.errors.experience}
-                                    tooltip="Describe the worker's relevant experience"
-                                >
-                                    <Textarea
-                                        placeholder="Enter worker's experience"
-                                        {...workerForm.register('experience')}
-                                        rows={4}
-                                        className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                    />
-                                </FormField>
-
-                                <div className="bg-muted/30 p-3 rounded-md flex items-center gap-2">
-                                    <FaCalendarAlt className="text-primary" />
-                                    <span className="text-sm font-medium">
-                                        {editingWorker ? `Created: ${new Date(editingWorker.createdAt).toLocaleDateString()}` : `Creation Date: ${new Date(currentDate).toLocaleDateString()}`}
-                                    </span>
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => {
-                                setIsAddingWorker(false);
-                                setEditingWorker(null);
-                                workerForm.reset();
-                            }}>
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                disabled={isLoading}
-                                onClick={workerForm.handleSubmit(handleWorkerSubmit)}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaSave className="mr-2 h-4 w-4" />}
-                                {editingWorker ? 'Update Worker' : 'Create Worker'}
-                            </Button>
-                        </DialogFooter>
+                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaSave className="mr-2 h-4 w-4" />}
+                                    {editingWorker ? 'Update Worker' : 'Create Worker'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
                     </DialogContent>
                 </Dialog>
 

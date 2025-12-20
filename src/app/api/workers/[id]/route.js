@@ -1,3 +1,4 @@
+// src/app/api/workers/%5Bid%5D/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -10,12 +11,12 @@ export async function PUT(request, { params }) {
     
     console.log(`PUT /api/workers/${id} called`);
     try {
-        const { status, jobTitle } = await request.json();
+        const { status, jobTitle, skills, experience, skillLevel, name, email, phone } = await request.json();
         
         // Validate that at least one field is provided
-        if (!status && !jobTitle) {
+        if (!status && !jobTitle && !skills && !experience && !skillLevel && !name && !email && !phone) {
             return NextResponse.json(
-                { success: false, error: "At least one field (status or jobTitle) must be provided" },
+                { success: false, error: "At least one field must be provided" },
                 { status: 400 }
             );
         }
@@ -26,6 +27,12 @@ export async function PUT(request, { params }) {
         const updateData = { updatedAt: new Date() };
         if (status) updateData.status = status.trim();
         if (jobTitle) updateData.jobTitle = jobTitle.trim();
+        if (skills !== undefined) updateData.skills = skills.trim();
+        if (experience !== undefined) updateData.experience = experience.trim();
+        if (skillLevel) updateData.skillLevel = skillLevel.trim();
+        if (name) updateData.name = name.trim();
+        if (email) updateData.email = email.trim();
+        if (phone !== undefined) updateData.phone = phone.trim();
 
         const result = await collection.updateOne(
             { _id: new ObjectId(id) },

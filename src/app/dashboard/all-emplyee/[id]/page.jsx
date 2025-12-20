@@ -682,7 +682,7 @@ export default function EmployeeDetails() {
                                                     <p className="font-medium text-slate-900 dark:text-white">Email Notifications</p>
                                                     <p className="text-sm text-slate-600 dark:text-slate-400">Receive email updates about your account</p>
                                                 </div>
-                                                <button classname=" cursor-pointerrelative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 dark:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                                <button className=" cursor-pointerrelative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 dark:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                                                     <span className="sr-only">Toggle email notifications</span>
                                                     <span className="inline-block h-4 w-4 rounded-full bg-blue-600 transition-transform translate-x-0"></span>
                                                 </button>
@@ -692,7 +692,7 @@ export default function EmployeeDetails() {
                                                     <p className="font-medium text-slate-900 dark:text-white">Two-Factor Authentication</p>
                                                     <p className="text-sm text-slate-600 dark:text-slate-400">Add an extra layer of security</p>
                                                 </div>
-                                                <button classname=" cursor-pointerpx-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                                                <button className=" cursor-pointerpx-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
                                                     Enable 2FA
                                                 </button>
                                             </div>

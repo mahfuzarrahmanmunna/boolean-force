@@ -393,7 +393,7 @@ const PortfolioSection = () => {
                                     <p className="text-gray-300 text-sm line-clamp-2 mb-4">
                                         {project.description}
                                     </p>
-                                    <button classname=" cursor-pointerflex items-center text-white font-medium text-sm hover:text-blue-400 transition-colors">
+                                    <button className=" cursor-pointerflex items-center text-white font-medium text-sm hover:text-blue-400 transition-colors">
                                         View Details
                                         <ArrowRight className="w-4 h-4 ml-1" />
                                     </button>
@@ -437,11 +437,11 @@ const PortfolioSection = () => {
                                 </div>
 
                                 <div className="flex items-center justify-between">
-                                    <button classname=" cursor-pointertext-blue-400 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+                                    <button className=" cursor-pointertext-blue-400 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
                                         <ExternalLink className="w-4 h-4 mr-1" />
                                         Live Preview
                                     </button>
-                                    <button classname=" cursor-pointertext-purple-400 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
+                                    <button className=" cursor-pointertext-purple-400 hover:text-white transition-colors duration-300 flex items-center text-sm font-medium">
                                         <Mail className="w-4 h-4 mr-1" />
                                         Discuss
                                     </button>
