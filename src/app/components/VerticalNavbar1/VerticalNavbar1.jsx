@@ -73,7 +73,7 @@ const VerticalNavbar1 = () => {
             <nav className={`fixed top-0 left-0 h-full z-40 transition-all duration-500 bg-slate-900/95 backdrop-blur-xl shadow-2xl border-r border-slate-700/30 ${isCollapsed ? 'w-20' : 'w-64'} md:block hidden`}>
                 <div className="h-full flex flex-col relative">
                     {/* Orange Star Decoration */}
-                    <div className="flex justify-center pt-6 pb-4">
+                    <div className="flex justify-center py-6 pb-4">
                         <div className="relative">
                             <svg className="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -206,7 +206,7 @@ const VerticalNavbar1 = () => {
                 <div className={`absolute top-0 left-0 h-full w-64 transition-transform duration-500 ease-in-out transform ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                     <div className={`h-full bg-slate-900/95 backdrop-blur-xl shadow-2xl border-r border-slate-700/30 flex flex-col`}>
                         {/* Orange Star Decoration */}
-                        <div className="flex justify-center pt-6 pb-4">
+                        <div className="flex justify-center py-6 pb-4">
                             <div className="relative">
                                 <svg className="w-8 h-8 text-orange-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />

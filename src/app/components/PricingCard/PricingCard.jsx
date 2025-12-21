@@ -178,7 +178,7 @@ const PricingCard = () => {
 
                                 <p className="text-gray-300 mb-8">{plan.description}</p>
 
-                                <div className="border-t border-gray-700/50 pt-6 mb-8 flex-grow">
+                                <div className="border-t border-gray-700/50 py-6 mb-8 flex-grow">
                                     <ul className="space-y-3">
                                         {plan.features.map((feature, index) => (
                                             <li key={index} className="flex items-start">

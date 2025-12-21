@@ -840,7 +840,7 @@ export default function WorkerDetails() {
                                         </div>
                                     </div>
                                     {isAdmin && (
-                                        <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                                        <div className="mt-8 py-6 border-t border-slate-200 dark:border-slate-700">
                                             <div className="flex items-center justify-between mb-4">
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Change Status</span>
                                             </div>

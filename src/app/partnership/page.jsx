@@ -325,7 +325,7 @@ const PartnershipPage = () => {
                                         <p className="text-gray-300 mb-6 text-center">{option.description}</p>
 
                                         {/* Features list */}
-                                        <div className="border-t border-white/10 pt-6 mb-8 flex-grow">
+                                        <div className="border-t border-white/10 py-6 mb-8 flex-grow">
                                             <ul className="space-y-3">
                                                 {option.features.map((feature, index) => (
                                                     <li key={index} className="flex items-start transform transition-transform duration-300 hover:translate-x-1">

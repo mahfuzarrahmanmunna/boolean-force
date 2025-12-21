@@ -382,7 +382,7 @@ export default function EmployeeDetails() {
                                 </div>
 
                                 {/* Social Links */}
-                                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                                <div className="mt-6 py-6 border-t border-slate-200 dark:border-slate-700">
                                     <p className="text-sm font-medium text-slate-900 dark:text-white mb-3">Social Profiles</p>
                                     <div className="flex justify-center space-x-3">
                                         {employee.social?.linkedin && (

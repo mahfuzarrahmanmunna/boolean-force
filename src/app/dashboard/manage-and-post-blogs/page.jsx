@@ -2025,7 +2025,7 @@ export default function ManageAndPostBlogs() {
                             </div>
 
                             {/* Comments Section */}
-                            <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                            <div className="mt-8 py-6 border-t border-gray-200 dark:border-gray-700">
                                 <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Comments</h3>
 
                                 {/* Add Comment Form */}

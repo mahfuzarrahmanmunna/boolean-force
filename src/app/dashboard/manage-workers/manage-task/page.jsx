@@ -546,7 +546,7 @@ export default function ManageTasks() {
 
             {/* Filters and Search */}
             <Card>
-                <CardContent className="pt-6">
+                <CardContent className="py-6">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="relative flex-1">
                             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
