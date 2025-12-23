@@ -219,12 +219,12 @@ export default function ManageWorkers() {
     const [viewingTeam, setViewingTeam] = useState(null);
     const [assigningWorkTo, setAssigningWorkTo] = useState(null);
     const [selectedTasksToAssign, setSelectedTasksToAssign] = useState([]);
-    const [selectedWorkersForNewTask, setSelectedWorkersForNewTask] = useState([]);
+    const [selectedTeamsForNewTask, setSelectedTeamsForNewTask] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-    // Add missing state variable for worker search in task creation dialog
-    const [workerSearchTerm, setWorkerSearchTerm] = useState('');
+    // Add missing state variable for team search in task creation dialog
+    const [teamSearchTerm, setTeamSearchTerm] = useState('');
     // Current date for creation timestamp
     const currentDate = new Date().toISOString().split('T')[0];
     // State for tab animation
@@ -335,7 +335,7 @@ export default function ManageWorkers() {
         }
     };
 
-    // Handle adding new work task and assigning it to workers
+    // Handle adding new work task and assigning it to teams
     const handleWorkSubmit = async (data) => {
         setIsLoading(true);
         try {
@@ -361,14 +361,14 @@ export default function ManageWorkers() {
 
             const newWork = await response.json();
 
-            // If workers are selected, assign task to them
-            if (selectedWorkersForNewTask.length > 0) {
+            // If teams are selected, assign task to them
+            if (selectedTeamsForNewTask.length > 0) {
                 // Create an array of promises for each assignment
-                const assignmentPromises = selectedWorkersForNewTask.map(workerId =>
-                    fetch(`/api/workers/${workerId}/assign`, {
+                const assignmentPromises = selectedTeamsForNewTask.map(teamId =>
+                    fetch(`/api/teams/${teamId}/assign`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ taskIds: [newWork.data._id] }),
+                        body: JSON.stringify({ projectIds: [newWork.data._id] }),
                     })
                 );
 
@@ -376,17 +376,17 @@ export default function ManageWorkers() {
                 const assignmentResults = await Promise.allSettled(assignmentPromises);
 
                 const failedAssignments = [];
-                const successfulWorkerIds = [];
+                const successfulTeamIds = [];
 
                 // Process each result
                 for (let i = 0; i < assignmentResults.length; i++) {
                     const result = assignmentResults[i];
-                    const workerId = selectedWorkersForNewTask[i];
-                    const worker = workers.find(w => w._id === workerId);
-                    const workerName = worker ? worker.name : `Worker ID ${workerId}`;
+                    const teamId = selectedTeamsForNewTask[i];
+                    const team = teams.find(t => t._id === teamId);
+                    const teamName = team ? team.name : `Team ID ${teamId}`;
 
                     if (result.status === 'fulfilled' && result.value.ok) {
-                        successfulWorkerIds.push(workerId);
+                        successfulTeamIds.push(teamId);
                     } else {
                         let errorMessage = 'Unknown error';
                         if (result.status === 'rejected') {
@@ -399,45 +399,45 @@ export default function ManageWorkers() {
                                 errorMessage = `Server responded with status ${result.value.status}`;
                             }
                         }
-                        failedAssignments.push({ workerName, errorMessage });
+                        failedAssignments.push({ teamName, errorMessage });
                     }
                 }
 
                 // If there were any failures, throw a detailed error
                 if (failedAssignments.length > 0) {
                     const failureMessages = failedAssignments.map(
-                        ({ workerName, errorMessage }) => `• ${workerName}: ${errorMessage}`
+                        ({ teamName, errorMessage }) => `• ${teamName}: ${errorMessage}`
                     ).join('<br>'); // Use <br> for HTML rendering in notification
 
-                    throw new Error(`Task created, but failed to assign to some workers:<br>${failureMessages}`);
+                    throw new Error(`Task created, but failed to assign to some teams:<br>${failureMessages}`);
                 }
 
-                // If all assignments were successful, fetch updated worker data to keep UI in sync
-                const updatedWorkersPromises = successfulWorkerIds.map(async (workerId) => {
-                    const res = await fetch(`/api/workers/${workerId}`);
+                // If all assignments were successful, fetch updated team data to keep UI in sync
+                const updatedTeamsPromises = successfulTeamIds.map(async (teamId) => {
+                    const res = await fetch(`/api/teams/${teamId}`);
                     if (res.ok) return res.json();
                     return null;
                 });
 
-                const updatedWorkersData = await Promise.all(updatedWorkersPromises);
+                const updatedTeamsData = await Promise.all(updatedTeamsPromises);
 
-                setWorkers(prevWorkers =>
-                    prevWorkers.map(worker => {
-                        const updatedData = updatedWorkersData.find(data => data && data.data._id === worker._id);
-                        return updatedData ? updatedData.data : worker;
+                setTeams(prevTeams =>
+                    prevTeams.map(team => {
+                        const updatedData = updatedTeamsData.find(data => data && data.data._id === team._id);
+                        return updatedData ? updatedData.data : team;
                     })
                 );
 
             } else {
-                // If no workers are selected, add task to available work list
+                // If no teams are selected, add task to available work list
                 setAvailableWork(prev => [...prev, newWork.data]);
             }
 
             // Reset form and show success
             setIsAddingWork(false);
             workForm.reset();
-            setSelectedWorkersForNewTask([]);
-            setWorkerSearchTerm('');
+            setSelectedTeamsForNewTask([]);
+            setTeamSearchTerm('');
             showNotification('New work task created and assigned successfully!', 'success');
 
         } catch (error) {
@@ -449,7 +449,7 @@ export default function ManageWorkers() {
         }
     };
 
-    // Handle assigning work to a worker
+    // Handle assigning work to a team
     const handleAssignWork = async () => {
         if (selectedTasksToAssign.length === 0) {
             showNotification('Please select at least one task to assign.', 'error');
@@ -459,24 +459,12 @@ export default function ManageWorkers() {
         setIsLoading(true);
         try {
             console.log('Assigning tasks:', selectedTasksToAssign);
-            console.log('Worker ID:', assigningWorkTo._id);
+            console.log('Team ID:', assigningWorkTo._id);
 
-            // Get task details to check which client it belongs to
-            const taskDetails = availableWork.filter(task => selectedTasksToAssign.includes(task._id));
-
-            // Check if all tasks belong to the same client
-            const uniqueClientIds = [...new Set(taskDetails.map(task => task.clientId))];
-
-            if (uniqueClientIds.length > 1) {
-                showNotification('You can only assign tasks that belong to the same client.', 'error');
-                setIsLoading(false);
-                return;
-            }
-
-            const response = await fetch(`/api/workers/${assigningWorkTo._id}/assign`, {
+            const response = await fetch(`/api/teams/${assigningWorkTo._id}/assign`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ taskIds: selectedTasksToAssign }),
+                body: JSON.stringify({ projectIds: selectedTasksToAssign }),
             });
 
             console.log('Response status:', response.status);
@@ -494,17 +482,17 @@ export default function ManageWorkers() {
                 throw new Error(errorMessage);
             }
 
-            // Update worker's assigned work
-            setWorkers(workers.map(w =>
-                w._id === assigningWorkTo._id
-                    ? { ...w, assignedWork: [...(w.assignedWork || []), ...result.data.assignedTasks.map(t => t._id)] }
-                    : w
+            // Update team's assigned work
+            setTeams(teams.map(t =>
+                t._id === assigningWorkTo._id
+                    ? { ...t, assignedProjects: [...(t.assignedProjects || []), ...result.data.assignedProjects.map(p => p._id)] }
+                    : t
             ));
 
             // Update available work list with the updated tasks
             setAvailableWork(prev =>
                 prev.map(task => {
-                    const updatedTask = result.data.assignedTasks.find(t => t._id === task._id);
+                    const updatedTask = result.data.assignedProjects.find(p => p._id === task._id);
                     return updatedTask || task;
                 })
             );
@@ -614,6 +602,11 @@ export default function ManageWorkers() {
         return availableWork.filter(task => allMemberIds.includes(task.assignedTo));
     };
 
+    // Get projects assigned to a team
+    const getTeamProjects = (team) => {
+        return availableWork.filter(task => team.assignedProjects?.includes(task._id));
+    };
+
     // Filter workers based on search and status
     const filteredWorkers = useMemo(() => {
         return workers.filter(worker => {
@@ -624,15 +617,13 @@ export default function ManageWorkers() {
         });
     }, [workers, searchTerm, statusFilter]);
 
-    // Filter workers for task assignment based on search term
-    const filteredWorkersForTask = useMemo(() => {
-        return workers.filter(worker => {
-            const matchesStatus = worker.status === 'active' || worker.status === 'approved';
-            const matchesSearch = worker.name.toLowerCase().includes(workerSearchTerm.toLowerCase()) ||
-                worker.email.toLowerCase().includes(workerSearchTerm.toLowerCase());
-            return matchesStatus && matchesSearch;
+    // Filter teams for task assignment based on search term
+    const filteredTeamsForTask = useMemo(() => {
+        return teams.filter(team => {
+            const matchesSearch = team.name.toLowerCase().includes(teamSearchTerm.toLowerCase());
+            return matchesSearch;
         });
-    }, [workers, workerSearchTerm]);
+    }, [teams, teamSearchTerm]);
 
     // Update form when editingWorker changes
     useEffect(() => {
@@ -672,10 +663,10 @@ export default function ManageWorkers() {
                                 <div>
                                     <CardTitle className="text-3xl font-bold flex items-center gap-3">
                                         <FaUserClock className="text-primary animate-pulse" />
-                                        Manage Workers
+                                        Manage Workers & Teams
                                     </CardTitle>
                                     <CardDescription className="mt-2">
-                                        Approve workers and assign tasks
+                                        Approve workers, create teams, and assign tasks to teams
                                     </CardDescription>
                                 </div>
                                 <div className="flex gap-2">
@@ -759,7 +750,7 @@ export default function ManageWorkers() {
                                             <TableHead>Team Name</TableHead>
                                             <TableHead>Team Leader</TableHead>
                                             <TableHead>Members</TableHead>
-                                            <TableHead>Tasks</TableHead>
+                                            <TableHead>Assigned Tasks</TableHead>
                                             <TableHead className="text-right">Actions</TableHead>
                                         </TableRow>
                                     </TableHeader>
@@ -767,7 +758,7 @@ export default function ManageWorkers() {
                                         {teams.map((team) => {
                                             const teamLeader = workers.find(w => w._id === team.teamLeader);
                                             const teamMembers = getTeamMemberDetails(team.teamMembers || []);
-                                            const teamTasks = getTeamTasks(team);
+                                            const teamProjects = getTeamProjects(team);
 
                                             return (
                                                 <TableRow key={team._id} className="hover:bg-muted/50 transition-all duration-200">
@@ -804,7 +795,7 @@ export default function ManageWorkers() {
                                                     </TableCell>
                                                     <TableCell>
                                                         <div className="flex items-center gap-1">
-                                                            <span>{teamTasks.length}</span>
+                                                            <span>{teamProjects.length}</span>
                                                             <Tooltip>
                                                                 <TooltipTrigger asChild>
                                                                     <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
@@ -813,12 +804,12 @@ export default function ManageWorkers() {
                                                                 </TooltipTrigger>
                                                                 <TooltipContent>
                                                                     <div className="space-y-1 max-w-xs">
-                                                                        {teamTasks.slice(0, 3).map(task => (
+                                                                        {teamProjects.slice(0, 3).map(task => (
                                                                             <div key={task._id}>{task.title}</div>
                                                                         ))}
-                                                                        {teamTasks.length > 3 && (
+                                                                        {teamProjects.length > 3 && (
                                                                             <div className="text-xs text-muted-foreground">
-                                                                                ...and {teamTasks.length - 3} more
+                                                                                ...and {teamProjects.length - 3} more
                                                                             </div>
                                                                         )}
                                                                     </div>
@@ -841,6 +832,24 @@ export default function ManageWorkers() {
                                                                 </TooltipTrigger>
                                                                 <TooltipContent>
                                                                     <p>View Team Details</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <AnimatedButton
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        onClick={() => {
+                                                                            setAssigningWorkTo(team);
+                                                                            setSelectedTasksToAssign([]);
+                                                                        }}
+                                                                        className="cursor-pointer"
+                                                                    >
+                                                                        <FaTasks className="h-4 w-4" />
+                                                                    </AnimatedButton>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Assign Work</p>
                                                                 </TooltipContent>
                                                             </Tooltip>
                                                             <Tooltip>
@@ -892,7 +901,7 @@ export default function ManageWorkers() {
                                     <TableRow>
                                         <TableHead>Worker</TableHead>
                                         <TableHead>Status</TableHead>
-                                        <TableHead>Assigned Tasks</TableHead>
+                                        <TableHead>Team</TableHead>
                                         <TableHead>Joined</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
@@ -924,21 +933,20 @@ export default function ManageWorkers() {
                                                 </Tooltip>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="flex items-center gap-2">
-                                                    <span>{worker.assignedWork ? worker.assignedWork.length : 0}</span>
-                                                    <AnimatedButton
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-6 w-6 p-0"
-                                                        onClick={() => {
-                                                            setAssigningWorkTo(worker);
-                                                            setSelectedTasksToAssign([]);
-                                                        }}
-                                                        title="Assign Work"
-                                                    >
-                                                        <FaPlus className="h-3 w-3" />
-                                                    </AnimatedButton>
-                                                </div>
+                                                {(() => {
+                                                    const team = teams.find(t => 
+                                                        t.teamLeader === worker._id || 
+                                                        (t.teamMembers || []).includes(worker._id)
+                                                    );
+                                                    return team ? (
+                                                        <Badge variant="outline" className="flex items-center gap-1">
+                                                            <FaUsers className="h-3 w-3" />
+                                                            {team.name}
+                                                        </Badge>
+                                                    ) : (
+                                                        <span className="text-muted-foreground">No team</span>
+                                                    );
+                                                })()}
                                             </TableCell>
                                             <TableCell>
                                                 {new Date(worker.createdAt).toLocaleDateString()}
@@ -958,23 +966,6 @@ export default function ManageWorkers() {
                                                         </TooltipTrigger>
                                                         <TooltipContent>
                                                             <p>Edit Worker Status</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <AnimatedButton
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => {
-                                                                    setAssigningWorkTo(worker);
-                                                                    setSelectedTasksToAssign([]);
-                                                                }}
-                                                            >
-                                                                <FaTasks className="h-4 w-4" />
-                                                            </AnimatedButton>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Assign Work</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                     <Tooltip>
@@ -1071,7 +1062,7 @@ export default function ManageWorkers() {
                             <DialogHeader>
                                 <DialogTitle>Assign Work</DialogTitle>
                                 <DialogDescription>
-                                    Select tasks to assign to {assigningWorkTo?.name}
+                                    Select tasks to assign to {assigningWorkTo?.name} team
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="max-h-60 overflow-y-auto border rounded-md p-2">
@@ -1100,7 +1091,7 @@ export default function ManageWorkers() {
                                                     <p className="text-sm text-muted-foreground">
                                                         {task.description}
                                                     </p>
-                                                    {/* Display currently assigned workers for this task */}
+                                                    {/* Display currently assigned teams for this task */}
                                                     {task?.assignedTo && (
                                                         <div className="flex flex-wrap gap-1 mt-1">
                                                             <span className="text-xs text-muted-foreground">Assigned to:</span>
@@ -1108,11 +1099,12 @@ export default function ManageWorkers() {
                                                                 // Convert to array if it's a string (old format) or use as-is if already an array
                                                                 (Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo])
                                                                     .filter(Boolean) // Remove any falsy values (null, undefined, empty string)
-                                                                    .map(workerId => {
-                                                                        const worker = workers.find(w => w._id === workerId);
-                                                                        return worker ? (
-                                                                            <Badge key={workerId} variant="outline" className="text-xs">
-                                                                                {worker.name}
+                                                                    .map(teamId => {
+                                                                        const team = teams.find(t => t._id === teamId);
+                                                                        return team ? (
+                                                                            <Badge key={teamId} variant="outline" className="text-xs">
+                                                                                <FaUsers className="h-3 w-3 mr-1" />
+                                                                                {team.name}
                                                                             </Badge>
                                                                         ) : null;
                                                                     })
@@ -1338,10 +1330,10 @@ export default function ManageWorkers() {
                                             Assigned Tasks
                                         </h3>
                                         {(() => {
-                                            const teamTasks = getTeamTasks(viewingTeam);
-                                            return teamTasks.length > 0 ? (
+                                            const teamProjects = getTeamProjects(viewingTeam);
+                                            return teamProjects.length > 0 ? (
                                                 <div className="space-y-2">
-                                                    {teamTasks.map(task => (
+                                                    {teamProjects.map(task => (
                                                         <div key={task._id} className="p-3 border rounded-md">
                                                             <div className="flex items-center justify-between">
                                                                 <div>
@@ -1354,7 +1346,7 @@ export default function ManageWorkers() {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <p className="text-sm text-muted-foreground">No tasks assigned to team members</p>
+                                                <p className="text-sm text-muted-foreground">No tasks assigned to this team</p>
                                             );
                                         })()}
                                     </div>
@@ -1371,8 +1363,8 @@ export default function ManageWorkers() {
                     {/* Add Work Dialog - Enhanced Version */}
                     <Dialog open={isAddingWork} onOpenChange={() => {
                         setIsAddingWork(false);
-                        setSelectedWorkersForNewTask([]);
-                        setWorkerSearchTerm('');
+                        setSelectedTeamsForNewTask([]);
+                        setTeamSearchTerm('');
                     }}>
                         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
@@ -1381,7 +1373,7 @@ export default function ManageWorkers() {
                                     Create New Work Task
                                 </DialogTitle>
                                 <DialogDescription>
-                                    Add a new task and assign it to workers
+                                    Add a new task and assign it to teams
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -1397,7 +1389,7 @@ export default function ManageWorkers() {
                                         value="assignment"
                                         className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                                     >
-                                        Assignment
+                                        Team Assignment
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="preview"
@@ -1473,7 +1465,7 @@ export default function ManageWorkers() {
                                             <FormField
                                                 label="Priority"
                                                 error={workForm.formState.errors.priority}
-                                                tooltip="Set the priority level to help workers understand urgency"
+                                                tooltip="Set the priority level to help teams understand urgency"
                                             >
                                                 <Select
                                                     value={workForm.watch('priority')}
@@ -1549,70 +1541,77 @@ export default function ManageWorkers() {
 
                                 <TabsContent value="assignment" className="space-y-4 mt-4">
                                     <FormField
-                                        label="Assign to Workers (Optional)"
-                                        tooltip="Select workers to assign this task to. Leave empty to make it available for anyone."
+                                        label="Assign to Teams (Optional)"
+                                        tooltip="Select teams to assign this task to. Leave empty to make it available for any team."
                                     >
                                         <div className="space-y-3">
-                                            {/* Worker Search Input */}
+                                            {/* Team Search Input */}
                                             <div className="relative">
                                                 <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                                                 <Input
-                                                    placeholder="Search workers by name or email..."
-                                                    value={workerSearchTerm}
-                                                    onChange={(e) => setWorkerSearchTerm(e.target.value)}
+                                                    placeholder="Search teams by name..."
+                                                    value={teamSearchTerm}
+                                                    onChange={(e) => setTeamSearchTerm(e.target.value)}
                                                     className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                                 />
                                             </div>
 
-                                            {/* Worker Selection Stats */}
+                                            {/* Team Selection Stats */}
                                             <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
                                                 <span className="text-sm font-medium">
-                                                    {selectedWorkersForNewTask.length} worker{selectedWorkersForNewTask.length !== 1 ? 's' : ''} selected
+                                                    {selectedTeamsForNewTask.length} team{selectedTeamsForNewTask.length !== 1 ? 's' : ''} selected
                                                 </span>
-                                                {selectedWorkersForNewTask.length > 0 && (
+                                                {selectedTeamsForNewTask.length > 0 && (
                                                     <AnimatedButton
                                                         variant="ghost"
                                                         size="sm"
-                                                        onClick={() => setSelectedWorkersForNewTask([])}
+                                                        onClick={() => setSelectedTeamsForNewTask([])}
                                                     >
                                                         Clear All
                                                     </AnimatedButton>
                                                 )}
                                             </div>
 
-                                            {/* Worker List */}
+                                            {/* Team List */}
                                             <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                                                {filteredWorkersForTask.length > 0 ? (
+                                                {filteredTeamsForTask.length > 0 ? (
                                                     <div className="space-y-2">
-                                                        {filteredWorkersForTask.map((worker) => (
-                                                            <div key={worker._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200">
+                                                        {filteredTeamsForTask.map((team) => (
+                                                            <div key={team._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200">
                                                                 <Checkbox
-                                                                    id={`worker-${worker._id}`}
-                                                                    checked={selectedWorkersForNewTask.includes(worker._id)}
+                                                                    id={`team-${team._id}`}
+                                                                    checked={selectedTeamsForNewTask.includes(team._id)}
                                                                     onCheckedChange={() => {
-                                                                        if (selectedWorkersForNewTask.includes(worker._id)) {
-                                                                            setSelectedWorkersForNewTask(selectedWorkersForNewTask.filter(id => id !== worker._id));
+                                                                        if (selectedTeamsForNewTask.includes(team._id)) {
+                                                                            setSelectedTeamsForNewTask(selectedTeamsForNewTask.filter(id => id !== team._id));
                                                                         } else {
-                                                                            setSelectedWorkersForNewTask([...selectedWorkersForNewTask, worker._id]);
+                                                                            setSelectedTeamsForNewTask([...selectedTeamsForNewTask, team._id]);
                                                                         }
                                                                     }}
                                                                 />
                                                                 <label
-                                                                    htmlFor={`worker-${worker._id}`}
+                                                                    htmlFor={`team-${team._id}`}
                                                                     className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2 flex-1"
                                                                 >
                                                                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
-                                                                        <FaUser className="h-4 w-4" />
+                                                                        <FaUsers className="h-4 w-4" />
                                                                     </div>
                                                                     <div className="flex-1">
                                                                         <div className="flex items-center gap-2">
-                                                                            <span>{worker.name}</span>
-                                                                            <StatusBadge status={worker.status} />
+                                                                            <span>{team.name}</span>
+                                                                            <Badge variant="outline" className="text-xs">
+                                                                                {getTeamMemberDetails(team.teamMembers || []).length + 1} members
+                                                                            </Badge>
                                                                         </div>
-                                                                        <div className="text-xs text-muted-foreground">{worker.email}</div>
+                                                                        <div className="text-xs text-muted-foreground">
+                                                                            Leader: {(() => {
+                                                                                const leader = workers.find(w => w._id === team.teamLeader);
+                                                                                return leader ? leader.name : 'Unknown';
+                                                                            })()}
+                                                                        </div>
                                                                     </div>
                                                                     <div className="text-xs text-muted-foreground">
-                                                                        {worker.assignedWork ? worker.assignedWork.length : 0} tasks
+                                                                        {getTeamProjects(team).length} tasks
                                                                     </div>
                                                                 </label>
                                                             </div>
@@ -1620,7 +1619,7 @@ export default function ManageWorkers() {
                                                     </div>
                                                 ) : (
                                                     <p className="text-center text-muted-foreground py-4">
-                                                        {workerSearchTerm ? 'No workers match your search.' : 'No active workers available.'}
+                                                        {teamSearchTerm ? 'No teams match your search.' : 'No teams available.'}
                                                     </p>
                                                 )}
                                             </div>
@@ -1691,29 +1690,31 @@ export default function ManageWorkers() {
                                                 </div>
                                             )}
 
-                                            {selectedWorkersForNewTask.length > 0 && (
+                                            {selectedTeamsForNewTask.length > 0 && (
                                                 <div>
-                                                    <h4 className="text-sm font-medium mb-2">Assigned to:</h4>
+                                                    <h4 className="text-sm font-medium mb-2">Assigned to teams:</h4>
                                                     <div className="flex flex-wrap gap-2">
-                                                        {selectedWorkersForNewTask.map(workerId => {
-                                                            const worker = workers.find(w => w._id === workerId);
-                                                            return worker ? (
-                                                                <Tooltip key={workerId}>
+                                                        {selectedTeamsForNewTask.map(teamId => {
+                                                            const team = teams.find(t => t._id === teamId);
+                                                            return team ? (
+                                                                <Tooltip key={teamId}>
                                                                     <TooltipTrigger asChild>
                                                                         <Badge variant="outline" className="flex items-center gap-1 transition-all duration-200 hover:scale-105">
-                                                                            <FaUser className="h-3 w-3" />
-                                                                            {worker.name}
+                                                                            <FaUsers className="h-3 w-3" />
+                                                                            {team.name}
                                                                         </Badge>
                                                                     </TooltipTrigger>
                                                                     <TooltipContent>
-                                                                        <p>{worker.email}</p>
+                                                                        <p>Leader: {(() => {
+                                                                            const leader = workers.find(w => w._id === team.teamLeader);
+                                                                            return leader ? leader.name : 'Unknown';
+                                                                        })()}</p>
                                                                     </TooltipContent>
                                                                 </Tooltip>
                                                             ) : null;
                                                         })}
                                                     </div>
                                                 </div>
-
                                             )}
                                         </CardContent>
                                     </AnimatedCard>
@@ -1724,8 +1725,8 @@ export default function ManageWorkers() {
                                 <AnimatedButton type="button" variant="outline" onClick={() => {
                                     setIsAddingWork(false);
                                     workForm.reset();
-                                    setSelectedWorkersForNewTask([]);
-                                    setWorkerSearchTerm('');
+                                    setSelectedTeamsForNewTask([]);
+                                    setTeamSearchTerm('');
                                 }}>
                                     Cancel
                                 </AnimatedButton>

@@ -114,7 +114,54 @@ import {
     Database as DatabaseIcon,
     Cloud as CloudIcon,
     Smartphone as SmartphoneIcon,
-    Monitor as MonitorIcon
+    Monitor as MonitorIcon,
+    // Project management icons
+    FolderOpen,
+    Folder,
+    Projector,
+    UserShield,
+    ShieldCheck,
+    Lock,
+    Unlock,
+    KeyRound,
+    BadgeCheck,
+    FolderKanban,
+    GanttChart,
+    Kanban,
+    SquareStack,
+    FolderTree,
+    GitBranch,
+    FolderPlus,
+    FolderLock,
+    FolderOpenDot,
+    FileQuestion,
+    FolderInput,
+    FolderOutput,
+    FolderSync,
+    FolderCog,
+    FolderX,
+    FolderPlus as FolderPlusIcon,
+    FolderLock as FolderLockIcon,
+    FolderOpen as FolderOpenIcon,
+    FolderCog as FolderCogIcon,
+    FolderX as FolderXIcon,
+    FolderSync as FolderSyncIcon,
+    FolderInput as FolderInputIcon,
+    FolderOutput as FolderOutputIcon,
+    FolderTree as FolderTreeIcon,
+    FolderQuestion as FolderQuestionIcon,
+    FolderKanban as FolderKanbanIcon,
+    FolderDot as FolderDotIcon,
+    FolderOpenDot as FolderOpenDotIcon,
+    FolderLockDot as FolderLockDotIcon,
+    FolderCogDot as FolderCogDotIcon,
+    FolderXDot as FolderXDotIcon,
+    FolderSyncDot as FolderSyncDotIcon,
+    FolderInputDot as FolderInputDotIcon,
+    FolderOutputDot as FolderOutputDotIcon,
+    FolderTreeDot as FolderTreeDotIcon,
+    FolderQuestionDot as FolderQuestionDotIcon,
+    FolderKanbanDot as FolderKanbanDotIcon
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
@@ -145,6 +192,40 @@ export default function AdminLayout({ children }) {
     const [generatedPassword, setGeneratedPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [passwordCopied, setPasswordCopied] = useState(false);
+
+    // State for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        project: {
+            create_project: false,
+            edit_project: false,
+            delete_project: false,
+            view_all_projects: false,
+            assign_project: false,
+            monetize_project: false,
+            view_revenue: false,
+            manage_payments: false,
+            set_pricing: false
+        },
+        task: {
+            create_task: false,
+            edit_task: false,
+            delete_task: false,
+            submit_task: false,
+            approve_task: false,
+            assign_task: false
+        },
+        team: {
+            add_member: false,
+            remove_member: false,
+            edit_member_role: false,
+            view_team_stats: false
+        },
+        system: {
+            view_analytics: false,
+            export_data: false,
+            manage_settings: false
+        }
+    });
 
     const pathname = usePathname();
     const router = useRouter();
@@ -196,6 +277,32 @@ export default function AdminLayout({ children }) {
                 console.error('Error parsing search history:', error);
             }
         }
+    }, []);
+
+    // Load user permissions from localStorage or API
+    useEffect(() => {
+        const loadUserPermissions = async () => {
+            try {
+                // Try to get permissions from localStorage first
+                const savedPermissions = localStorage.getItem('userPermissions');
+                if (savedPermissions) {
+                    setUserPermissions(JSON.parse(savedPermissions));
+                    return;
+                }
+
+                // If not in localStorage, fetch from API
+                const response = await fetch('/api/user/permissions');
+                if (response.ok) {
+                    const permissions = await response.json();
+                    setUserPermissions(permissions);
+                    localStorage.setItem('userPermissions', JSON.stringify(permissions));
+                }
+            } catch (error) {
+                console.error('Error loading user permissions:', error);
+            }
+        };
+
+        loadUserPermissions();
     }, []);
 
     // Close dropdowns when clicking outside
@@ -289,6 +396,31 @@ export default function AdminLayout({ children }) {
         return null; // Will redirect
     }
 
+    // Check if user has permission to access current route
+    const hasPermission = (permission) => {
+        // Admin has all permissions
+        if (session.user.role === "admin") return true;
+        
+        // Check specific permission
+        if (permission.startsWith('project.') && userPermissions.project[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        if (permission.startsWith('task.') && userPermissions.task[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        if (permission.startsWith('team.') && userPermissions.team[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        if (permission.startsWith('system.') && userPermissions.system[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        return false;
+    };
+
     // Get user initials for avatar
     const getUserInitials = () => {
         if (session?.user?.name) {
@@ -308,6 +440,7 @@ export default function AdminLayout({ children }) {
             localStorage.removeItem('userRole');
             localStorage.removeItem('userName');
             localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPermissions');
 
             // Clear any session storage items
             sessionStorage.clear();
@@ -391,7 +524,7 @@ export default function AdminLayout({ children }) {
             }
         } catch (error) {
             console.error('Error creating client account:', error);
-            toast.error('An error occurred while creating the client account');
+            toast.error('An error occurred while creating client account');
         } finally {
             setIsCreatingClient(false);
         }
@@ -542,6 +675,22 @@ export default function AdminLayout({ children }) {
             ]
         },
         {
+            title: 'Project Management',
+            icon: <FolderOpen className="w-5 h-5" />,
+            href: '/dashboard/manage-projects',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600',
+            submenu: [
+                { title: 'All Projects', href: '/dashboard/manage-projects', permission: 'project.view_all_projects' },
+                { title: 'Active Projects', href: '/dashboard/manage-projects/active', permission: 'project.view_all_projects' },
+                { title: 'Create Project', href: '/dashboard/create-project', permission: 'project.create_project' },
+                { title: 'Project Templates', href: '/dashboard/project-templates', permission: 'project.create_project' },
+                { title: 'Project Analytics', href: '/dashboard/project-analytics', permission: 'project.view_all_projects' },
+                { title: 'Project Settings', href: '/dashboard/project-settings', permission: 'project.manage_settings' }
+            ]
+        },
+        {
             title: 'Services',
             icon: <Briefcase className="w-5 h-5" />,
             href: '/dashboard/manage-services',
@@ -637,6 +786,14 @@ export default function AdminLayout({ children }) {
             gradient: 'from-blue-500 to-blue-600'
         },
         {
+            title: 'Manage Team Leaders',
+            icon: <Crown className="w-5 h-5" />,
+            href: '/dashboard/manage-team-leaders',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600'
+        },
+        {
             title: 'Worker Analytics',
             icon: <BarChartIcon className="w-5 h-5" />,
             href: '/dashboard/worker-analytics',
@@ -650,7 +807,7 @@ export default function AdminLayout({ children }) {
             href: '/dashboard/project-analytics',
             badge: null,
             color: 'cyan',
-            gradient: 'from-cyan-500 to-cyan-600',
+            gradient: 'from-cyan-500 to-cyan-600'
         },
         {
             title: 'Settings',
@@ -831,15 +988,15 @@ export default function AdminLayout({ children }) {
             if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
             if (pathname === 'dashboard/manage-analytics') return 'Analytics';
             if (pathname === 'dashboard/manage-orders') return 'Order Management';
-            if (pathname === 'dashboard/manage-messages') return 'Messages';
-            if (pathname === 'dashboard/manage-settings') return 'Settings';
+            if (pathname === '/dashboard/manage-messages') return 'Messages';
+            if (pathname === '/dashboard/manage-settings') return 'Settings';
         }
         // Worker page titles
         else {
             if (pathname === '/dashboard/workers/manage-my-tasks') return 'My Tasks';
             if (pathname.startsWith('/dashboard/workers/manage-my-tasks/')) return 'Task Details';
-            if (pathname === '/dashboard/manage-submit-task') return 'Submit Task';
-            if (pathname === '/dashboard/manage-time-tracking') return 'Time Tracking';
+            if (pathname === '/dashboard/workers/manage-submit-task') return 'Submit Task';
+            if (pathname === '/dashboard/workers/manage-time-tracking') return 'Time Tracking';
             if (pathname === '/dashboard/manage-performance') return 'Performance';
             if (pathname === '/dashboard/manage-earnings') return 'Earnings';
             if (pathname === '/dashboard/manage-messages') return 'Messages';
@@ -932,92 +1089,122 @@ export default function AdminLayout({ children }) {
                 {/* Navigation */}
                 <nav className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                     <ul className="space-y-1.5">
-                        {menuItems.map((item, index) => (
-                            <li key={item.title}>
-                                <div>
-                                    {item.onClick ? (
-                                        <button
-                                            onClick={item.onClick}
-                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+                        {menuItems.map((item, index) => {
+                            // Check if user has permission to access this menu item
+                            const hasRequiredPermission = item.permission ? hasPermission(item.permission) : true;
+                            
+                            return (
+                                <li key={item.title}>
+                                    <div>
+                                        {item.onClick ? (
+                                            <button
+                                                onClick={item.onClick}
+                                                className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${!hasRequiredPermission ? 'opacity-50 cursor-not-allowed' : getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
+                                                style={{ animationDelay: `${index * 50}ms` }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
 
-                                            <div className="flex items-center relative z-10">
-                                                <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
-                                                    {item.icon}
-                                                </span>
-                                                {!sidebarCollapsed && (
-                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 relative z-10">
-                                                {item.badge && !sidebarCollapsed && (
-                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
-                                                        {item.badge}
+                                                <div className="flex items-center relative z-10">
+                                                    <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
+                                                        {item.icon}
                                                     </span>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ) : (
-                                        <Link
-                                            href={item.href}
-                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${isActive(item.href)
-                                                ? `${getColorClasses(item.color, true)} border-2`
-                                                : `${getColorClasses(item.color, false)} border-transparent`
-                                                } relative overflow-hidden`}
-                                            onClick={() => item.submenu && toggleSubmenu(item.title)}
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+                                                    {!sidebarCollapsed && (
+                                                        <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 relative z-10">
+                                                    {item.badge && !sidebarCollapsed && (
+                                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                            {item.badge}
+                                                        </span>
+                                                    )}
+                                                    {!hasRequiredPermission && (
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Lock className="w-4 h-4 text-amber-500" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>You need project management permissions to access this feature</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${!hasRequiredPermission ? 'opacity-50 cursor-not-allowed' : isActive(item.href)
+                                                    ? `${getColorClasses(item.color, true)} border-2`
+                                                    : `${getColorClasses(item.color, false)} border-transparent`
+                                                    } relative overflow-hidden`}
+                                                onClick={() => item.submenu && toggleSubmenu(item.title)}
+                                                style={{ animationDelay: `${index * 50}ms` }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
 
-                                            <div className="flex items-center relative z-10">
-                                                <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
-                                                    {item.icon}
-                                                </span>
-                                                {!sidebarCollapsed && (
-                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 relative z-10">
-                                                {item.badge && !sidebarCollapsed && (
-                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
-                                                        {item.badge}
+                                                <div className="flex items-center relative z-10">
+                                                    <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
+                                                        {item.icon}
                                                     </span>
-                                                )}
-                                                {item.submenu && !sidebarCollapsed && (
-                                                    <ChevronDown
-                                                        className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
-                                                            }`}
-                                                    />
-                                                )}
-                                            </div>
-                                        </Link>
-                                    )}
+                                                    {!sidebarCollapsed && (
+                                                        <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 relative z-10">
+                                                    {item.badge && !sidebarCollapsed && (
+                                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                            {item.badge}
+                                                        </span>
+                                                    )}
+                                                    {item.submenu && !sidebarCollapsed && (
+                                                        <ChevronDown
+                                                            className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
+                                                                }`}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        )}
 
                                     {/* Enhanced Submenu */}
                                     {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
                                         <ul className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
-                                            {item.submenu.map((subitem, subIndex) => (
-                                                <li key={subitem.title}>
-                                                    <Link
-                                                        href={subitem.href}
-                                                        className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${pathname === subitem.href
-                                                            ? `${getColorClasses(item.color, true)} shadow-md`
-                                                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                                                            }`}
-                                                        style={{ animationDelay: `${subIndex * 30}ms` }}
-                                                    >
-                                                        <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                        <span className="text-sm font-medium">{subitem.title}</span>
-                                                    </Link>
-                                                </li>
-                                            ))}
+                                            {item.submenu.map((subitem, subIndex) => {
+                                                // Check if user has permission to access this submenu item
+                                                const hasSubPermission = subitem.permission ? hasPermission(subitem.permission) : true;
+                                                
+                                                return (
+                                                    <li key={subitem.title}>
+                                                        <Link
+                                                            href={subitem.href}
+                                                            className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${!hasSubPermission ? 'opacity-50 cursor-not-allowed' : pathname === subitem.href
+                                                                ? `${getColorClasses(item.color, true)} shadow-md`
+                                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                                                                }`}
+                                                            style={{ animationDelay: `${subIndex * 30}ms` }}
+                                                        >
+                                                            <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <span className="text-sm font-medium">{subitem.title}</span>
+                                                            {!hasSubPermission && (
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Lock className="w-3 h-3 text-amber-500 ml-2" />
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <p>You need project management permissions to access this feature</p>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            )}
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            })}
                                         </ul>
                                     )}
                                 </div>
                             </li>
-                        ))}
+                            );
+                        })}
                     </ul>
                 </nav>
 
@@ -1106,31 +1293,31 @@ export default function AdminLayout({ children }) {
                                             {/* Search History */}
                                             {searchQuery === '' && searchHistory.length > 0 && (
                                                 <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent Searches</h3>
-                                                        <button
-                                                            onClick={clearSearchHistory}
-                                                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                                        >
-                                                            Clear
-                                                        </button>
-                                                    </div>
-                                                    <ul className="space-y-1">
-                                                        {searchHistory.map((query, index) => (
-                                                            <li key={index}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSearchQuery(query);
-                                                                        handleSearch(query);
-                                                                    }}
-                                                                    className="flex items-center w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
-                                                                >
-                                                                    <ClockIcon className="w-4 h-4 text-slate-400 mr-2" />
-                                                                    <span className="text-sm text-slate-700 dark:text-slate-300">{query}</span>
-                                                                </button>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent Searches</h3>
+                                                            <button
+                                                                onClick={clearSearchHistory}
+                                                                className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                        </div>
+                                                        <ul className="space-y-1">
+                                                            {searchHistory.map((query, index) => (
+                                                                <li key={index}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSearchQuery(query);
+                                                                            handleSearch(query);
+                                                                        }}
+                                                                        className="flex items-center w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+                                                                    >
+                                                                        <ClockIcon className="w-4 h-4 text-slate-400 mr-2" />
+                                                                        <span className="text-sm text-slate-700 dark:text-slate-300">{query}</span>
+                                                                    </button>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
                                                 </div>
                                             )}
 
@@ -1173,21 +1360,21 @@ export default function AdminLayout({ children }) {
                                             {/* Search Tips */}
                                             {searchQuery === '' && (
                                                 <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-                                                    <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Search Tips</h3>
-                                                    <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Type a URL to navigate directly to a website
-                                                        </li>
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Search for pages, settings, or features
-                                                        </li>
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Use <kbd className="px-1 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">Ctrl+K</kbd> to quickly open search
-                                                        </li>
-                                                    </ul>
+                                                        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Search Tips</h3>
+                                                        <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Type a URL to navigate directly to a website
+                                                            </li>
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Search for pages, settings, or features
+                                                            </li>
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Use <kbd className="px-1 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">Ctrl+K</kbd> to quickly open search
+                                                            </li>
+                                                        </ul>
                                                 </div>
                                             )}
                                         </div>
@@ -1428,7 +1615,7 @@ export default function AdminLayout({ children }) {
                                         </button>
                                     </div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        This password will be sent to the client&apos;s email. They can change it after logging in.
+                                        This password will be sent to client&apos;s email. They can change it after logging in.
                                     </p>
                                 </div>
                             )}
