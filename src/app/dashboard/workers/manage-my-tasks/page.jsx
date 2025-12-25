@@ -717,7 +717,7 @@ export default function WorkerTasks() {
                                         </div>
                                         {selectedTask.estimatedHours && (
                                             <div>
-                                                <h3 className="text-sm font-medium text-muted-foreground mb-1">Estimated Hours</h3>
+                                                <h3 className="text-sm font-medium text-muted-foreground mb-1">Story Point</h3>
                                                 <p>{selectedTask.estimatedHours} hours</p>
                                             </div>
                                         )}

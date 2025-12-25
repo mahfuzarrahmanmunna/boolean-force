@@ -963,7 +963,7 @@ export default function ProjectDetails() {
                                                     icon={<FaCalendarTimes className="h-4 w-4" />}
                                                 />
                                                 <InfoField
-                                                    label="Estimated Hours"
+                                                    label="Story Point"
                                                     value={project.estimatedHours || 'Not specified'}
                                                     icon={<FaStopwatch className="h-4 w-4" />}
                                                 />

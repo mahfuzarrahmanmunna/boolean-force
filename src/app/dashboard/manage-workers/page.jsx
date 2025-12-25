@@ -13,6 +13,9 @@ import {
     FaPaperclip, FaStar, FaClock, FaChartLine, FaQuestionCircle, FaLightbulb, FaUsers
 } from 'react-icons/fa';
 
+// Import the new component
+// import CreateWorkTaskModal from '@/app/dashboard/components/CreateWorkTaskModal';
+
 // shadcn/ui imports
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,6 +50,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import CreateWorkTaskModal from '@/app/components/CreateWorkTaskModal/page';
 
 // Constants
 const STATUS_OPTIONS = [
@@ -56,37 +60,9 @@ const STATUS_OPTIONS = [
     { value: 'inactive', label: 'Inactive', description: 'Worker is not currently available for tasks' }
 ];
 
-const PRIORITY_OPTIONS = [
-    { value: 'low', label: 'Low', color: 'bg-green-500', description: 'Low priority task, can be completed when time permits' },
-    { value: 'medium', label: 'Medium', color: 'bg-yellow-500', description: 'Standard priority task' },
-    { value: 'high', label: 'High', color: 'bg-orange-500', description: 'High priority task, should be completed soon' },
-    { value: 'urgent', label: 'Urgent', color: 'bg-red-500', description: 'Urgent task, requires immediate attention' }
-];
-
-const CATEGORY_OPTIONS = [
-    { value: 'development', label: 'Development', icon: '💻', description: 'Software development tasks' },
-    { value: 'design', label: 'Design', icon: '🎨', description: 'UI/UX design tasks' },
-    { value: 'marketing', label: 'Marketing', icon: '📢', description: 'Marketing and promotional tasks' },
-    { value: 'research', label: 'Research', icon: '🔍', description: 'Research and analysis tasks' },
-    { value: 'maintenance', label: 'Maintenance', icon: '🔧', description: 'System maintenance tasks' },
-    { value: 'testing', label: 'Testing', icon: '🧪', description: 'Quality assurance and testing tasks' },
-    { value: 'documentation', label: 'Documentation', icon: '📝', description: 'Documentation tasks' },
-    { value: 'other', label: 'Other', icon: '📌', description: 'Other types of tasks' }
-];
-
 // Form schemas
 const statusFormSchema = z.object({
     status: z.string().min(1, "Status is required"),
-});
-
-const workFormSchema = z.object({
-    title: z.string().min(1, "Title is required"),
-    description: z.string().min(1, "Description is required"),
-    dueDate: z.string().optional(),
-    priority: z.string().default('medium'),
-    category: z.string().default('other'),
-    estimatedHours: z.string().optional(),
-    tags: z.string().optional(),
 });
 
 const teamFormSchema = z.object({
@@ -219,17 +195,10 @@ export default function ManageWorkers() {
     const [viewingTeam, setViewingTeam] = useState(null);
     const [assigningWorkTo, setAssigningWorkTo] = useState(null);
     const [selectedTasksToAssign, setSelectedTasksToAssign] = useState([]);
-    const [selectedTeamsForNewTask, setSelectedTeamsForNewTask] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-    // Add missing state variable for team search in task creation dialog
-    const [teamSearchTerm, setTeamSearchTerm] = useState('');
-    // Current date for creation timestamp
-    const currentDate = new Date().toISOString().split('T')[0];
-    // State for tab animation
-    const [activeTab, setActiveTab] = useState('details');
-
+    
     // Show notification function
     const showNotification = (message, type = 'success') => {
         setNotification({ show: true, message, type });
@@ -243,19 +212,6 @@ export default function ManageWorkers() {
         resolver: zodResolver(statusFormSchema),
         defaultValues: {
             status: '',
-        },
-    });
-
-    const workForm = useForm({
-        resolver: zodResolver(workFormSchema),
-        defaultValues: {
-            title: '',
-            description: '',
-            dueDate: '',
-            priority: 'medium',
-            category: 'other',
-            estimatedHours: '',
-            tags: '',
         },
     });
 
@@ -330,120 +286,6 @@ export default function ManageWorkers() {
         } catch (error) {
             console.error("Error updating worker:", error);
             showNotification(error.message || 'Failed to update worker.', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Handle adding new work task and assigning it to teams
-    const handleWorkSubmit = async (data) => {
-        setIsLoading(true);
-        try {
-            // Add creation date to data
-            const taskData = {
-                ...data,
-                createdAt: currentDate,
-                // Convert tags string to array if provided
-                tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : []
-            };
-
-            // Create work task
-            const response = await fetch('/api/work', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(taskData),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to create work task');
-            }
-
-            const newWork = await response.json();
-
-            // If teams are selected, assign task to them
-            if (selectedTeamsForNewTask.length > 0) {
-                // Create an array of promises for each assignment
-                const assignmentPromises = selectedTeamsForNewTask.map(teamId =>
-                    fetch(`/api/teams/${teamId}/assign`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ projectIds: [newWork.data._id] }),
-                    })
-                );
-
-                // Wait for all promises to settle (either fulfilled or rejected)
-                const assignmentResults = await Promise.allSettled(assignmentPromises);
-
-                const failedAssignments = [];
-                const successfulTeamIds = [];
-
-                // Process each result
-                for (let i = 0; i < assignmentResults.length; i++) {
-                    const result = assignmentResults[i];
-                    const teamId = selectedTeamsForNewTask[i];
-                    const team = teams.find(t => t._id === teamId);
-                    const teamName = team ? team.name : `Team ID ${teamId}`;
-
-                    if (result.status === 'fulfilled' && result.value.ok) {
-                        successfulTeamIds.push(teamId);
-                    } else {
-                        let errorMessage = 'Unknown error';
-                        if (result.status === 'rejected') {
-                            errorMessage = result.reason.message || 'Network or server error';
-                        } else { // The fetch was successful but server responded with an error status
-                            try {
-                                const errorData = await result.value.json();
-                                errorMessage = errorData.error || `Server error (status: ${result.value.status})`;
-                            } catch (e) {
-                                errorMessage = `Server responded with status ${result.value.status}`;
-                            }
-                        }
-                        failedAssignments.push({ teamName, errorMessage });
-                    }
-                }
-
-                // If there were any failures, throw a detailed error
-                if (failedAssignments.length > 0) {
-                    const failureMessages = failedAssignments.map(
-                        ({ teamName, errorMessage }) => `• ${teamName}: ${errorMessage}`
-                    ).join('<br>'); // Use <br> for HTML rendering in notification
-
-                    throw new Error(`Task created, but failed to assign to some teams:<br>${failureMessages}`);
-                }
-
-                // If all assignments were successful, fetch updated team data to keep UI in sync
-                const updatedTeamsPromises = successfulTeamIds.map(async (teamId) => {
-                    const res = await fetch(`/api/teams/${teamId}`);
-                    if (res.ok) return res.json();
-                    return null;
-                });
-
-                const updatedTeamsData = await Promise.all(updatedTeamsPromises);
-
-                setTeams(prevTeams =>
-                    prevTeams.map(team => {
-                        const updatedData = updatedTeamsData.find(data => data && data.data._id === team._id);
-                        return updatedData ? updatedData.data : team;
-                    })
-                );
-
-            } else {
-                // If no teams are selected, add task to available work list
-                setAvailableWork(prev => [...prev, newWork.data]);
-            }
-
-            // Reset form and show success
-            setIsAddingWork(false);
-            workForm.reset();
-            setSelectedTeamsForNewTask([]);
-            setTeamSearchTerm('');
-            showNotification('New work task created and assigned successfully!', 'success');
-
-        } catch (error) {
-            console.error("Error in handleWorkSubmit:", error);
-            // The notification will now display detailed, multi-line error message
-            showNotification(error.message || 'Failed to create work task.', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -617,14 +459,7 @@ export default function ManageWorkers() {
         });
     }, [workers, searchTerm, statusFilter]);
 
-    // Filter teams for task assignment based on search term
-    const filteredTeamsForTask = useMemo(() => {
-        return teams.filter(team => {
-            const matchesSearch = team.name.toLowerCase().includes(teamSearchTerm.toLowerCase());
-            return matchesSearch;
-        });
-    }, [teams, teamSearchTerm]);
-
+    console.log(filteredWorkers);
     // Update form when editingWorker changes
     useEffect(() => {
         if (editingWorker) {
@@ -1360,388 +1195,17 @@ export default function ManageWorkers() {
                         </DialogContent>
                     </Dialog>
 
-                    {/* Add Work Dialog - Enhanced Version */}
-                    <Dialog open={isAddingWork} onOpenChange={() => {
-                        setIsAddingWork(false);
-                        setSelectedTeamsForNewTask([]);
-                        setTeamSearchTerm('');
-                    }}>
-                        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                                <DialogTitle className="flex items-center gap-2">
-                                    <FaBriefcase className="text-primary animate-pulse" />
-                                    Create New Work Task
-                                </DialogTitle>
-                                <DialogDescription>
-                                    Add a new task and assign it to teams
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger
-                                        value="details"
-                                        className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        Task Details
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="assignment"
-                                        className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        Team Assignment
-                                    </TabsTrigger>
-                                    <TabsTrigger
-                                        value="preview"
-                                        className="transition-all duration-200 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                                    >
-                                        Preview
-                                    </TabsTrigger>
-                                </TabsList>
-
-                                <TabsContent value="details" className="space-y-4 mt-4">
-                                    <form onSubmit={workForm.handleSubmit(handleWorkSubmit)} className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField
-                                                label="Task Title"
-                                                error={workForm.formState.errors.title}
-                                                required
-                                                tooltip="Give your task a clear and descriptive title"
-                                            >
-                                                <Input
-                                                    placeholder="Enter task title"
-                                                    {...workForm.register('title')}
-                                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                                />
-                                            </FormField>
-                                            <FormField
-                                                label="Category"
-                                                error={workForm.formState.errors.category}
-                                                tooltip="Select the category that best describes this task"
-                                            >
-                                                <Select
-                                                    value={workForm.watch('category')}
-                                                    onValueChange={(value) => workForm.setValue('category', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a category" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {CATEGORY_OPTIONS.map(option => (
-                                                            <SelectItem key={option.value} value={option.value}>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span>{option.icon}</span>
-                                                                            <span>{option.label}</span>
-                                                                        </div>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>{option.description}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormField>
-                                        </div>
-
-                                        <FormField
-                                            label="Description"
-                                            error={workForm.formState.errors.description}
-                                            required
-                                            tooltip="Provide a detailed description of the task including requirements and expectations"
-                                        >
-                                            <Textarea
-                                                placeholder="Enter task description"
-                                                {...workForm.register('description')}
-                                                rows={3}
-                                                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                            />
-                                        </FormField>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <FormField
-                                                label="Priority"
-                                                error={workForm.formState.errors.priority}
-                                                tooltip="Set the priority level to help teams understand urgency"
-                                            >
-                                                <Select
-                                                    value={workForm.watch('priority')}
-                                                    onValueChange={(value) => workForm.setValue('priority', value)}
-                                                >
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select priority" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {PRIORITY_OPTIONS.map(option => (
-                                                            <SelectItem key={option.value} value={option.value}>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <div className={`w-3 h-3 rounded-full ${option.color}`}></div>
-                                                                            <span>{option.label}</span>
-                                                                        </div>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>{option.description}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormField>
-
-                                            <FormField
-                                                label="Due Date"
-                                                error={workForm.formState.errors.dueDate}
-                                                tooltip="Set a deadline for task completion"
-                                            >
-                                                <Input
-                                                    type="date"
-                                                    {...workForm.register('dueDate')}
-                                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                                />
-                                            </FormField>
-
-                                            <FormField
-                                                label="Estimated Hours"
-                                                error={workForm.formState.errors.estimatedHours}
-                                                tooltip="Provide an estimate of how long this task will take"
-                                            >
-                                                <Input
-                                                    type="number"
-                                                    placeholder="e.g., 8"
-                                                    {...workForm.register('estimatedHours')}
-                                                    className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                                />
-                                            </FormField>
-                                        </div>
-
-                                        <FormField
-                                            label="Tags"
-                                            error={workForm.formState.errors.tags}
-                                            tooltip="Add tags to help categorize and find this task later"
-                                        >
-                                            <Input
-                                                placeholder="e.g., frontend, urgent, bug-fix"
-                                                {...workForm.register('tags')}
-                                                className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                            />
-                                        </FormField>
-
-                                        <div className="bg-muted/30 p-3 rounded-md flex items-center gap-2">
-                                            <FaCalendarAlt className="text-primary" />
-                                            <span className="text-sm font-medium">Creation Date: {new Date(currentDate).toLocaleDateString()}</span>
-                                        </div>
-                                    </form>
-                                </TabsContent>
-
-                                <TabsContent value="assignment" className="space-y-4 mt-4">
-                                    <FormField
-                                        label="Assign to Teams (Optional)"
-                                        tooltip="Select teams to assign this task to. Leave empty to make it available for any team."
-                                    >
-                                        <div className="space-y-3">
-                                            {/* Team Search Input */}
-                                            <div className="relative">
-                                                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                                                <Input
-                                                    placeholder="Search teams by name..."
-                                                    value={teamSearchTerm}
-                                                    onChange={(e) => setTeamSearchTerm(e.target.value)}
-                                                    className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
-                                                />
-                                            </div>
-
-                                            {/* Team Selection Stats */}
-                                            <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
-                                                <span className="text-sm font-medium">
-                                                    {selectedTeamsForNewTask.length} team{selectedTeamsForNewTask.length !== 1 ? 's' : ''} selected
-                                                </span>
-                                                {selectedTeamsForNewTask.length > 0 && (
-                                                    <AnimatedButton
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={() => setSelectedTeamsForNewTask([])}
-                                                    >
-                                                        Clear All
-                                                    </AnimatedButton>
-                                                )}
-                                            </div>
-
-                                            {/* Team List */}
-                                            <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                                                {filteredTeamsForTask.length > 0 ? (
-                                                    <div className="space-y-2">
-                                                        {filteredTeamsForTask.map((team) => (
-                                                            <div key={team._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200">
-                                                                <Checkbox
-                                                                    id={`team-${team._id}`}
-                                                                    checked={selectedTeamsForNewTask.includes(team._id)}
-                                                                    onCheckedChange={() => {
-                                                                        if (selectedTeamsForNewTask.includes(team._id)) {
-                                                                            setSelectedTeamsForNewTask(selectedTeamsForNewTask.filter(id => id !== team._id));
-                                                                        } else {
-                                                                            setSelectedTeamsForNewTask([...selectedTeamsForNewTask, team._id]);
-                                                                        }
-                                                                    }}
-                                                                />
-                                                                <label
-                                                                    htmlFor={`team-${team._id}`}
-                                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2 flex-1"
-                                                                >
-                                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
-                                                                        <FaUsers className="h-4 w-4" />
-                                                                    </div>
-                                                                    <div className="flex-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span>{team.name}</span>
-                                                                            <Badge variant="outline" className="text-xs">
-                                                                                {getTeamMemberDetails(team.teamMembers || []).length + 1} members
-                                                                            </Badge>
-                                                                        </div>
-                                                                        <div className="text-xs text-muted-foreground">
-                                                                            Leader: {(() => {
-                                                                                const leader = workers.find(w => w._id === team.teamLeader);
-                                                                                return leader ? leader.name : 'Unknown';
-                                                                            })()}
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="text-xs text-muted-foreground">
-                                                                        {getTeamProjects(team).length} tasks
-                                                                    </div>
-                                                                </label>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <p className="text-center text-muted-foreground py-4">
-                                                        {teamSearchTerm ? 'No teams match your search.' : 'No teams available.'}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </FormField>
-                                </TabsContent>
-
-                                <TabsContent value="preview" className="space-y-4 mt-4">
-                                    <AnimatedCard className="transition-all duration-300 hover:shadow-lg">
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center justify-between">
-                                                <span>{workForm.watch('title') || 'Task Title'}</span>
-                                                <div className="flex items-center gap-2">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Badge variant="outline" className="flex items-center gap-1 transition-all duration-200 hover:scale-105">
-                                                                {CATEGORY_OPTIONS.find(c => c.value === workForm.watch('category'))?.icon}
-                                                                {CATEGORY_OPTIONS.find(c => c.value === workForm.watch('category'))?.label || 'No Category'}
-                                                            </Badge>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>{CATEGORY_OPTIONS.find(c => c.value === workForm.watch('category'))?.description || 'No description available'}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Badge variant="outline" className={`flex items-center gap-1 transition-all duration-200 hover:scale-105 ${PRIORITY_OPTIONS.find(p => p.value === workForm.watch('priority'))?.color
-                                                                } text-white`}>
-                                                                <FaFlag className="h-3 w-3" />
-                                                                {PRIORITY_OPTIONS.find(p => p.value === workForm.watch('priority'))?.label || 'No Priority'}
-                                                            </Badge>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>{PRIORITY_OPTIONS.find(p => p.value === workForm.watch('priority'))?.description || 'No description available'}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </div>
-                                            </CardTitle>
-                                            <CardDescription className="flex items-center gap-4 text-xs">
-                                                <span className="flex items-center gap-1">
-                                                    <FaCalendarAlt />
-                                                    Created: {new Date(currentDate).toLocaleDateString()}
-                                                </span>
-                                                {workForm.watch('dueDate') && (
-                                                    <span className="flex items-center gap-1">
-                                                        <FaClock />
-                                                        Due: {new Date(workForm.watch('dueDate')).toLocaleDateString()}
-                                                    </span>
-                                                )}
-                                                {workForm.watch('estimatedHours') && (
-                                                    <span className="flex items-center gap-1">
-                                                        <FaChartLine />
-                                                        Est. {workForm.watch('estimatedHours')} hours
-                                                    </span>
-                                                )}
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="mb-4">{workForm.watch('description') || 'Task description will appear here...'}</p>
-
-                                            {workForm.watch('tags') && (
-                                                <div className="flex flex-wrap gap-1 mb-4">
-                                                    {workForm.watch('tags').split(',').map((tag, index) => (
-                                                        <Badge key={index} variant="secondary" className="text-xs transition-all duration-200 hover:scale-105">
-                                                            {tag.trim()}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            )}
-
-                                            {selectedTeamsForNewTask.length > 0 && (
-                                                <div>
-                                                    <h4 className="text-sm font-medium mb-2">Assigned to teams:</h4>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {selectedTeamsForNewTask.map(teamId => {
-                                                            const team = teams.find(t => t._id === teamId);
-                                                            return team ? (
-                                                                <Tooltip key={teamId}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Badge variant="outline" className="flex items-center gap-1 transition-all duration-200 hover:scale-105">
-                                                                            <FaUsers className="h-3 w-3" />
-                                                                            {team.name}
-                                                                        </Badge>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Leader: {(() => {
-                                                                            const leader = workers.find(w => w._id === team.teamLeader);
-                                                                            return leader ? leader.name : 'Unknown';
-                                                                        })()}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            ) : null;
-                                                        })}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </CardContent>
-                                    </AnimatedCard>
-                                </TabsContent>
-                            </Tabs>
-
-                            <DialogFooter>
-                                <AnimatedButton type="button" variant="outline" onClick={() => {
-                                    setIsAddingWork(false);
-                                    workForm.reset();
-                                    setSelectedTeamsForNewTask([]);
-                                    setTeamSearchTerm('');
-                                }}>
-                                    Cancel
-                                </AnimatedButton>
-                                <AnimatedButton
-                                    type="submit"
-                                    disabled={isLoading}
-                                    onClick={workForm.handleSubmit(handleWorkSubmit)}
-                                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary"
-                                >
-                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaPlus className="mr-2 h-4 w-4" />}
-                                    Create Task
-                                </AnimatedButton>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                    {/* Create Work Task Modal Component */}
+                    <CreateWorkTaskModal
+                        isOpen={isAddingWork}
+                        onClose={() => setIsAddingWork(false)}
+                        teams={teams}
+                        workers={workers}
+                        availableWork={availableWork}
+                        setAvailableWork={setAvailableWork}
+                        setTeams={setTeams}
+                        showNotification={showNotification}
+                    />
                 </div>
             </div>
         </TooltipProvider>

@@ -1166,7 +1166,7 @@ export default function SubmitTaskPage() {
                                             </div>
                                         </div>
 
-                                        {/* Due Date and Estimated Hours */}
+                                        {/* Due Date and Story Point */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -1189,7 +1189,7 @@ export default function SubmitTaskPage() {
 
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                    Estimated Hours
+                                                    Story Point
                                                 </label>
                                                 <div className="relative">
                                                     <input

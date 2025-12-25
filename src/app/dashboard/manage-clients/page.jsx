@@ -1165,7 +1165,7 @@ export default function ManageClients() {
                                             </FormField>
 
                                             <FormField
-                                                label="Estimated Hours"
+                                                label="Story Point"
                                                 error={projectForm.formState.errors.estimatedHours}
                                                 tooltip="Provide an estimate of how long this project will take"
                                             >

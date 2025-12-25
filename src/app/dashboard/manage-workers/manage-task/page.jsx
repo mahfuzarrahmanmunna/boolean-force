@@ -889,7 +889,7 @@ export default function ManageTasks() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
-                                label="Estimated Hours"
+                                label="Story Point"
                                 error={taskForm.formState.errors.estimatedHours}
                             >
                                 <Input

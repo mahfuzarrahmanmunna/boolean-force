@@ -1190,7 +1190,7 @@ export default function ManageTeamsPage() {
 
                                         <div>
                                             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                Estimated Hours
+                                                Story Point
                                             </label>
                                             <Input
                                                 type="number"

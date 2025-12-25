@@ -39,8 +39,12 @@ export async function GET(request, { params }) {
         const serializedTask = {
             ...task,
             _id: task._id.toString(),
-            // Also serialize the assignedTo field if it exists
-            assignedTo: task.assignedTo ? task.assignedTo.toString() : null,
+            // Ensure assignedTo is always an array of strings
+            assignedTo: Array.isArray(task.assignedTo) 
+                ? task.assignedTo.map(id => id.toString())
+                : task.assignedTo 
+                    ? [task.assignedTo.toString()] 
+                    : [],
         };
 
         return NextResponse.json({
@@ -76,13 +80,70 @@ export async function PUT(request, { params }) {
             );
         }
 
-        // Get the task data from the request body
-        const taskData = await request.json();
-        console.log('Task data received for update:', taskData);
+        // Check if the request is multipart/form-data (for file uploads)
+        const contentType = request.headers.get('content-type');
+        let taskData;
+        let files = [];
 
-        // Parse tags if provided as a string
-        if (taskData.tags && typeof taskData.tags === 'string') {
-            taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        if (contentType && contentType.includes('multipart/form-data')) {
+            // Handle file upload
+            const formData = await request.formData();
+            
+            // Extract form fields
+            const title = formData.get('title');
+            const description = formData.get('description');
+            const dueDate = formData.get('dueDate');
+            const priority = formData.get('priority') || 'medium';
+            const category = formData.get('category') || 'other';
+            const estimatedHours = formData.get('estimatedHours');
+            const tags = formData.get('tags');
+            const directions = formData.get('directions');
+            const assignedTeams = formData.get('assignedTeams');
+            
+            // Parse JSON fields
+            const parsedTags = tags ? JSON.parse(tags) : [];
+            const parsedAssignedTeams = assignedTeams ? JSON.parse(assignedTeams) : [];
+            
+            // Handle file uploads
+            for (const [key, value] of formData.entries()) {
+                if (key === 'files' && value instanceof File) {
+                    // In a real implementation, you would upload the file to a storage service
+                    // For now, we'll just store the file info
+                    const fileName = `${Date.now()}-${value.name}`;
+                    
+                    // In a real app, you would upload to a service like S3, Cloudinary, etc.
+                    // For this example, we'll just store the file info in the database
+                    files.push({
+                        name: value.name,
+                        size: value.size,
+                        type: value.type,
+                        // In a real implementation, you would store the URL here
+                        url: `/uploads/${fileName}`
+                    });
+                }
+            }
+            
+            // Create task data object
+            taskData = {
+                title,
+                description,
+                dueDate,
+                priority,
+                category,
+                estimatedHours,
+                tags: parsedTags,
+                directions,
+                files,
+                assignedTo: parsedAssignedTeams
+            };
+        } else {
+            // Handle regular JSON request (no files)
+            taskData = await request.json();
+            
+            // Parse tags if provided as a string
+            if (taskData.tags && typeof taskData.tags === 'string') {
+                taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            }
         }
 
         // Get the collection
@@ -130,8 +191,12 @@ export async function PUT(request, { params }) {
         const serializedTask = {
             ...updatedTask,
             _id: updatedTask._id.toString(),
-            // Also serialize the assignedTo field if it exists
-            assignedTo: updatedTask.assignedTo ? updatedTask.assignedTo.toString() : null,
+            // Ensure assignedTo is always an array of strings
+            assignedTo: Array.isArray(updatedTask.assignedTo) 
+                ? updatedTask.assignedTo.map(id => id.toString())
+                : updatedTask.assignedTo 
+                    ? [updatedTask.assignedTo.toString()] 
+                    : [],
         };
 
         return NextResponse.json({
