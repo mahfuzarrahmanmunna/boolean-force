@@ -409,7 +409,7 @@ const FileUpload = ({ files, setFiles, onRemoveFile }) => {
   );
 };
 
-export default function CreateWorkTaskModal({
+export default function EditWorkTaskModal({
   isOpen,
   onClose,
   teams,
@@ -418,9 +418,10 @@ export default function CreateWorkTaskModal({
   setAvailableWork,
   setTeams,
   showNotification,
+  taskToEdit,
 }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTeamsForNewTask, setSelectedTeamsForNewTask] = useState([]);
+  const [selectedTeamsForTask, setSelectedTeamsForTask] = useState([]);
   const [teamSearchTerm, setTeamSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("details");
   const [files, setFiles] = useState([]);
@@ -432,27 +433,24 @@ export default function CreateWorkTaskModal({
   const workForm = useForm({
     resolver: zodResolver(workFormSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      status: "planning",
-      priority: "medium",
-      category: "other",
-      budget: "",
-      startDate: "",
-      endDate: "",
-      dueDate: "",
-      estimatedHours: "",
-      tags: "",
-      directions: "",
-      progress: 0,
+      title: taskToEdit?.title || "",
+      description: taskToEdit?.description || "",
+      status: taskToEdit?.status || "planning",
+      priority: taskToEdit?.priority || "medium",
+      category: taskToEdit?.category || "other",
+      budget: taskToEdit?.budget || "",
+      startDate: taskToEdit?.startDate || "",
+      endDate: taskToEdit?.endDate || "",
+      dueDate: taskToEdit?.dueDate || "",
+      estimatedHours: taskToEdit?.estimatedHours || "",
+      tags: taskToEdit?.tags ? taskToEdit.tags.join(", ") : "",
+      directions: taskToEdit?.directions || "",
+      progress: taskToEdit?.progress || 0,
     },
   });
 
   // Filter teams for task assignment based on search term
-  // FIXED: Added guard clause to prevent error when teams is undefined
   const filteredTeamsForTask = useMemo(() => {
-    if (!teams || !Array.isArray(teams)) return [];
-    
     return teams.filter((team) => {
       const matchesSearch = team.name
         .toLowerCase()
@@ -462,20 +460,14 @@ export default function CreateWorkTaskModal({
   }, [teams, teamSearchTerm]);
 
   // Get team member details
-  // FIXED: Added guard clause to prevent error when memberIds is undefined
   const getTeamMemberDetails = (memberIds) => {
-    if (!memberIds || !Array.isArray(memberIds)) return [];
-    
     return memberIds
-      .map((id) => workers?.find((w) => w._id === id))
+      .map((id) => workers.find((w) => w._id === id))
       .filter(Boolean);
   };
 
   // Get projects assigned to a team
-  // FIXED: Added guard clause to prevent error when availableWork is undefined
   const getTeamProjects = (team) => {
-    if (!availableWork || !Array.isArray(availableWork)) return [];
-    
     return availableWork.filter((task) =>
       team.assignedProjects?.includes(task._id)
     );
@@ -507,10 +499,11 @@ export default function CreateWorkTaskModal({
       });
 
       // Add creation date
-      formData.append("createdAt", currentDate);
+      formData.append("createdAt", taskToEdit?.createdAt || currentDate);
+      formData.append("updatedAt", currentDate);
 
       // Add selected teams
-      formData.append("assignedTeams", JSON.stringify(selectedTeamsForNewTask));
+      formData.append("assignedTeams", JSON.stringify(selectedTeamsForTask));
 
       // Add files
       files.forEach((file) => {
@@ -520,28 +513,28 @@ export default function CreateWorkTaskModal({
         formData.append("fileInfo", JSON.stringify(file));
       });
 
-      // Create work task with file upload
-      const response = await fetch("/api/work", {
-        method: "POST",
+      // Update work task with file upload
+      const response = await fetch(`/api/work/${taskToEdit._id}`, {
+        method: "PUT",
         body: formData, // Don't set Content-Type header when using FormData
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create work task");
+        throw new Error(errorData.error || "Failed to update work task");
       }
 
       const result = await response.json();
-      const newWork = result.data;
+      const updatedWork = result.data;
 
       // If teams are selected, assign task to them
-      if (selectedTeamsForNewTask.length > 0) {
+      if (selectedTeamsForTask.length > 0) {
         // Create an array of promises for each assignment
-        const assignmentPromises = selectedTeamsForNewTask.map((teamId) =>
+        const assignmentPromises = selectedTeamsForTask.map((teamId) =>
           fetch(`/api/teams/${teamId}/assign`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ projectIds: [newWork._id] }),
+            body: JSON.stringify({ projectIds: [updatedWork._id] }),
           })
         );
 
@@ -554,8 +547,8 @@ export default function CreateWorkTaskModal({
         // Process each result
         for (let i = 0; i < assignmentResults.length; i++) {
           const result = assignmentResults[i];
-          const teamId = selectedTeamsForNewTask[i];
-          const team = teams?.find((t) => t._id === teamId);
+          const teamId = selectedTeamsForTask[i];
+          const team = teams.find((t) => t._id === teamId);
           const teamName = team ? team.name : `Team ID ${teamId}`;
 
           if (result.status === "fulfilled" && result.value.ok) {
@@ -602,7 +595,7 @@ export default function CreateWorkTaskModal({
             .join("<br>"); // Use <br> for HTML rendering in notification
 
           throw new Error(
-            `Task created, but failed to assign to some teams:<br>${failureMessages}`
+            `Task updated, but failed to assign to some teams:<br>${failureMessages}`
           );
         }
 
@@ -610,13 +603,13 @@ export default function CreateWorkTaskModal({
         if (successfulTeamIds.length > 0) {
           try {
             // Fetch the updated task to get the latest assignedTo information
-            const updatedTaskResponse = await fetch(`/api/work/${newWork._id}`);
+            const updatedTaskResponse = await fetch(`/api/work/${updatedWork._id}`);
             if (updatedTaskResponse.ok) {
               const updatedTaskData = await updatedTaskResponse.json();
               if (updatedTaskData.data) {
                 setAvailableWork((prev) =>
                   prev.map((task) =>
-                    task._id === newWork._id ? updatedTaskData.data : task
+                    task._id === updatedWork._id ? updatedTaskData.data : task
                   )
                 );
               }
@@ -626,23 +619,27 @@ export default function CreateWorkTaskModal({
           }
         }
       } else {
-        // If no teams are selected, add task to available work list
-        setAvailableWork((prev) => [...prev, newWork]);
+        // If no teams are selected, update task in available work list
+        setAvailableWork((prev) =>
+          prev.map((task) =>
+            task._id === taskToEdit._id ? updatedWork : task
+          )
+        );
       }
 
       // Reset form and show success
       onClose();
       workForm.reset();
-      setSelectedTeamsForNewTask([]);
+      setSelectedTeamsForTask([]);
       setTeamSearchTerm("");
       setFiles([]);
       showNotification(
-        "New work task created and assigned successfully!",
+        "Work task updated and assigned successfully!",
         "success"
       );
     } catch (error) {
       console.error("Error in handleWorkSubmit:", error);
-      showNotification(error.message || "Failed to create work task.", "error");
+      showNotification(error.message || "Failed to update work task.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -652,7 +649,7 @@ export default function CreateWorkTaskModal({
   useEffect(() => {
     if (!isOpen) {
       workForm.reset();
-      setSelectedTeamsForNewTask([]);
+      setSelectedTeamsForTask([]);
       setTeamSearchTerm("");
       setFiles([]);
       setActiveTab("details");
@@ -666,10 +663,10 @@ export default function CreateWorkTaskModal({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FaBriefcase className="text-primary animate-pulse" />
-              Create New Work Task
+              Edit Work Task
             </DialogTitle>
             <DialogDescription>
-              Add a new task and assign it to teams
+              Update task details and assign it to teams
             </DialogDescription>
           </DialogHeader>
 
@@ -879,7 +876,7 @@ export default function CreateWorkTaskModal({
                 <div className="bg-muted/30 p-3 rounded-md flex items-center gap-2">
                   <FaCalendarAlt className="text-primary" />
                   <span className="text-sm font-medium">
-                    Creation Date: {new Date(currentDate).toLocaleDateString()}
+                    Creation Date: {new Date(taskToEdit?.createdAt || currentDate).toLocaleDateString()}
                   </span>
                 </div>
               </form>
@@ -953,7 +950,7 @@ export default function CreateWorkTaskModal({
               <div className="bg-muted/30 p-3 rounded-md flex items-center gap-2">
                 <FaCalendarAlt className="text-primary" />
                 <span className="text-sm font-medium">
-                  Created: {new Date(currentDate).toLocaleDateString()}
+                  Created: {new Date(taskToEdit?.createdAt || currentDate).toLocaleDateString()}
                 </span>
               </div>
             </TabsContent>
@@ -1020,14 +1017,14 @@ export default function CreateWorkTaskModal({
                   {/* Team Selection Stats */}
                   <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
                     <span className="text-sm font-medium">
-                      {selectedTeamsForNewTask.length} team
-                      {selectedTeamsForNewTask.length !== 1 ? "s" : ""} selected
+                      {selectedTeamsForTask.length} team
+                      {selectedTeamsForTask.length !== 1 ? "s" : ""} selected
                     </span>
-                    {selectedTeamsForNewTask.length > 0 && (
+                    {selectedTeamsForTask.length > 0 && (
                       <AnimatedButton
                         variant="ghost"
                         size="sm"
-                        onClick={() => setSelectedTeamsForNewTask([])}
+                        onClick={() => setSelectedTeamsForTask([])}
                       >
                         Clear All
                       </AnimatedButton>
@@ -1045,21 +1042,19 @@ export default function CreateWorkTaskModal({
                           >
                             <Checkbox
                               id={`team-${team._id}`}
-                              checked={selectedTeamsForNewTask.includes(
-                                team._id
-                              )}
+                              checked={selectedTeamsForTask.includes(team._id)}
                               onCheckedChange={() => {
                                 if (
-                                  selectedTeamsForNewTask.includes(team._id)
+                                  selectedTeamsForTask.includes(team._id)
                                 ) {
-                                  setSelectedTeamsForNewTask(
-                                    selectedTeamsForNewTask.filter(
+                                  setSelectedTeamsForTask(
+                                    selectedTeamsForTask.filter(
                                       (id) => id !== team._id
                                     )
                                   );
                                 } else {
-                                  setSelectedTeamsForNewTask([
-                                    ...selectedTeamsForNewTask,
+                                  setSelectedTeamsForTask([
+                                    ...selectedTeamsForTask,
                                     team._id,
                                   ]);
                                 }
@@ -1085,7 +1080,7 @@ export default function CreateWorkTaskModal({
                                 <div className="text-xs text-muted-foreground">
                                   Leader:{" "}
                                   {(() => {
-                                    const leader = workers?.find(
+                                    const leader = workers.find(
                                       (w) => w._id === team.teamLeader
                                     );
                                     return leader ? leader.name : "Unknown";
@@ -1125,9 +1120,9 @@ export default function CreateWorkTaskModal({
               {isLoading ? (
                 <FaSpinner className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <FaPlus className="mr-2 h-4 w-4" />
+                <FaSave className="mr-2 h-4 w-4" />
               )}
-              Create Task
+              Update Task
             </AnimatedButton>
           </DialogFooter>
         </DialogContent>
