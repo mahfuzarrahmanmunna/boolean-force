@@ -2,6 +2,84 @@
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
+// Helper function to check if a user is a team leader
+async function isTeamLeader(userId) {
+    try {
+        const teamsCollection = await dbConnect('teams');
+        const team = await teamsCollection.findOne({
+            teamLeader: new ObjectId(userId)
+        });
+        return !!team;
+    } catch (error) {
+        console.error('Error checking team leader status:', error);
+        return false;
+    }
+}
+
+// Helper function to check if a user has permission to access a work item
+async function hasWorkPermission(userId, workId, action = 'read') {
+    try {
+        // Admins have all permissions
+        const usersCollection = await dbConnect('users');
+        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
+        
+        if (!user) {
+            return false;
+        }
+        
+        if (user.role === 'admin') {
+            return true;
+        }
+        
+        // Check if user is a team leader
+        const isLeader = await isTeamLeader(userId);
+        if (!isLeader) {
+            return false;
+        }
+        
+        // For read operations, check if the work is assigned to the user's team
+        if (action === 'read') {
+            const workCollection = await dbConnect('work');
+            const work = await workCollection.findOne({ _id: new ObjectId(workId) });
+            
+            if (!work) {
+                return false;
+            }
+            
+            // Check if the work is assigned to the user's team
+            const teamsCollection = await dbConnect('teams');
+            const team = await teamsCollection.findOne({
+                teamLeader: new ObjectId(userId),
+                _id: { $in: work.assignedTo || [] }
+            });
+            
+            return !!team;
+        }
+        
+        // For write/delete operations, team leaders can manage work assigned to their teams
+        const workCollection = await dbConnect('work');
+        const work = await workCollection.findOne({ _id: new ObjectId(workId) });
+        
+        if (!work) {
+            return false;
+        }
+        
+        // Check if the work is assigned to the user's team
+        const teamsCollection = await dbConnect('teams');
+        const team = await teamsCollection.findOne({
+            teamLeader: new ObjectId(userId),
+            _id: { $in: work.assignedTo || [] }
+        });
+        
+        return !!team;
+    } catch (error) {
+        console.error('Error checking work permission:', error);
+        return false;
+    }
+}
 
 // GET - Fetch a specific work task by ID
 export async function GET(request, { params }) {
@@ -12,12 +90,30 @@ export async function GET(request, { params }) {
     console.log('ID value:', id);
 
     try {
+        // Get the current user session
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json(
+                { success: false, error: "Authentication required." },
+                { status: 401 }
+            );
+        }
+
         // Validate the ID format
         if (!ObjectId.isValid(id)) {
             console.error(`Invalid ObjectId format: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
+            );
+        }
+
+        // Check if user has permission to read this work item
+        const hasPermission = await hasWorkPermission(session.user.id, id, 'read');
+        if (!hasPermission) {
+            return NextResponse.json(
+                { success: false, error: "You don't have permission to view this work task." },
+                { status: 403 }
             );
         }
 
@@ -71,12 +167,30 @@ export async function PUT(request, { params }) {
     console.log('ID value:', id);
 
     try {
+        // Get the current user session
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json(
+                { success: false, error: "Authentication required." },
+                { status: 401 }
+            );
+        }
+
         // Validate the ID format
         if (!ObjectId.isValid(id)) {
             console.error(`Invalid ObjectId format: ${id}`);
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
+            );
+        }
+
+        // Check if user has permission to update this work item
+        const hasPermission = await hasWorkPermission(session.user.id, id, 'write');
+        if (!hasPermission) {
+            return NextResponse.json(
+                { success: false, error: "You don't have permission to update this work task." },
+                { status: 403 }
             );
         }
 
@@ -167,7 +281,8 @@ export async function PUT(request, { params }) {
             {
                 $set: {
                     ...taskData,
-                    updatedAt: new Date()
+                    updatedAt: new Date(),
+                    updatedBy: new ObjectId(session.user.id)
                 }
             }
         );
@@ -223,11 +338,29 @@ export async function DELETE(request, { params }) {
     console.log('ID value:', id);
 
     try {
+        // Get the current user session
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json(
+                { success: false, error: "Authentication required." },
+                { status: 401 }
+            );
+        }
+
         // Validate the ID format
         if (!ObjectId.isValid(id)) {
             return NextResponse.json(
                 { success: false, error: "Invalid work task ID format." },
                 { status: 400 }
+            );
+        }
+
+        // Check if user has permission to delete this work item
+        const hasPermission = await hasWorkPermission(session.user.id, id, 'delete');
+        if (!hasPermission) {
+            return NextResponse.json(
+                { success: false, error: "You don't have permission to delete this work task." },
+                { status: 403 }
             );
         }
 
