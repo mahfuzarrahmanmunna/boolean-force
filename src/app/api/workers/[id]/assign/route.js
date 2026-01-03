@@ -1,4 +1,4 @@
-// src/app/api/workers/[id]/assign/route.js
+// app/api/workers/[id]/assign/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -122,7 +122,7 @@ export async function POST(request, { params }) {
         await workersCollection.updateOne(
             { _id: new ObjectId(id) },
             {
-                $push: { assignedWork: { $each: objectTaskIds } },
+                $push: { assignedWork: { $each: objectTaskIds.map(id => id.toString()) } },
                 $set: { status: 'active' }
             }
         );

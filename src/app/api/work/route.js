@@ -44,8 +44,12 @@ export async function GET(request) {
             return {
                 ...item,
                 _id: item._id.toString(),
-                // Also serialize the assignedTo field if it exists
-                assignedTo: item.assignedTo ? item.assignedTo.toString() : null,
+                // Ensure assignedTo is always an array of strings
+                assignedTo: Array.isArray(item.assignedTo) 
+                    ? item.assignedTo.map(id => id.toString())
+                    : item.assignedTo 
+                        ? [item.assignedTo.toString()] 
+                        : [],
             };
         }).filter(Boolean); // Filter out null values
 
@@ -71,18 +75,80 @@ export async function POST(request) {
             throw new Error("Failed to connect to work collection");
         }
 
-        const taskData = await request.json();
-        console.log('Task data received:', taskData);
+        // Check if the request is multipart/form-data (for file uploads)
+        const contentType = request.headers.get('content-type');
+        let taskData;
+        let files = [];
 
-        // Parse tags if provided as a string
-        if (taskData.tags && typeof taskData.tags === 'string') {
-            taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        if (contentType && contentType.includes('multipart/form-data')) {
+            // Handle file upload
+            const formData = await request.formData();
+            
+            // Extract form fields
+            const title = formData.get('title');
+            const description = formData.get('description');
+            const dueDate = formData.get('dueDate');
+            const priority = formData.get('priority') || 'medium';
+            const category = formData.get('category') || 'other';
+            const estimatedHours = formData.get('estimatedHours');
+            const tags = formData.get('tags');
+            const directions = formData.get('directions');
+            const createdAt = formData.get('createdAt');
+            const assignedTeams = formData.get('assignedTeams');
+            
+            // Parse JSON fields
+            const parsedTags = tags ? JSON.parse(tags) : [];
+            const parsedAssignedTeams = assignedTeams ? JSON.parse(assignedTeams) : [];
+            
+            // Handle file uploads
+            for (const [key, value] of formData.entries()) {
+                if (key === 'files' && value instanceof File) {
+                    // In a real implementation, you would upload the file to a storage service
+                    // For now, we'll just store the file info
+                    const fileName = `${Date.now()}-${value.name}`;
+                    
+                    // In a real app, you would upload to a service like S3, Cloudinary, etc.
+                    // For this example, we'll just store the file info in the database
+                    files.push({
+                        name: value.name,
+                        size: value.size,
+                        type: value.type,
+                        // In a real implementation, you would store the URL here
+                        url: `/uploads/${fileName}`
+                    });
+                }
+            }
+            
+            // Create task data object
+            taskData = {
+                title,
+                description,
+                dueDate,
+                priority,
+                category,
+                estimatedHours,
+                tags: parsedTags,
+                directions,
+                createdAt: createdAt || new Date(),
+                files,
+                assignedTo: parsedAssignedTeams
+            };
+        } else {
+            // Handle regular JSON request (no files)
+            taskData = await request.json();
+            
+            // Parse tags if provided as a string
+            if (taskData.tags && typeof taskData.tags === 'string') {
+                taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+            }
         }
 
-        // Create a new task document with assignedTo as an empty array
+        console.log('Task data received:', taskData);
+
+        // Create a new task document with assignedTo as an empty array if not provided
         const newTask = {
             ...taskData,
-            assignedTo: [], // Always initialize as empty array
+            assignedTo: taskData.assignedTo || [], // Initialize as empty array if not provided
             createdAt: new Date(),
             updatedAt: new Date(),
             progress: 0
@@ -98,7 +164,7 @@ export async function POST(request) {
         const createdTask = {
             ...newTask,
             _id: result.insertedId.toString(),
-            assignedTo: [] // Ensure assignedTo is an array in the response
+            assignedTo: newTask.assignedTo || [] // Ensure assignedTo is an array in the response
         };
 
         console.log('Task created:', createdTask);
@@ -112,140 +178,6 @@ export async function POST(request) {
         return NextResponse.json({
             success: false,
             error: "Something went wrong while creating work task. Please try again later.",
-            details: err.message
-        }, { status: 500 });
-    }
-}
-
-// PUT - Update a work task
-export async function PUT(request, { params }) {
-    console.log(`PUT /api/work/${params.id} called`);
-    try {
-        // Validate the ID format
-        if (!ObjectId.isValid(params.id)) {
-            console.error(`Invalid ObjectId format: ${params.id}`);
-            return NextResponse.json(
-                { success: false, error: "Invalid work task ID format." },
-                { status: 400 }
-            );
-        }
-
-        // Get the task data from the request body
-        const taskData = await request.json();
-        console.log('Task data received for update:', taskData);
-
-        // Parse tags if provided as a string
-        if (taskData.tags && typeof taskData.tags === 'string') {
-            taskData.tags = taskData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-        }
-
-        // Get the collection
-        const collection = await dbConnect('work');
-
-        // First, check if the task exists
-        const existingTask = await collection.findOne({ _id: new ObjectId(params.id) });
-        if (!existingTask) {
-            console.error(`Task not found with ID: ${params.id}`);
-            return NextResponse.json(
-                { success: false, error: "Work task not found." },
-                { status: 404 }
-            );
-        }
-
-        console.log('Existing task found:', existingTask);
-
-        // Update the task
-        const result = await collection.updateOne(
-            { _id: new ObjectId(params.id) },
-            {
-                $set: {
-                    ...taskData,
-                    updatedAt: new Date()
-                }
-            }
-        );
-
-        console.log('Update result:', result);
-
-        // Check if the update was successful
-        if (result.matchedCount === 0) {
-            console.error(`Failed to update task with ID: ${params.id}`);
-            return NextResponse.json(
-                { success: false, error: "Failed to update work task." },
-                { status: 500 }
-            );
-        }
-
-        // Find and return the updated task
-        const updatedTask = await collection.findOne({ _id: new ObjectId(params.id) });
-        console.log('Updated task:', updatedTask);
-
-        // Handle assignedTo field - ensure it's always an array of strings
-        let assignedToArray = [];
-        if (updatedTask.assignedTo) {
-            if (Array.isArray(updatedTask.assignedTo)) {
-                assignedToArray = updatedTask.assignedTo.map(id => id.toString());
-            } else {
-                assignedToArray = [updatedTask.assignedTo.toString()];
-            }
-        }
-
-        // Serialize the task
-        const serializedTask = {
-            ...updatedTask,
-            _id: updatedTask._id.toString(),
-            assignedTo: assignedToArray
-        };
-
-        return NextResponse.json({
-            success: true,
-            data: serializedTask
-        });
-    } catch (err) {
-        console.error(`Error in PUT /api/work/${params.id}:`, err);
-        return NextResponse.json({
-            success: false,
-            error: "Something went wrong while updating work task. Please try again later.",
-            details: err.message
-        }, { status: 500 });
-    }
-}
-
-// DELETE - Delete a work task
-export async function DELETE(request, { params }) {
-    console.log(`DELETE /api/work/${params.id} called`);
-    try {
-        // Validate the ID format
-        if (!ObjectId.isValid(params.id)) {
-            return NextResponse.json(
-                { success: false, error: "Invalid work task ID format." },
-                { status: 400 }
-            );
-        }
-
-        // Get the collection
-        const collection = await dbConnect('work');
-
-        // Delete the task
-        const result = await collection.deleteOne({ _id: new ObjectId(params.id) });
-
-        // Check if the deletion was successful
-        if (result.deletedCount === 0) {
-            return NextResponse.json(
-                { success: false, error: "Work task not found." },
-                { status: 404 }
-            );
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: "Work task deleted successfully."
-        });
-    } catch (err) {
-        console.error(`Error in DELETE /api/work/${params.id}:`, err);
-        return NextResponse.json({
-            success: false,
-            error: "Something went wrong while deleting work task. Please try again later.",
             details: err.message
         }, { status: 500 });
     }

@@ -12,7 +12,7 @@ import {
     FaUserCheck, FaUserTimes, FaExclamationCircle, FaFlag, FaTag, FaInfoCircle,
     FaPaperclip, FaStar, FaClock, FaChartLine, FaQuestionCircle, FaLightbulb, FaDollarSign,
     FaPlayCircle, FaPauseCircle, FaStopCircle, FaArrowUp, FaArrowDown, FaArrowRight,
-    FaUser
+    FaUser, FaUsers
 } from 'react-icons/fa';
 
 // shadcn/ui imports
@@ -49,6 +49,9 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import CreateWorkTaskModal from '@/app/components/CreateWorkTaskModal/page';
+import EditWorkTaskModal from '@/app/components/EditWorkTaskModal/EditWorkTaskModal';
+// import EditWorkTaskModal from '@/app/components/EditWorkTaskModal/page';
 
 // Constants
 const STATUS_OPTIONS = [
@@ -86,6 +89,8 @@ const projectFormSchema = z.object({
     startDate: z.string().optional(),
     endDate: z.string().optional(),
     tags: z.string().optional(),
+    status: z.string().default('planning'),
+    progress: z.number().default(0),
 });
 
 // Helper Components
@@ -129,7 +134,7 @@ const EmptyState = ({ message, icon }) => (
     </div>
 );
 
-// Form Field Component (without shadcn form)
+// Form Field Component
 const FormField = ({ label, error, children, required = false, description, tooltip }) => (
     <div className="space-y-2">
         <div className="flex items-center gap-2">
@@ -186,32 +191,28 @@ export default function ManageAllProjects() {
     const [projects, setProjects] = useState([]);
     const [clients, setClients] = useState([]);
     const [workers, setWorkers] = useState([]);
+    const [teams, setTeams] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-    const [editingProject, setEditingProject] = useState(null);
-    const [isAddingProject, setIsAddingProject] = useState(false);
     const [viewingProject, setViewingProject] = useState(null);
+    const [editingProject, setEditingProject] = useState(null);
+    const [editingTask, setEditingTask] = useState(null); // New state for editing tasks
     const [assigningProjectTo, setAssigningProjectTo] = useState(null);
-    const [selectedWorkersToAssign, setSelectedWorkersToAssign] = useState([]);
+    const [selectedTeamsToAssign, setSelectedTeamsToAssign] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [priorityFilter, setPriorityFilter] = useState('all');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
-    // Current date for creation timestamp
-    const currentDate = new Date().toISOString().split('T')[0];
+    // State for CreateWorkTaskModal
+    const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
     // State for tab animation
     const [activeTab, setActiveTab] = useState('details');
-    // State for worker search in project assignment dialog
-    const [workerSearchTerm, setWorkerSearchTerm] = useState('');
-
-    // Show notification function
-    const showNotification = (message, type = 'success') => {
-        setNotification({ show: true, message, type });
-        setTimeout(() => {
-            setNotification({ show: false, message: '', type: '' });
-        }, 3000);
-    };
+    
+    // Current date for creation timestamp
+    const currentDate = new Date().toISOString().split('T')[0];
+    // State for team search in project assignment dialog
+    const [teamSearchTerm, setTeamSearchTerm] = useState('');
 
     // Forms
     const projectForm = useForm({
@@ -226,30 +227,48 @@ export default function ManageAllProjects() {
             startDate: '',
             endDate: '',
             tags: '',
+            status: 'planning',
+            progress: 0,
         },
     });
 
-    // Fetch projects, clients, and workers from API on component mount
+    // Show notification function
+    const showNotification = (message, type = 'success') => {
+        setNotification({ show: true, message, type });
+        setTimeout(() => {
+            setNotification({ show: false, message: '', type: '' });
+        }, 3000);
+    };
+
+    // Fetch projects, clients, workers, and teams from API on component mount
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [projectsResponse, usersResponse] = await Promise.all([
+                const [projectsResponse, usersResponse, teamsResponse] = await Promise.all([
                     fetch('/api/work'),
-                    fetch('/api/users')
+                    fetch('/api/users'),
+                    fetch('/api/teams')
                 ]);
 
                 if (!projectsResponse.ok) throw new Error('Failed to fetch projects');
                 if (!usersResponse.ok) throw new Error('Failed to fetch users');
+                if (!teamsResponse.ok) throw new Error('Failed to fetch teams');
 
-                const projectsData = await projectsResponse.json();
+                const projectsResult = await projectsResponse.json();
                 const usersData = await usersResponse.json();
+                const teamsData = await teamsResponse.json();
 
                 // Extract clients from users data
                 const clientsData = usersData.filter(user => user.role === 'client');
 
-                setProjects(projectsData.data?.projects || projectsData || []);
+                // Handle different response structures
+                const projectsData = projectsResult.data || projectsResult;
+                const teamsList = teamsData.data || teamsData;
+                
+                setProjects(projectsData);
                 setClients(clientsData);
                 setWorkers(usersData);
+                setTeams(teamsList);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 showNotification('Failed to load data. Please try again.', 'error');
@@ -296,7 +315,6 @@ export default function ManageAllProjects() {
                 showNotification('Project updated successfully!', 'success');
             } else {
                 setProjects(prev => [result.data, ...prev]);
-                setIsAddingProject(false);
                 showNotification('Project created successfully!', 'success');
             }
 
@@ -331,52 +349,81 @@ export default function ManageAllProjects() {
         }
     };
 
-    // Handle assigning workers to a project
-    const handleAssignWorkers = async () => {
-        if (selectedWorkersToAssign.length === 0) {
-            showNotification('Please select at least one worker to assign.', 'error');
+    // Handle assigning teams to a project
+    const handleAssignTeams = async () => {
+        if (selectedTeamsToAssign.length === 0) {
+            showNotification('Please select at least one team to assign.', 'error');
             return;
         }
 
         setIsLoading(true);
         try {
-            console.log('Assigning workers:', selectedWorkersToAssign);
+            console.log('Assigning teams:', selectedTeamsToAssign);
             console.log('Project ID:', assigningProjectTo._id);
 
-            const response = await fetch(`/api/projects/${assigningProjectTo._id}/assign`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ workerIds: selectedWorkersToAssign }),
+            // For each selected team, assign project to that team
+            const assignmentPromises = selectedTeamsToAssign.map(teamId => 
+                fetch(`/api/teams/${teamId}/assign`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ projectIds: [assigningProjectTo._id] }),
+                })
+            );
+
+            // Wait for all assignments to complete
+            const results = await Promise.allSettled(assignmentPromises);
+            
+            // Check if any assignments failed
+            const failedAssignments = [];
+            const successfulTeamIds = [];
+            
+            results.forEach((result, index) => {
+                const teamId = selectedTeamsToAssign[index];
+                const team = teams.find(t => t._id === teamId);
+                const teamName = team ? team.name : `Team ID ${teamId}`;
+                
+                if (result.status === 'rejected' || !result.value.ok) {
+                    failedAssignments.push(teamName);
+                } else {
+                    successfulTeamIds.push(teamId);
+                }
             });
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-
-            // Parse JSON response first
-            const result = await response.json();
-            console.log('Response data:', result);
-
-            // Then check if the response was successful
-            if (!response.ok) {
-                // Extract the error message from the backend response
-                const errorMessage = result.error || result.details || 'Failed to assign workers';
-                console.error('Error from backend:', errorMessage);
-                throw new Error(errorMessage);
+            if (failedAssignments.length > 0) {
+                throw new Error(`Failed to assign project to teams: ${failedAssignments.join(', ')}`);
             }
 
-            // Update project's assigned workers
-            setProjects(projects.map(p =>
-                p._id === assigningProjectTo._id
-                    ? { ...p, assignedWorkers: [...(p.assignedWorkers || []), ...result.data.assignedWorkers] }
-                    : p
+            // Update the project's assignedTo field with the team IDs
+            const updatedProject = {
+                ...assigningProjectTo,
+                assignedTo: [...(assigningProjectTo.assignedTo || []), ...successfulTeamIds],
+                updatedAt: new Date().toISOString()
+            };
+
+            // Update the projects state
+            setProjects(projects.map(p => 
+                p._id === assigningProjectTo._id ? updatedProject : p
             ));
 
+            // Update the teams state to reflect the new assignments
+            const updatedTeams = teams.map(team => {
+                if (successfulTeamIds.includes(team._id)) {
+                    return {
+                        ...team,
+                        assignedProjects: [...(team.assignedProjects || []), assigningProjectTo._id],
+                        updatedAt: new Date().toISOString()
+                    };
+                }
+                return team;
+            });
+            setTeams(updatedTeams);
+
             setAssigningProjectTo(null);
-            setSelectedWorkersToAssign([]);
-            showNotification('Workers assigned successfully!', 'success');
+            setSelectedTeamsToAssign([]);
+            showNotification('Teams assigned successfully!', 'success');
         } catch (error) {
-            console.error("Error assigning workers:", error);
-            showNotification(error.message || 'Failed to assign workers.', 'error');
+            console.error("Error assigning teams:", error);
+            showNotification(error.message || 'Failed to assign teams.', 'error');
         } finally {
             setIsLoading(false);
         }
@@ -385,23 +432,39 @@ export default function ManageAllProjects() {
     // Get client name by ID
     const getClientName = (clientId) => {
         if (!clientId) return 'Unassigned';
-        const client = clients.find(c => c._id === clientId);
+        const client = clients.find(c => c && c._id === clientId);
         return client ? client.name : 'Unknown Client';
     };
 
-    // Get worker name by ID
-    const getWorkerName = (workerId) => {
-        if (!workerId) return 'Unassigned';
-        const worker = workers.find(w => w._id === workerId);
-        return worker ? worker.name : 'Unknown Worker';
+    // Get team name by ID
+    const getTeamName = (teamId) => {
+        if (!teamId) return 'Unassigned';
+        const team = teams.find(t => t && t._id === teamId);
+        return team ? team.name : 'Unknown Team';
+    };
+
+    // Get team leader name by ID
+    const getTeamLeaderName = (teamId) => {
+        if (!teamId) return 'Unknown';
+        const team = teams.find(t => t && t._id === teamId);
+        if (!team || !team.teamLeader) return 'Unknown';
+        const leader = workers.find(w => w && w._id === team.teamLeader);
+        return leader ? leader.name : 'Unknown Leader';
     };
 
     // Filter projects based on search and filters
     const filteredProjects = useMemo(() => {
         return projects.filter(project => {
-            const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                getClientName(project.clientId).toLowerCase().includes(searchTerm.toLowerCase());
+            // Add null check for project
+            if (!project) return false;
+            
+            const title = project.title || '';
+            const description = project.description || '';
+            const clientId = project.clientId || '';
+            
+            const matchesSearch = title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                getClientName(clientId).toLowerCase().includes(searchTerm.toLowerCase());
             const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
             const matchesPriority = priorityFilter === 'all' || project.priority === priorityFilter;
             const matchesCategory = categoryFilter === 'all' || project.category === categoryFilter;
@@ -410,15 +473,14 @@ export default function ManageAllProjects() {
         });
     }, [projects, searchTerm, statusFilter, priorityFilter, categoryFilter, clients]);
 
-    // Filter workers for project assignment based on search term
-    const filteredWorkersForProject = useMemo(() => {
-        return workers.filter(worker => {
-            const matchesStatus = worker.status === 'active' || worker.status === 'approved';
-            const matchesSearch = worker.name.toLowerCase().includes(workerSearchTerm.toLowerCase()) ||
-                worker.email.toLowerCase().includes(workerSearchTerm.toLowerCase());
-            return matchesStatus && matchesSearch;
+    // Filter teams for project assignment based on search term
+    const filteredTeamsForProject = useMemo(() => {
+        return teams.filter(team => {
+            const name = team.name || '';
+            const matchesSearch = name.toLowerCase().includes(teamSearchTerm.toLowerCase());
+            return matchesSearch;
         });
-    }, [workers, workerSearchTerm]);
+    }, [teams, teamSearchTerm]);
 
     // Update form when editingProject changes
     useEffect(() => {
@@ -432,6 +494,8 @@ export default function ManageAllProjects() {
             projectForm.setValue('startDate', editingProject.startDate || '');
             projectForm.setValue('endDate', editingProject.endDate || '');
             projectForm.setValue('tags', editingProject.tags ? editingProject.tags.join(', ') : '');
+            projectForm.setValue('status', editingProject.status || 'planning');
+            projectForm.setValue('progress', editingProject.progress || 0);
         }
     }, [editingProject, projectForm]);
 
@@ -464,11 +528,11 @@ export default function ManageAllProjects() {
                                     </CardDescription>
                                 </div>
                                 <AnimatedButton
-                                    onClick={() => setIsAddingProject(true)}
-                                    className="bg-gradient-to-r cursor-pointer from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                                    onClick={() => setIsCreateTaskModalOpen(true)}
+                                    className="bg-gradient-to-r cursor-pointer from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
                                 >
-                                    <FaPlus className="mr-2 h-4 w-4" />
-                                    New Project
+                                    <FaTasks className="mr-2 h-4 w-4" />
+                                    Create Task
                                 </AnimatedButton>
                             </div>
                         </CardHeader>
@@ -476,7 +540,7 @@ export default function ManageAllProjects() {
 
                     {/* Filters */}
                     <AnimatedCard className="shadow-md">
-                        <CardContent className="pt-6">
+                        <CardContent className="py-6">
                             <div className="flex flex-col lg:flex-row gap-4">
                                 <div className="relative flex-1">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -544,6 +608,7 @@ export default function ManageAllProjects() {
                                         <TableHead>Priority</TableHead>
                                         <TableHead>Progress</TableHead>
                                         <TableHead>Budget</TableHead>
+                                        <TableHead>Assigned Teams</TableHead>
                                         <TableHead>Created</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
@@ -553,9 +618,9 @@ export default function ManageAllProjects() {
                                         <TableRow key={project._id} className="hover:bg-muted/50 transition-all duration-200">
                                             <TableCell>
                                                 <div>
-                                                    <div className="font-medium">{project.title}</div>
+                                                    <div className="font-medium">{project.title || 'Untitled'}</div>
                                                     <div className="text-sm text-muted-foreground line-clamp-1">
-                                                        {project.description}
+                                                        {project.description || 'No description'}
                                                     </div>
                                                 </div>
                                             </TableCell>
@@ -566,10 +631,10 @@ export default function ManageAllProjects() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <StatusBadge status={project.status} />
+                                                <StatusBadge status={project.status || 'unknown'} />
                                             </TableCell>
                                             <TableCell>
-                                                <PriorityBadge priority={project.priority} />
+                                                <PriorityBadge priority={project.priority || 'medium'} />
                                             </TableCell>
                                             <TableCell>
                                                 <div className="flex items-center gap-2">
@@ -581,6 +646,19 @@ export default function ManageAllProjects() {
                                                 <div className="flex items-center gap-1">
                                                     <FaDollarSign className="h-4 w-4 text-muted-foreground" />
                                                     {project.budget ? project.budget.toLocaleString() : 'N/A'}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {project.assignedTo && project.assignedTo.length > 0 ? (
+                                                        project.assignedTo.map((teamId, index) => (
+                                                            <Badge key={index} variant="outline" className="text-xs">
+                                                                {getTeamName(teamId)}
+                                                            </Badge>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-sm text-muted-foreground">Not assigned</span>
+                                                    )}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
@@ -623,14 +701,28 @@ export default function ManageAllProjects() {
                                                                 size="sm"
                                                                 onClick={() => {
                                                                     setAssigningProjectTo(project);
-                                                                    setSelectedWorkersToAssign([]);
+                                                                    setSelectedTeamsToAssign([]);
                                                                 }}
                                                             >
-                                                                <FaUserPlus className="h-4 w-4" />
+                                                                <FaUsers className="h-4 w-4" />
                                                             </AnimatedButton>
                                                         </TooltipTrigger>
                                                         <TooltipContent>
-                                                            <p>Assign Workers</p>
+                                                            <p>Assign Teams</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <AnimatedButton
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => setEditingTask(project)}
+                                                            >
+                                                                <FaBriefcase className="h-4 w-4" />
+                                                            </AnimatedButton>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>Edit as Task</p>
                                                         </TooltipContent>
                                                     </Tooltip>
                                                     <Tooltip>
@@ -663,9 +755,8 @@ export default function ManageAllProjects() {
                         </CardContent>
                     </AnimatedCard>
 
-                    {/* Add/Edit Project Dialog */}
-                    <Dialog open={isAddingProject || !!editingProject} onOpenChange={() => {
-                        setIsAddingProject(false);
+                    {/* Edit Project Dialog */}
+                    <Dialog open={!!editingProject} onOpenChange={() => {
                         setEditingProject(null);
                         projectForm.reset();
                     }}>
@@ -758,7 +849,7 @@ export default function ManageAllProjects() {
                                         <FormField
                                             label="Category"
                                             error={projectForm.formState.errors.category}
-                                            tooltip="Select the category that best describes this project"
+                                            tooltip="Select category that best describes this project"
                                         >
                                             <Select
                                                 value={projectForm.watch('category')}
@@ -789,7 +880,7 @@ export default function ManageAllProjects() {
                                         <FormField
                                             label="Priority"
                                             error={projectForm.formState.errors.priority}
-                                            tooltip="Set the priority level for this project"
+                                            tooltip="Set priority level for this project"
                                         >
                                             <Select
                                                 value={projectForm.watch('priority')}
@@ -909,7 +1000,7 @@ export default function ManageAllProjects() {
                                                     type="range"
                                                     min="0"
                                                     max="100"
-                                                    {...projectForm.register('progress')}
+                                                    {...projectForm.register('progress', { valueAsNumber: true })}
                                                     className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                                 />
                                                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -1014,7 +1105,6 @@ export default function ManageAllProjects() {
 
                             <DialogFooter>
                                 <AnimatedButton type="button" variant="outline" onClick={() => {
-                                    setIsAddingProject(false);
                                     setEditingProject(null);
                                     projectForm.reset();
                                 }}>
@@ -1033,81 +1123,83 @@ export default function ManageAllProjects() {
                         </DialogContent>
                     </Dialog>
 
-                    {/* Assign Workers Dialog */}
+                    {/* Assign Teams Dialog */}
                     <Dialog open={!!assigningProjectTo} onOpenChange={() => {
                         setAssigningProjectTo(null);
-                        setSelectedWorkersToAssign([]);
+                        setSelectedTeamsToAssign([]);
                     }}>
                         <DialogContent className="sm:max-w-[500px]">
                             <DialogHeader>
-                                <DialogTitle>Assign Workers</DialogTitle>
+                                <DialogTitle>Assign Teams</DialogTitle>
                                 <DialogDescription>
-                                    Select workers to assign to {assigningProjectTo?.title}
+                                    Select teams to assign to {assigningProjectTo?.title || 'Selected Project'}
                                 </DialogDescription>
                             </DialogHeader>
                             <div className="space-y-3">
-                                {/* Worker Search Input */}
+                                {/* Team Search Input */}
                                 <div className="relative">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                                     <Input
-                                        placeholder="Search workers by name or email..."
-                                        value={workerSearchTerm}
-                                        onChange={(e) => setWorkerSearchTerm(e.target.value)}
+                                        placeholder="Search teams by name..."
+                                        value={teamSearchTerm}
+                                        onChange={(e) => setTeamSearchTerm(e.target.value)}
                                         className="pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                                     />
                                 </div>
 
-                                {/* Worker Selection Stats */}
+                                {/* Team Selection Stats */}
                                 <div className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
                                     <span className="text-sm font-medium">
-                                        {selectedWorkersToAssign.length} worker{selectedWorkersToAssign.length !== 1 ? 's' : ''} selected
+                                        {selectedTeamsToAssign.length} team{selectedTeamsToAssign.length !== 1 ? 's' : ''} selected
                                     </span>
-                                    {selectedWorkersToAssign.length > 0 && (
+                                    {selectedTeamsToAssign.length > 0 && (
                                         <AnimatedButton
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => setSelectedWorkersToAssign([])}
+                                            onClick={() => setSelectedTeamsToAssign([])}
                                         >
                                             Clear All
                                         </AnimatedButton>
                                     )}
                                 </div>
 
-                                {/* Worker List */}
+                                {/* Team List */}
                                 <div className="max-h-60 overflow-y-auto border rounded-md p-2">
-                                    {filteredWorkersForProject.length > 0 ? (
+                                    {filteredTeamsForProject.length > 0 ? (
                                         <div className="space-y-2">
-                                            {filteredWorkersForProject.map((worker) => (
-                                                <div key={worker._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200">
+                                            {filteredTeamsForProject.map((team) => (
+                                                <div key={team._id} className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200">
                                                     <Checkbox
-                                                        id={`worker-${worker._id}`}
-                                                        checked={selectedWorkersToAssign.includes(worker._id)}
+                                                        id={`team-${team._id}`}
+                                                        checked={selectedTeamsToAssign.includes(team._id)}
                                                         onCheckedChange={() => {
-                                                            if (selectedWorkersToAssign.includes(worker._id)) {
-                                                                setSelectedWorkersToAssign(selectedWorkersToAssign.filter(id => id !== worker._id));
+                                                            if (selectedTeamsToAssign.includes(team._id)) {
+                                                                setSelectedTeamsToAssign(selectedTeamsToAssign.filter(id => id !== team._id));
                                                             } else {
-                                                                setSelectedWorkersToAssign([...selectedWorkersToAssign, worker._id]);
+                                                                setSelectedTeamsToAssign([...selectedTeamsToAssign, team._id]);
                                                             }
                                                         }}
                                                     />
                                                     <label
-                                                        htmlFor={`worker-${worker._id}`}
+                                                        htmlFor={`team-${team._id}`}
                                                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex items-center gap-2 flex-1"
                                                     >
                                                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
-                                                            <FaUser className="h-4 w-4" />
+                                                            <FaUsers className="h-4 w-4" />
                                                         </div>
                                                         <div className="flex-1">
                                                             <div className="flex items-center gap-2">
-                                                                <span>{worker.name}</span>
+                                                                <span>{team.name || 'Unnamed Team'}</span>
                                                                 <Badge variant="outline" className="text-xs">
-                                                                    {worker.role}
+                                                                    {team.teamMembers ? team.teamMembers.length : 0} members
                                                                 </Badge>
                                                             </div>
-                                                            <div className="text-xs text-muted-foreground">{worker.email}</div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                Leader: {getTeamLeaderName(team._id)}
+                                                            </div>
                                                         </div>
                                                         <div className="text-xs text-muted-foreground">
-                                                            {worker.assignedWork ? worker.assignedWork.length : 0} tasks
+                                                            {team.assignedProjects ? team.assignedProjects.length : 0} projects
                                                         </div>
                                                     </label>
                                                 </div>
@@ -1115,7 +1207,7 @@ export default function ManageAllProjects() {
                                         </div>
                                     ) : (
                                         <p className="text-center text-muted-foreground py-4">
-                                            {workerSearchTerm ? 'No workers match your search.' : 'No active workers available.'}
+                                            {teamSearchTerm ? 'No teams match your search.' : 'No teams available.'}
                                         </p>
                                     )}
                                 </div>
@@ -1123,15 +1215,15 @@ export default function ManageAllProjects() {
                             <DialogFooter>
                                 <AnimatedButton type="button" variant="outline" onClick={() => {
                                     setAssigningProjectTo(null);
-                                    setSelectedWorkersToAssign([]);
+                                    setSelectedTeamsToAssign([]);
                                 }}>
                                     Cancel
                                 </AnimatedButton>
                                 <AnimatedButton
-                                    onClick={handleAssignWorkers}
-                                    disabled={isLoading || selectedWorkersToAssign.length === 0}
+                                    onClick={handleAssignTeams}
+                                    disabled={isLoading || selectedTeamsToAssign.length === 0}
                                 >
-                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaUserPlus className="mr-2 h-4 w-4" />}
+                                    {isLoading ? <FaSpinner className="mr-2 h-4 w-4 animate-spin" /> : <FaUsers className="mr-2 h-4 w-4" />}
                                     Assign Selected
                                 </AnimatedButton>
                             </DialogFooter>
@@ -1144,7 +1236,7 @@ export default function ManageAllProjects() {
                             <DialogHeader>
                                 <DialogTitle className="flex items-center gap-2">
                                     <FaProjectDiagram className="text-primary" />
-                                    {viewingProject?.title}
+                                    {viewingProject?.title || 'Project Details'}
                                 </DialogTitle>
                                 <DialogDescription>
                                     Project details and information
@@ -1156,13 +1248,13 @@ export default function ManageAllProjects() {
                                         <div>
                                             <h4 className="text-sm font-medium text-muted-foreground">Status</h4>
                                             <div className="mt-1">
-                                                <StatusBadge status={viewingProject.status} />
+                                                <StatusBadge status={viewingProject.status || 'unknown'} />
                                             </div>
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-medium text-muted-foreground">Priority</h4>
                                             <div className="mt-1">
-                                                <PriorityBadge priority={viewingProject.priority} />
+                                                <PriorityBadge priority={viewingProject.priority || 'medium'} />
                                             </div>
                                         </div>
                                         <div>
@@ -1185,15 +1277,7 @@ export default function ManageAllProjects() {
 
                                     <div>
                                         <h4 className="text-sm font-medium text-muted-foreground">Description</h4>
-                                        <p className="mt-1">{viewingProject.description}</p>
-                                    </div>
-
-                                    <div>
-                                        <h4 className="text-sm font-medium text-muted-foreground">Progress</h4>
-                                        <div className="mt-1 flex items-center gap-2">
-                                            <Progress value={viewingProject.progress || 0} className="flex-1" />
-                                            <span className="text-sm">{viewingProject.progress || 0}%</span>
-                                        </div>
+                                        <p className="mt-1">{viewingProject.description || 'No description available'}</p>
                                     </div>
 
                                     {viewingProject.tags && viewingProject.tags.length > 0 && (
@@ -1209,16 +1293,24 @@ export default function ManageAllProjects() {
                                         </div>
                                     )}
 
-                                    {viewingProject.assignedWorkers && viewingProject.assignedWorkers.length > 0 && (
+                                    {viewingProject.assignedTo && viewingProject.assignedTo.length > 0 && (
                                         <div>
-                                            <h4 className="text-sm font-medium text-muted-foreground">Assigned Workers</h4>
-                                            <div className="mt-1 flex flex-wrap gap-1">
-                                                {viewingProject.assignedWorkers.map((workerId, index) => (
-                                                    <Badge key={index} variant="outline" className="flex items-center gap-1">
-                                                        <FaUser className="h-3 w-3" />
-                                                        {getWorkerName(workerId)}
-                                                    </Badge>
-                                                ))}
+                                            <h4 className="text-sm font-medium text-muted-foreground">Assigned Teams</h4>
+                                            <div className="mt-1 space-y-2">
+                                                {viewingProject.assignedTo.map((teamId, index) => {
+                                                    const team = teams.find(t => t._id === teamId);
+                                                    return (
+                                                        <div key={index} className="flex items-center justify-between p-2 bg-muted/30 rounded-md">
+                                                            <div className="flex items-center gap-2">
+                                                                <FaUsers className="h-4 w-4 text-muted-foreground" />
+                                                                <span>{getTeamName(teamId)}</span>
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                Leader: {getTeamLeaderName(teamId)}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}
@@ -1242,6 +1334,31 @@ export default function ManageAllProjects() {
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
+
+                    {/* Create Work Task Modal */}
+                    <CreateWorkTaskModal
+                        isOpen={isCreateTaskModalOpen}
+                        onClose={() => setIsCreateTaskModalOpen(false)}
+                        teams={teams}
+                        workers={workers}
+                        availableWork={projects}
+                        setAvailableWork={setProjects}
+                        setTeams={setTeams}
+                        showNotification={showNotification}
+                    />
+
+                    {/* Edit Work Task Modal */}
+                    <EditWorkTaskModal
+                        isOpen={!!editingTask}
+                        onClose={() => setEditingTask(null)}
+                        teams={teams}
+                        workers={workers}
+                        availableWork={projects}
+                        setAvailableWork={setProjects}
+                        setTeams={setTeams}
+                        showNotification={showNotification}
+                        taskToEdit={editingTask}
+                    />
                 </div>
             </div>
         </TooltipProvider>

@@ -7,19 +7,11 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(request) {
     try {
         const formData = await request.formData();
-        const file = formData.get('image');
+        const file = formData.get('file');
 
         if (!file) {
             return NextResponse.json(
                 { error: "No file provided" },
-                { status: 400 }
-            );
-        }
-
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            return NextResponse.json(
-                { error: "File must be an image" },
                 { status: 400 }
             );
         }
@@ -46,7 +38,13 @@ export async function POST(request) {
         // Return the URL
         const url = `/uploads/${filename}`;
 
-        return NextResponse.json({ url });
+        return NextResponse.json({ 
+            success: true,
+            url,
+            filename,
+            size: file.size,
+            type: file.type
+        });
     } catch (error) {
         console.error("Error uploading file:", error);
         return NextResponse.json(

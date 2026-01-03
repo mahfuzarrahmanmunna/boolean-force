@@ -470,7 +470,7 @@ export default function WorkerTasks() {
 
                     {/* Filters */}
                     <AnimatedCard className="shadow-md">
-                        <CardContent className="pt-6">
+                        <CardContent className="py-6">
                             <div className="flex flex-col lg:flex-row gap-4">
                                 <div className="relative flex-1">
                                     <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -717,7 +717,7 @@ export default function WorkerTasks() {
                                         </div>
                                         {selectedTask.estimatedHours && (
                                             <div>
-                                                <h3 className="text-sm font-medium text-muted-foreground mb-1">Estimated Hours</h3>
+                                                <h3 className="text-sm font-medium text-muted-foreground mb-1">Story Point</h3>
                                                 <p>{selectedTask.estimatedHours} hours</p>
                                             </div>
                                         )}

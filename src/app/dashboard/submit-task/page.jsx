@@ -249,11 +249,11 @@ export default function SubmitTaskPage() {
                             <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Submit Task</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                            <button className=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                                 <Search className="w-5 h-5" />
                             </button>
                             <div className="relative">
-                                <button className="p-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                <button className=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
                                     <Filter className="w-5 h-5" />
                                 </button>
                             </div>
@@ -400,7 +400,7 @@ export default function SubmitTaskPage() {
                                         </div>
                                     </div>
 
-                                    {/* Due Date and Estimated Hours */}
+                                    {/* Due Date and Story Point */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -423,7 +423,7 @@ export default function SubmitTaskPage() {
 
                                         <div>
                                             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                Estimated Hours
+                                                Story Point
                                             </label>
                                             <div className="relative">
                                                 <input
@@ -681,7 +681,7 @@ export default function SubmitTaskPage() {
                                                     </p>
                                                 </div>
                                                 <div>
-                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Estimated Hours</h4>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Story Point</h4>
                                                     <p className="text-slate-900 dark:text-white">
                                                         {taskData.estimatedHours || 'Not specified'}
                                                     </p>

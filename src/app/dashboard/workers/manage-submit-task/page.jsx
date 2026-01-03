@@ -1166,7 +1166,7 @@ export default function SubmitTaskPage() {
                                             </div>
                                         </div>
 
-                                        {/* Due Date and Estimated Hours */}
+                                        {/* Due Date and Story Point */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -1189,7 +1189,7 @@ export default function SubmitTaskPage() {
 
                                             <div>
                                                 <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                                                    Estimated Hours
+                                                    Story Point
                                                 </label>
                                                 <div className="relative">
                                                     <input
@@ -1723,7 +1723,7 @@ export default function SubmitTaskPage() {
                                 ))}
                                 {users.length > 5 && (
                                     <div className="text-center">
-                                        <button className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                                        <button className=" cursor-pointertext-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">
                                             View all members
                                         </button>
                                     </div>
