@@ -1,11 +1,11 @@
-// src/app/api/work/bulk/route.js
+// src/app/api/projects/bulk/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 // POST - Perform bulk actions on work tasks
 export async function POST(request) {
-    console.log("POST /api/work/bulk called");
+    console.log("POST /api/projects/bulk called");
     try {
         // Get the action and task IDs from the request body
         const { taskIds, action } = await request.json();
@@ -104,7 +104,7 @@ export async function POST(request) {
         });
     }
     catch (err) {
-        console.error("Error in POST /api/work/bulk:", err);
+        console.error("Error in POST /api/projects/bulk:", err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while performing bulk action. Please try again later.",

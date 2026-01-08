@@ -485,7 +485,7 @@ export default function WorkerDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${workId}`, {
+            const response = await fetch(`/api/projects/${workId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),

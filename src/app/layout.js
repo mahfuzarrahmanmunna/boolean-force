@@ -11,7 +11,7 @@ import BinaryBack from "./components/BinarayBack/BinaryBack";
 import { AuthProviders } from "@/providers/AuthProviders";
 import AuthDebug from "./components/AuthDebug";
 import Chatbot from "./components/Chatbot/Chatbot";
-import AnimatedCursor from "react-animated-cursor";
+// import AnimatedCursor from "react-animated-cursor";
 // import AuthDebug from "./components/AuthDebug";
 
 const inter = Inter({

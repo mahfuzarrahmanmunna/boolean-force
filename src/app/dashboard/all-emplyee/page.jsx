@@ -241,7 +241,7 @@ export default function ManageWorkers() {
             try {
                 const [workersResponse, workResponse] = await Promise.all([
                     fetch('/api/workers'),
-                    fetch('/api/work')
+                    fetch('/api/projects')
                 ]);
 
                 if (!workersResponse.ok) throw new Error('Failed to fetch workers');

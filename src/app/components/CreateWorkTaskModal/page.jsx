@@ -521,7 +521,7 @@ export default function CreateWorkTaskModal({
       });
 
       // Create work task with file upload
-      const response = await fetch("/api/work", {
+      const response = await fetch("/api/projects", {
         method: "POST",
         body: formData, // Don't set Content-Type header when using FormData
       });
@@ -610,7 +610,7 @@ export default function CreateWorkTaskModal({
         if (successfulTeamIds.length > 0) {
           try {
             // Fetch the updated task to get the latest assignedTo information
-            const updatedTaskResponse = await fetch(`/api/work/${newWork._id}`);
+            const updatedTaskResponse = await fetch(`/api/projects/${newWork._id}`);
             if (updatedTaskResponse.ok) {
               const updatedTaskData = await updatedTaskResponse.json();
               if (updatedTaskData.data) {

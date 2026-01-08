@@ -272,12 +272,12 @@ export default function WorkerTasks() {
             return; // Stop the function here
         }
 
-        console.log('ID is valid. Proceeding with API call to:', `/api/work/${taskId}`);
+        console.log('ID is valid. Proceeding with API call to:', `/api/projects/${taskId}`);
         // --- END DEBUGGING ---
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${taskId}`, {
+            const response = await fetch(`/api/projects/${taskId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),

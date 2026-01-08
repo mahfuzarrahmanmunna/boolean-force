@@ -1,4 +1,3 @@
-// app/api/teams/[id]/assign/route.js
 import { dbConnect } from '@/lib/dbConnect';
 import { NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
@@ -35,7 +34,7 @@ export async function POST(request, { params }) {
         }
         
         const teamsCollection = await dbConnect('teams');
-        const workCollection = await dbConnect('work');
+        const projectsCollection = await dbConnect('projects'); // Changed from 'work' to 'projects'
         
         // Check if team exists
         const team = await teamsCollection.findOne({ _id: new ObjectId(id) });
@@ -47,7 +46,7 @@ export async function POST(request, { params }) {
         }
         
         // Check if all projects exist
-        const projects = await workCollection.find({
+        const projects = await projectsCollection.find({
             _id: { $in: projectIds.map(id => new ObjectId(id)) }
         }).toArray();
         
@@ -82,8 +81,9 @@ export async function POST(request, { params }) {
         }
         
         // Update each project to add the team ID to assignedTo array
+        // Initialize assignedTo if it doesn't exist, then add to team ID
         const projectUpdatePromises = projectIds.map(projectId =>
-            workCollection.updateOne(
+            projectsCollection.updateOne(
                 { _id: new ObjectId(projectId) },
                 {
                     $addToSet: {
@@ -102,7 +102,7 @@ export async function POST(request, { params }) {
         const updatedTeam = await teamsCollection.findOne({ _id: new ObjectId(id) });
         
         // Get the updated projects
-        const updatedProjects = await workCollection.find({
+        const updatedProjects = await projectsCollection.find({
             _id: { $in: projectIds.map(id => new ObjectId(id)) }
         }).toArray();
         
@@ -116,7 +116,7 @@ export async function POST(request, { params }) {
     } catch (error) {
         console.error('Error assigning projects to team:', error);
         return NextResponse.json(
-            { error: 'Failed to assign projects to team' },
+            { error: `Failed to assign projects to team: ${error.message}` },
             { status: 500 }
         );
     }

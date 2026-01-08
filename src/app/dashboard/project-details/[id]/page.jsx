@@ -238,7 +238,7 @@ export default function ProjectDetails() {
             setIsLoading(true);
             try {
                 const [projectResponse, workersResponse] = await Promise.all([
-                    fetch(`/api/work/${projectId}`),
+                    fetch(`/api/projects/${projectId}`),
                     fetch('/api/workers')
                 ]);
 
@@ -290,7 +290,7 @@ export default function ProjectDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${projectId}`, {
+            const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editForm),
@@ -321,7 +321,7 @@ export default function ProjectDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${projectId}`, {
+            const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -354,7 +354,7 @@ export default function ProjectDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${projectId}`, {
+            const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ progress: newProgress }),
@@ -392,7 +392,7 @@ export default function ProjectDetails() {
                 ? project.assignedTo.filter(id => id !== memberId)
                 : (project.assignedTo === memberId ? null : project.assignedTo);
 
-            const response = await fetch(`/api/work/${projectId}`, {
+            const response = await fetch(`/api/projects/${projectId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ assignedTo: updatedAssignedTo }),

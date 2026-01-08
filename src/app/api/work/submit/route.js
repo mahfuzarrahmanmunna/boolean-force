@@ -1,9 +1,10 @@
-// app/api/work/submit/route.js
+// app/api/projects/submit/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/authOptions";
+// import { authOptions } from "@/lib/auth";
 
 // Helper function to check if a user is a team leader
 async function isTeamLeader(userId) {
@@ -124,7 +125,7 @@ export async function POST(request) {
         });
     }
     catch (err) {
-        console.error(`Error in POST /api/work/submit:`, err);
+        console.error(`Error in POST /api/projects/submit:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while submitting work. Please try again later.",

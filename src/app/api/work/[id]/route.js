@@ -1,9 +1,10 @@
-// app/api/work/[id]/route.js
+// app/api/projects/[id]/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/lib/authOptions";
+// import { authOptions } from "@/lib/auth";
 
 // Helper function to check if a user is a team leader
 async function isTeamLeader(userId) {
@@ -85,7 +86,7 @@ async function hasWorkPermission(userId, workId, action = 'read') {
 export async function GET(request, { params }) {
     // Awaiting the params promise to get the id
     const { id } = await params;
-    console.log(`GET /api/work/${id} called`);
+    console.log(`GET /api/projects/${id} called`);
     console.log('ID type:', typeof id);
     console.log('ID value:', id);
 
@@ -149,7 +150,7 @@ export async function GET(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in GET /api/work/${id}:`, err);
+        console.error(`Error in GET /api/projects/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while fetching work task. Please try again later.",
@@ -162,7 +163,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
     // Awaiting the params promise to get the id
     const { id } = await params;
-    console.log(`PUT /api/work/${id} called`);
+    console.log(`PUT /api/projects/${id} called`);
     console.log('ID type:', typeof id);
     console.log('ID value:', id);
 
@@ -320,7 +321,7 @@ export async function PUT(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in PUT /api/work/${id}:`, err);
+        console.error(`Error in PUT /api/projects/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while updating work task. Please try again later.",
@@ -333,7 +334,7 @@ export async function PUT(request, { params }) {
 export async function DELETE(request, { params }) {
     // Awaiting the params promise to get the id
     const { id } = await params;
-    console.log(`DELETE /api/work/${id} called`);
+    console.log(`DELETE /api/projects/${id} called`);
     console.log('ID type:', typeof id);
     console.log('ID value:', id);
 
@@ -384,7 +385,7 @@ export async function DELETE(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in DELETE /api/work/${id}:`, err);
+        console.error(`Error in DELETE /api/projects/${id}:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while deleting work task. Please try again later.",
