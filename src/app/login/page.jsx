@@ -28,14 +28,14 @@ const Login = () => {
   // Redirect based on role when session changes
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
-      console.log("User logged in:", session.user);
-      console.log("User role:", session.user.role);
+      // console.log("User logged in:", session.user);
+      // console.log("User role:", session.user.role);
 
       // Redirect based on role
       if (session.user.role === "admin") {
         router.push("/dashboard");
       } else if (session.user.role === "worker") {
-        router.push("/dashboard/workers");
+        router.push("/worker-dashboard");
       } else if (session.user.role === "client") {
         router.push("/client-dashboard");
       } else {
@@ -61,7 +61,7 @@ const Login = () => {
         throw new Error("Please fill in all fields");
       }
 
-      console.log("Attempting login for:", formData.email);
+      // console.log("Attempting login for:", formData.email);
 
       const result = await signIn("credentials", {
         redirect: false,
@@ -69,7 +69,7 @@ const Login = () => {
         password: formData.password,
       });
 
-      console.log("Sign in result:", result);
+      // console.log("Sign in result:", result);
 
       if (result.error) {
         console.log("Login error:", result.error);

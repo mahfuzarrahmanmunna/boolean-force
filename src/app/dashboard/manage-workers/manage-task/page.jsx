@@ -247,7 +247,7 @@ export default function ManageTasks() {
         setIsLoading(true);
         try {
             // Fixed the typo: changed from '/api/works' to '/api/work'
-            const url = editingTask ? `/api/work/${editingTask._id}` : '/api/work';
+            const url = editingTask ? `/api/projects/${editingTask._id}` : '/api/work';
             const method = editingTask ? 'PUT' : 'POST';
             
             console.log(`Submitting ${method} request to ${url}`, data);
@@ -304,7 +304,7 @@ export default function ManageTasks() {
             try {
                 console.log(`Deleting task with ID: ${taskId}`);
                 // Fixed the typo: changed from '/api/tasks' to '/api/work'
-                const response = await fetch(`/api/work/${taskId}`, {
+                const response = await fetch(`/api/projects/${taskId}`, {
                     method: 'DELETE',
                 });
 
@@ -344,8 +344,8 @@ export default function ManageTasks() {
         setIsLoading(true);
         try {
             console.log(`Performing ${action} on tasks:`, selectedTasks);
-            // Fixed the typo: changed from '/api/tasks/bulk' to '/api/work/bulk'
-            const response = await fetch('/api/work/bulk', {
+            // Fixed the typo: changed from '/api/tasks/bulk' to '/api/projects/bulk'
+            const response = await fetch('/api/projects/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ taskIds: selectedTasks, action }),
@@ -546,7 +546,7 @@ export default function ManageTasks() {
 
             {/* Filters and Search */}
             <Card>
-                <CardContent className="pt-6">
+                <CardContent className="py-6">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="relative flex-1">
                             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -889,7 +889,7 @@ export default function ManageTasks() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <FormField
-                                label="Estimated Hours"
+                                label="Story Point"
                                 error={taskForm.formState.errors.estimatedHours}
                             >
                                 <Input

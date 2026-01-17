@@ -145,7 +145,7 @@ const PricingCard = () => {
 
                                         <p className="text-gray-300 mb-8">{plan.description}</p>
 
-                                        <div className={`border-t border-gray-700/50 pt-6 mb-8 flex-grow ${isMiddle ? 'md:pt-8' : ''}`}>
+                                        <div className={`border-t border-gray-700/50 py-6 mb-8 flex-grow ${isMiddle ? 'md:pt-8' : ''}`}>
                                             <ul className="space-y-3">
                                                 {plan.features && plan.features.map((feature, i) => (
                                                     <li key={i} className="flex items-start gap-3">

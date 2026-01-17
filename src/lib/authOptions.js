@@ -1,9 +1,44 @@
-import { loginUser } from "@/app/actions/auth/loginUser";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import { dbConnect } from "./dbConnect";
-// import dbConnect from "@/database/dbConnect";
+import bcrypt from "bcryptjs";
+
+// Direct implementation of loginUser
+async function loginUser({ email, password, role }) {
+  try {
+    const db = await dbConnect();
+    const usersCollection = db.collection("test_user");
+    
+    const user = await usersCollection.findOne({ email });
+    
+    if (!user) {
+      return null;
+    }
+    
+    if (user.password) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return null;
+      }
+    }
+    
+    if (role && user.role !== role) {
+      return null;
+    }
+    
+    return {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+    };
+  } catch (error) {
+    console.error("Login error:", error);
+    return null;
+  }
+}
 
 export const authOptions = {
     providers: [
@@ -12,24 +47,20 @@ export const authOptions = {
             credentials: {
                 email: { label: "Email", type: "text", placeholder: "Enter Email" },
                 password: { label: "Password", type: "password" },
-                role: { label: "Role", type: "text" } // Added role field
+                role: { label: "Role", type: "text" }
             },
             async authorize(credentials) {
                 const { email, password, role } = credentials;
-
                 const user = await loginUser({ email, password, role });
-                // console.log("Authorize user:", user);
-
+                
                 if (!user) {
                     throw new Error("Invalid email or password");
                 }
 
-                // Check role match
                 if (role && user.role !== role) {
                     throw new Error("Role mismatch");
                 }
 
-                // Return only safe fields
                 return user;
             },
         }),
@@ -45,7 +76,7 @@ export const authOptions = {
 
     pages: {
         signIn: "/login",
-        signUp: "/register", // Add sign up page
+        signUp: "/register",
     },
 
     callbacks: {

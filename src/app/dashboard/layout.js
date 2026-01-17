@@ -1,4 +1,3 @@
-// src/app/dashboard/layout.js
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
@@ -114,10 +113,59 @@ import {
     Database as DatabaseIcon,
     Cloud as CloudIcon,
     Smartphone as SmartphoneIcon,
-    Monitor as MonitorIcon
+    Monitor as MonitorIcon,
+    // Project management icons
+    FolderOpen,
+    Folder,
+    Projector,
+    UserShield,
+    ShieldCheck,
+    Lock,
+    Unlock,
+    KeyRound,
+    BadgeCheck,
+    FolderKanban,
+    GanttChart,
+    Kanban,
+    SquareStack,
+    FolderTree,
+    GitBranch,
+    FolderPlus,
+    FolderLock,
+    FolderOpenDot,
+    FileQuestion,
+    FolderInput,
+    FolderOutput,
+    FolderSync,
+    FolderCog,
+    FolderX,
+    FolderPlus as FolderPlusIcon,
+    FolderLock as FolderLockIcon,
+    FolderOpen as FolderOpenIcon,
+    FolderCog as FolderCogIcon,
+    FolderX as FolderXIcon,
+    FolderSync as FolderSyncIcon,
+    FolderInput as FolderInputIcon,
+    FolderOutput as FolderOutputIcon,
+    FolderTree as FolderTreeIcon,
+    FolderQuestion as FolderQuestionIcon,
+    FolderKanban as FolderKanbanIcon,
+    FolderDot as FolderDotIcon,
+    FolderOpenDot as FolderOpenDotIcon,
+    FolderLockDot as FolderLockDotIcon,
+    FolderCogDot as FolderCogDotIcon,
+    FolderXDot as FolderXDotIcon,
+    FolderSyncDot as FolderSyncDotIcon,
+    FolderInputDot as FolderInputDotIcon,
+    FolderOutputDot as FolderOutputDotIcon,
+    FolderTreeDot as FolderTreeDotIcon,
+    FolderQuestionDot as FolderQuestionDotIcon,
+    FolderKanbanDot as FolderKanbanDotIcon
 } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { toast } from 'react-hot-toast';
+import { UserPenIcon } from 'lucide-react';
+import { UserPlus2Icon } from 'lucide-react';
 
 export default function AdminLayout({ children }) {
     const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -134,6 +182,8 @@ export default function AdminLayout({ children }) {
     const [isHovering, setIsHovering] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+    const [Loading, setLoading] = useState(true);
+    
 
     // New states for client account management
     const [showClientAccountModal, setShowClientAccountModal] = useState(false);
@@ -143,6 +193,40 @@ export default function AdminLayout({ children }) {
     const [generatedPassword, setGeneratedPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [passwordCopied, setPasswordCopied] = useState(false);
+    const [user, setUser] = useState(null);
+    // State for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        project: {
+            create_project: false,
+            edit_project: false,
+            delete_project: false,
+            view_all_projects: false,
+            assign_project: false,
+            monetize_project: false,
+            view_revenue: false,
+            manage_payments: false,
+            set_pricing: false
+        },
+        task: {
+            create_task: false,
+            edit_task: false,
+            delete_task: false,
+            submit_task: false,
+            approve_task: false,
+            assign_task: false
+        },
+        team: {
+            add_member: false,
+            remove_member: false,
+            edit_member_role: false,
+            view_team_stats: false
+        },
+        system: {
+            view_analytics: false,
+            export_data: false,
+            manage_settings: false
+        }
+    });
 
     const pathname = usePathname();
     const router = useRouter();
@@ -195,6 +279,33 @@ export default function AdminLayout({ children }) {
             }
         }
     }, []);
+
+    // Load user permissions from localStorage or API
+    useEffect(() => {
+        const loggedInUser = JSON.parse(localStorage.getItem("user"));
+        if (!loggedInUser) {
+            setLoading(false); // no user → stop loading
+            return;
+        }
+        setUser(loggedInUser);
+
+        const loadUserPermissions = async () => {
+            try {
+                const res = await fetch(`/api/users/permissions?userId=${loggedInUser._id}`);
+                const data = await res.json();
+                setPermissions(data.permissions);
+                setRole(data.role);
+            } catch (err) {
+                console.error("Error loading user permissions:", err);
+            } finally {
+                setLoading(false); // ✅ stop loading once fetch finishes
+            }
+        };
+
+        loadUserPermissions();
+    }, []);
+
+
 
     // Close dropdowns when clicking outside
     useEffect(() => {
@@ -258,7 +369,7 @@ export default function AdminLayout({ children }) {
     useEffect(() => {
         if (status !== "loading" && !session) {
             const savedRole = localStorage.getItem('userRole');
-            if (savedRole && savedRole !== "admin" && savedRole !== "worker") {
+            if (savedRole && savedRole !== "admin") {
                 router.push("/unauthorized");
             }
         }
@@ -283,16 +394,41 @@ export default function AdminLayout({ children }) {
         );
     }
 
-    if (!session || (session.user.role !== "admin" && session.user.role !== "worker")) {
+    if (!session || session.user.role !== "admin") {
         return null; // Will redirect
     }
+
+    // Check if user has permission to access current route
+    const hasPermission = (permission) => {
+        // Admin has all permissions
+        if (session.user.role === "admin") return true;
+
+        // Check specific permission
+        if (permission.startsWith('project.') && userPermissions.project[permission.split('.')[1]]) {
+            return true;
+        }
+
+        if (permission.startsWith('task.') && userPermissions.task[permission.split('.')[1]]) {
+            return true;
+        }
+
+        if (permission.startsWith('team.') && userPermissions.team[permission.split('.')[1]]) {
+            return true;
+        }
+
+        if (permission.startsWith('system.') && userPermissions.system[permission.split('.')[1]]) {
+            return true;
+        }
+
+        return false;
+    };
 
     // Get user initials for avatar
     const getUserInitials = () => {
         if (session?.user?.name) {
             return session.user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         }
-        return session.user.role === "admin" ? 'AD' : 'WK'; // Default for admin/worker
+        return 'AD'; // Default for admin
     };
 
     // Handle logout with confirmation
@@ -306,6 +442,7 @@ export default function AdminLayout({ children }) {
             localStorage.removeItem('userRole');
             localStorage.removeItem('userName');
             localStorage.removeItem('userEmail');
+            localStorage.removeItem('userPermissions');
 
             // Clear any session storage items
             sessionStorage.clear();
@@ -389,7 +526,7 @@ export default function AdminLayout({ children }) {
             }
         } catch (error) {
             console.error('Error creating client account:', error);
-            toast.error('An error occurred while creating the client account');
+            toast.error('An error occurred while creating client account');
         } finally {
             setIsCreatingClient(false);
         }
@@ -437,18 +574,15 @@ export default function AdminLayout({ children }) {
             return;
         }
 
-        // Get all menu items based on user role
-        const allMenuItems = session.user.role === "admin" ? adminMenuItems : workerMenuItems;
-
         // Filter menu items based on query
-        const filteredItems = allMenuItems.filter(item =>
+        const filteredItems = adminMenuItems.filter(item =>
             item.title.toLowerCase().includes(query.toLowerCase()) ||
             (item.href && item.href.toLowerCase().includes(query.toLowerCase()))
         );
 
         // Flatten submenu items
         const submenuItems = [];
-        allMenuItems.forEach(item => {
+        adminMenuItems.forEach(item => {
             if (item.submenu) {
                 item.submenu.forEach(subitem => {
                     if (subitem.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -540,6 +674,22 @@ export default function AdminLayout({ children }) {
             ]
         },
         {
+            title: 'Project Management',
+            icon: <FolderOpen className="w-5 h-5" />,
+            href: '/dashboard/manage-projects',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600',
+            submenu: [
+                { title: 'All Projects', href: '/dashboard/manage-projects', permission: 'project.view_all_projects' },
+                { title: 'Active Projects', href: '/dashboard/manage-projects/active', permission: 'project.view_all_projects' },
+                { title: 'Create Project', href: '/dashboard/create-project', permission: 'project.create_project' },
+                { title: 'Project Templates', href: '/dashboard/project-templates', permission: 'project.create_project' },
+                { title: 'Project Analytics', href: '/dashboard/project-analytics', permission: 'project.view_all_projects' },
+                { title: 'Project Settings', href: '/dashboard/project-settings', permission: 'project.manage_settings' }
+            ]
+        },
+        {
             title: 'Services',
             icon: <Briefcase className="w-5 h-5" />,
             href: '/dashboard/manage-services',
@@ -596,7 +746,7 @@ export default function AdminLayout({ children }) {
         {
             title: 'Messages',
             icon: <MessageSquare className="w-5 h-5" />,
-            href: 'manage-contacts',
+            href: '/dashboard/free-chat-support',
             badge: '3',
             color: 'indigo',
             gradient: 'from-indigo-500 to-indigo-600'
@@ -604,11 +754,59 @@ export default function AdminLayout({ children }) {
         {
             title: 'Client Accounts',
             icon: <UserPlus className="w-5 h-5" />,
-            href: 'dashboard/create-client-account',
+            href: '/dashboard/create-client-account',
             badge: null,
             color: 'amber',
             gradient: 'from-amber-500 to-amber-600',
             // onClick: () => setShowClientAccountModal(true)
+        },
+        {
+            title: 'Manage Clients',
+            icon: <UserPenIcon className='w-5 h-5' />,
+            href: "/dashboard/manage-clients",
+            budge: null,
+            color: 'cyan',
+            gradient: 'from-cyan-500 to-cyan-600',
+        },
+        {
+            title: "All Employee",
+            icon: <UserPlus2Icon />,
+            href: "/dashboard/all-emplyee",
+            budge: null,
+            color: 'gray',
+            gradient: 'from-gray-500 to-gray-600',
+        },
+        {
+            title: 'Manage Teams',
+            icon: <Users className="w-5 h-5" />,
+            href: '/dashboard/manage-teams',
+            badge: null,
+            color: 'blue',
+            gradient: 'from-blue-500 to-blue-600'
+        },
+        {
+            title: 'Manage Team Leaders',
+            icon: <Crown className="w-5 h-5" />,
+            href: '/dashboard/manage-team-leaders',
+            badge: null,
+            color: 'purple',
+            gradient: 'from-purple-500 to-purple-600'
+        },
+        {
+            title: 'Worker Analytics',
+            icon: <BarChartIcon className="w-5 h-5" />,
+            href: '/dashboard/worker-analytics',
+            badge: null,
+            color: 'lime',
+            gradient: 'from-lime-500 to-lime-600',
+        },
+        {
+            title: 'Project Analytics',
+            icon: <PieChart className="w-5 h-5" />,
+            href: '/dashboard/project-analytics',
+            badge: null,
+            color: 'cyan',
+            gradient: 'from-cyan-500 to-cyan-600'
         },
         {
             title: 'Settings',
@@ -626,99 +824,6 @@ export default function AdminLayout({ children }) {
         }
     ];
 
-    // Worker menu items
-    const workerMenuItems = [
-        {
-            title: 'Dashboard',
-            icon: <HomeIcon className="w-5 h-5" />,
-            href: '/dashboard/workers',
-            badge: null,
-            color: 'blue',
-            gradient: 'from-blue-500 to-blue-600'
-        },
-        {
-            title: 'My Tasks',
-            icon: <ClipboardList className="w-5 h-5" />,
-            href: '/dashboard/workers/manage-my-tasks',
-            badge: '5',
-            color: 'emerald',
-            gradient: 'from-emerald-500 to-emerald-600',
-            submenu: [
-                { title: 'All Tasks', href: '/dashboard/workers/manage-my-tasks' },
-                { title: 'Pending Tasks', href: '/dashboard/workers/manage-my-tasks/pending' },
-                { title: 'In Progress', href: '/dashboard/workers/manage-my-tasks/in-progress' },
-                { title: 'Completed', href: '/dashboard/workers/manage-my-tasks/completed' }
-            ]
-        },
-        {
-            title: 'Submit Task',
-            icon: <FileCheck className="w-5 h-5" />,
-            href: '/dashboard/workers/manage-submit-task',
-            badge: null,
-            color: 'purple',
-            gradient: 'from-purple-500 to-purple-600'
-        },
-        {
-            title: 'Time Tracking',
-            icon: <Clock className="w-5 h-5" />,
-            href: '/dashboard/workers/manage-time-tracking',
-            badge: null,
-            color: 'indigo',
-            gradient: 'from-indigo-500 to-indigo-600'
-        },
-        {
-            title: 'Performance',
-            icon: <TrendingUpIcon className="w-5 h-5" />,
-            href: '/dashboard/manage-performance',
-            badge: null,
-            color: 'orange',
-            gradient: 'from-orange-500 to-orange-600'
-        },
-        {
-            title: 'Earnings',
-            icon: <DollarSign className="w-5 h-5" />,
-            href: '/dashboard/manage-earnings',
-            badge: null,
-            color: 'green',
-            gradient: 'from-green-500 to-green-600'
-        },
-        {
-            title: 'Messages',
-            icon: <MessageSquareIcon className="w-5 h-5" />,
-            href: '/dashboard/manage-messages',
-            badge: '2',
-            color: 'teal',
-            gradient: 'from-teal-500 to-teal-600'
-        },
-        {
-            title: 'Calendar',
-            icon: <CalendarIcon className="w-5 h-5" />,
-            href: '/dashboard/manage-calendar',
-            badge: null,
-            color: 'pink',
-            gradient: 'from-pink-500 to-pink-600'
-        },
-        {
-            title: 'Profile',
-            icon: <UserIcon className="w-5 h-5" />,
-            href: '/dashboard/manage-profile',
-            badge: null,
-            color: 'gray',
-            gradient: 'from-gray-500 to-gray-600'
-        },
-        {
-            title: 'Settings',
-            icon: <SettingsIcon className="w-5 h-5" />,
-            href: '/dashboard/manage-worker-settings',
-            badge: null,
-            color: 'gray',
-            gradient: 'from-gray-500 to-gray-600'
-        }
-    ];
-
-    // Use different menu items based on user role
-    const menuItems = session.user.role === "admin" ? adminMenuItems : workerMenuItems;
-
     const toggleSubmenu = (title) => {
         if (activeSubmenu === title) {
             setActiveSubmenu('');
@@ -728,7 +833,7 @@ export default function AdminLayout({ children }) {
     };
 
     const isActive = (href) => {
-        if (href === '/dashboard' || href === '/dashboard/workers') {
+        if (href === '/dashboard') {
             return pathname === href;
         }
         return pathname.startsWith(href);
@@ -776,42 +881,24 @@ export default function AdminLayout({ children }) {
     };
 
     const getPageTitle = () => {
-        if (pathname === '/dashboard') return session.user.role === "admin" ? 'Admin Dashboard' : 'Worker Dashboard';
-        if (pathname === '/dashboard/workers') return 'Worker Dashboard';
+        if (pathname === '/dashboard') return 'Admin Dashboard';
+        if (pathname === '/dashboard/manage-workers') return 'Workers Management';
+        if (pathname.startsWith('/dashboard/manage-workers/')) return 'Worker Details';
+        if (pathname === '/dashboard/manage-services') return 'Services Management';
+        if (pathname.startsWith('/dashboard/manage-services/')) return 'Service Details';
+        if (pathname === '/dashboard/manage-pricing-card') return 'Pricing Plans';
+        if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
+        if (pathname === 'dashboard/manage-analytics') return 'Analytics';
+        if (pathname === 'dashboard/manage-orders') return 'Order Management';
+        if (pathname === '/dashboard/manage-messages') return 'Messages';
+        if (pathname === '/dashboard/manage-settings') return 'Settings';
 
-        // Admin page titles
-        if (session.user.role === "admin") {
-            if (pathname === '/dashboard/manage-workers') return 'Workers Management';
-            if (pathname.startsWith('/dashboard/manage-workers/')) return 'Worker Details';
-            if (pathname === '/dashboard/manage-services') return 'Services Management';
-            if (pathname.startsWith('/dashboard/manage-services/')) return 'Service Details';
-            if (pathname === '/dashboard/manage-pricing-card') return 'Pricing Plans';
-            if (pathname === '/dashboard/manage-and-post-blogs') return 'Blog Management';
-            if (pathname === 'dashboard/manage-analytics') return 'Analytics';
-            if (pathname === 'dashboard/manage-orders') return 'Order Management';
-            if (pathname === 'dashboard/manage-messages') return 'Messages';
-            if (pathname === 'dashboard/manage-settings') return 'Settings';
-        }
-        // Worker page titles
-        else {
-            if (pathname === '/dashboard/workers/manage-my-tasks') return 'My Tasks';
-            if (pathname.startsWith('/dashboard/workers/manage-my-tasks/')) return 'Task Details';
-            if (pathname === '/dashboard/manage-submit-task') return 'Submit Task';
-            if (pathname === '/dashboard/manage-time-tracking') return 'Time Tracking';
-            if (pathname === '/dashboard/manage-performance') return 'Performance';
-            if (pathname === '/dashboard/manage-earnings') return 'Earnings';
-            if (pathname === '/dashboard/manage-messages') return 'Messages';
-            if (pathname === '/dashboard/manage-calendar') return 'Calendar';
-            if (pathname === '/dashboard/manage-profile') return 'Profile';
-            if (pathname === '/dashboard/manage-worker-settings') return 'Settings';
-        }
-
-        return session.user.role === "admin" ? 'Admin Dashboard' : 'Worker Dashboard';
+        return 'Admin Dashboard';
     };
 
     const getBreadcrumbs = () => {
         const paths = pathname.split('/').filter(Boolean);
-        const breadcrumbs = [{ name: 'Dashboard', href: session.user.role === "worker" ? '/dashboard/workers' : '/dashboard' }];
+        const breadcrumbs = [{ name: 'Dashboard', href: '/dashboard' }];
 
         if (paths.length > 1) {
             const pageName = paths[paths.length - 1].split('-').map(word =>
@@ -822,6 +909,11 @@ export default function AdminLayout({ children }) {
 
         return breadcrumbs;
     };
+
+    // Special handling for chat support page - render without dashboard layout
+    if (pathname === '/dashboard/free-chat-support') {
+        return <>{children}</>;
+    }
 
     return (
         <div className={`flex min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 ${darkMode ? 'dark' : ''}`}>
@@ -865,22 +957,19 @@ export default function AdminLayout({ children }) {
                 <div className="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-900/50 backdrop-blur-sm">
                     <div className={`flex items-center ${sidebarCollapsed ? 'justify-center' : ''} transition-all duration-300`}>
                         <div className="relative group">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl ${session.user.role === "admin"
-                                ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/50 group-hover:shadow-purple-500/70'
-                                : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-teal-500/50 group-hover:shadow-teal-500/70'
-                                }`}>
+                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold text-lg shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:shadow-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/50 group-hover:shadow-purple-500/70`}>
                                 <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-yellow-300 animate-pulse" />
-                                <span className="relative z-10">{session.user.role === "admin" ? "AD" : "WK"}</span>
+                                <span className="relative z-10">AD</span>
                                 <div className="absolute inset-0 rounded-2xl bg-white/0 group-hover:bg-white/10 transition-all duration-300"></div>
                             </div>
                         </div>
                         {!sidebarCollapsed && (
                             <div className="ml-3 transition-opacity duration-300">
                                 <span className="text-xl font-bold text-white block">
-                                    {session.user.role === "admin" ? "Admin Panel" : "Worker Portal"}
+                                    Admin Panel
                                 </span>
                                 <span className="text-xs text-slate-400 font-medium">
-                                    {session.user.role === "admin" ? "Control Center" : "Work Management"}
+                                    Control Center
                                 </span>
                             </div>
                         )}
@@ -890,92 +979,108 @@ export default function AdminLayout({ children }) {
                 {/* Navigation */}
                 <nav className="flex-1 p-4 overflow-y-auto custom-scrollbar">
                     <ul className="space-y-1.5">
-                        {menuItems.map((item, index) => (
-                            <li key={item.title}>
-                                <div>
-                                    {item.onClick ? (
-                                        <button
-                                            onClick={item.onClick}
-                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+                        {adminMenuItems.map((item, index) => {
+                            // Check if user has permission to access this menu item
+                            const hasRequiredPermission = item.permission ? hasPermission(item.permission) : true;
 
-                                            <div className="flex items-center relative z-10">
-                                                <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
-                                                    {item.icon}
-                                                </span>
-                                                {!sidebarCollapsed && (
-                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 relative z-10">
-                                                {item.badge && !sidebarCollapsed && (
-                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
-                                                        {item.badge}
+                            return (
+                                <li key={item.title}>
+                                    <div>
+                                        {item.onClick ? (
+                                            <button
+                                                onClick={item.onClick}
+                                                className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${!hasRequiredPermission ? 'opacity-50 cursor-not-allowed' : getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
+                                                style={{ animationDelay: `${index * 50}ms` }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+
+                                                <div className="flex items-center relative z-10">
+                                                    <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
+                                                        {item.icon}
                                                     </span>
-                                                )}
-                                            </div>
-                                        </button>
-                                    ) : (
-                                        <Link
-                                            href={item.href}
-                                            className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${isActive(item.href)
-                                                ? `${getColorClasses(item.color, true)} border-2`
-                                                : `${getColorClasses(item.color, false)} border-transparent`
-                                                } relative overflow-hidden`}
-                                            onClick={() => item.submenu && toggleSubmenu(item.title)}
-                                            style={{ animationDelay: `${index * 50}ms` }}
-                                        >
-                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+                                                    {!sidebarCollapsed && (
+                                                        <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 relative z-10">
+                                                    {item.badge && !sidebarCollapsed && (
+                                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                            {item.badge}
+                                                        </span>
+                                                    )}
+                                                    {!hasRequiredPermission && (
+                                                        <Lock className="w-4 h-4 text-amber-500" />
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ) : (
+                                            <Link
+                                                href={item.href}
+                                                className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${!hasRequiredPermission ? 'opacity-50 cursor-not-allowed' : isActive(item.href)
+                                                    ? `${getColorClasses(item.color, true)} border-2`
+                                                    : `${getColorClasses(item.color, false)} border-transparent`
+                                                    } relative overflow-hidden`}
+                                                onClick={() => item.submenu && toggleSubmenu(item.title)}
+                                                style={{ animationDelay: `${index * 50}ms` }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
 
-                                            <div className="flex items-center relative z-10">
-                                                <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
-                                                    {item.icon}
-                                                </span>
-                                                {!sidebarCollapsed && (
-                                                    <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 relative z-10">
-                                                {item.badge && !sidebarCollapsed && (
-                                                    <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
-                                                        {item.badge}
+                                                <div className="flex items-center relative z-10">
+                                                    <span className={`flex-shrink-0 transition-transform duration-300 ${isActive(item.href) ? 'scale-110' : 'group-hover:scale-110'}`}>
+                                                        {item.icon}
                                                     </span>
-                                                )}
-                                                {item.submenu && !sidebarCollapsed && (
-                                                    <ChevronDown
-                                                        className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
-                                                            }`}
-                                                    />
-                                                )}
-                                            </div>
-                                        </Link>
-                                    )}
+                                                    {!sidebarCollapsed && (
+                                                        <span className="ml-3 text-sm font-semibold transition-opacity duration-300">{item.title}</span>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-2 relative z-10">
+                                                    {item.badge && !sidebarCollapsed && (
+                                                        <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full bg-gradient-to-r ${item.gradient} text-white shadow-lg shadow-${item.color}-500/30`}>
+                                                            {item.badge}
+                                                        </span>
+                                                    )}
+                                                    {item.submenu && !sidebarCollapsed && (
+                                                        <ChevronDown
+                                                            className={`w-4 h-4 transition-all duration-300 ${activeSubmenu === item.title ? 'rotate-180 text-blue-400' : 'text-slate-400 group-hover:text-slate-300'
+                                                                }`}
+                                                        />
+                                                    )}
+                                                </div>
+                                            </Link>
+                                        )}
 
-                                    {/* Enhanced Submenu */}
-                                    {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
-                                        <ul className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
-                                            {item.submenu.map((subitem, subIndex) => (
-                                                <li key={subitem.title}>
-                                                    <Link
-                                                        href={subitem.href}
-                                                        className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${pathname === subitem.href
-                                                            ? `${getColorClasses(item.color, true)} shadow-md`
-                                                            : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                                                            }`}
-                                                        style={{ animationDelay: `${subIndex * 30}ms` }}
-                                                    >
-                                                        <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                        <span className="text-sm font-medium">{subitem.title}</span>
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            </li>
-                        ))}
+                                        {/* Enhanced Submenu */}
+                                        {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
+                                            <ul className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                                                {item.submenu.map((subitem, subIndex) => {
+                                                    // Check if user has permission to access this submenu item
+                                                    const hasSubPermission = subitem.permission ? hasPermission(subitem.permission) : true;
+
+                                                    return (
+                                                        <li key={subitem.title}>
+                                                            <Link
+                                                                href={subitem.href}
+                                                                className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${!hasSubPermission ? 'opacity-50 cursor-not-allowed' : pathname === subitem.href
+                                                                    ? `${getColorClasses(item.color, true)} shadow-md`
+                                                                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                                                                    }`}
+                                                                style={{ animationDelay: `${subIndex * 30}ms` }}
+                                                            >
+                                                                <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                                <span className="text-sm font-medium">{subitem.title}</span>
+                                                                {!hasSubPermission && (
+                                                                    <Lock className="w-3 h-3 text-amber-500 ml-2" />
+                                                                )}
+                                                            </Link>
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 </nav>
 
@@ -1204,7 +1309,7 @@ export default function AdminLayout({ children }) {
                                                 ))}
                                             </div>
                                             <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                                                <button className="w-full text-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                                                <button className=" cursor-pointerw-full text-center text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
                                                     View all notifications
                                                 </button>
                                             </div>
@@ -1218,10 +1323,7 @@ export default function AdminLayout({ children }) {
                                         onClick={() => setProfileOpen(!profileOpen)}
                                         className="flex items-center space-x-2 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 group"
                                     >
-                                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl group-hover:shadow-opacity-50 transition-all duration-300 ${session.user.role === "admin"
-                                            ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/30 group-hover:shadow-purple-500/50'
-                                            : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 shadow-teal-500/30 group-hover:shadow-teal-500/50'
-                                            }`}>
+                                        <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:shadow-xl group-hover:shadow-opacity-50 transition-all duration-300 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-purple-500/30 group-hover:shadow-purple-500/50">
                                             {getUserInitials()}
                                         </div>
                                         <ChevronDown className={`w-4 h-4 text-slate-600 dark:text-slate-300 hidden sm:block transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`} />
@@ -1230,32 +1332,17 @@ export default function AdminLayout({ children }) {
                                     {/* Enhanced Profile Dropdown */}
                                     {profileOpen && (
                                         <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden backdrop-blur-xl">
-                                            <div className={`p-5 border-b border-slate-200 dark:border-slate-700 ${session.user.role === "admin"
-                                                ? 'bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900'
-                                                : 'bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-slate-800 dark:to-slate-900'
-                                                }`}>
+                                            <div className="p-5 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${session.user.role === "admin"
-                                                        ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'
-                                                        : 'bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500'
-                                                        }`}>
+                                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500">
                                                         {getUserInitials()}
                                                     </div>
                                                     <div>
                                                         <p className="font-bold text-slate-900 dark:text-white">{session?.user?.name || 'User'}</p>
                                                         <p className="text-xs text-slate-500 dark:text-slate-400">{session?.user?.email || 'user@example.com'}</p>
                                                         <div className="flex items-center mt-1">
-                                                            {session.user.role === "admin" ? (
-                                                                <>
-                                                                    <Crown className="w-3 h-3 text-amber-500 mr-1" />
-                                                                    <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">Admin</span>
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <UserCheck className="w-3 h-3 text-emerald-500 mr-1" />
-                                                                    <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 capitalize">Worker</span>
-                                                                </>
-                                                            )}
+                                                            <Crown className="w-3 h-3 text-amber-500 mr-1" />
+                                                            <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">Admin</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1307,9 +1394,7 @@ export default function AdminLayout({ children }) {
                                 {getPageTitle()}
                             </h1>
                             <p className="text-slate-600 dark:text-slate-400 text-sm">
-                                {session.user.role === "admin"
-                                    ? "Manage and monitor your dashboard activities"
-                                    : "Manage your tasks and track your performance"}
+                                Manage and monitor your dashboard activities
                             </p>
                         </div>
                         {children}
@@ -1386,7 +1471,7 @@ export default function AdminLayout({ children }) {
                                         </button>
                                     </div>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                                        This password will be sent to the client&apos;s email. They can change it after logging in.
+                                        This password will be sent to client&apos;s email. They can change it after logging in.
                                     </p>
                                 </div>
                             )}
