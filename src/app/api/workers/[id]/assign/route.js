@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // app/api/projects/[id]/assign/route.js
+=======
+// app/api/workers/[id]/assign/route.js
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";

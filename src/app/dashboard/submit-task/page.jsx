@@ -1036,10 +1036,21 @@ export default function TeamLeaderSubmitPage() {
                                 Submit Project (Team Leader)
                             </h1>
                         </div>
+<<<<<<< HEAD
                         {teamInfo && (
                             <div className="flex items-center space-x-2">
                                 <Users className="w-4 h-4 text-gray-500" />
                                 <span className="text-sm text-gray-600">{teamInfo.name}</span>
+=======
+                        <div className="flex items-center space-x-4">
+                            <button className=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                <Search className="w-5 h-5" />
+                            </button>
+                            <div className="relative">
+                                <button className=" cursor-pointerp-2 rounded-lg text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                                    <Filter className="w-5 h-5" />
+                                </button>
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                             </div>
                         )}
                     </div>
@@ -1148,7 +1159,120 @@ export default function TeamLeaderSubmitPage() {
                                         />
                                     </div>
 
+<<<<<<< HEAD
                                     {/* File Upload */}
+=======
+                                    {/* Category and Priority */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Category
+                                            </label>
+                                            <div className="relative">
+                                                <select
+                                                    name="category"
+                                                    value={taskData.category}
+                                                    onChange={handleInputChange}
+                                                    className="w-full appearance-none px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white pr-10"
+                                                >
+                                                    <option value="">Select category</option>
+                                                    {categories.map(category => (
+                                                        <option key={category} value={category}>{category}</option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                    <ChevronDown className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Priority
+                                            </label>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="low"
+                                                        checked={taskData.priority === 'low'}
+                                                        onChange={handleInputChange}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm">Low</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="medium"
+                                                        checked={taskData.priority === 'medium'}
+                                                        onChange={handleInputChange}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm">Medium</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="priority"
+                                                        value="high"
+                                                        checked={taskData.priority === 'high'}
+                                                        onChange={handleInputChange}
+                                                        className="mr-2"
+                                                    />
+                                                    <span className="text-sm">High</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Due Date and Story Point */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Due Date <span className="text-red-500">*</span>
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="date"
+                                                    name="dueDate"
+                                                    value={taskData.dueDate}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                                                    required
+                                                />
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                    <Calendar className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Story Point
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="number"
+                                                    name="estimatedHours"
+                                                    value={taskData.estimatedHours}
+                                                    onChange={handleInputChange}
+                                                    min="0"
+                                                    step="0.5"
+                                                    className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                                                    placeholder="0"
+                                                />
+                                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                                                    <Clock className="w-5 h-5 text-slate-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Assigned To */}
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Attach Supporting Files
@@ -1222,6 +1346,196 @@ export default function TeamLeaderSubmitPage() {
                                         <p className="text-xs text-gray-500 mt-2 text-center">
                                             Once submitted, the project will be sent to admin for review
                                         </p>
+<<<<<<< HEAD
+=======
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                                            or
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() => fileInputRef.current?.click()}
+                                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                        >
+                                            Browse Files
+                                        </button>
+                                        <input
+                                            ref={fileInputRef}
+                                            type="file"
+                                            multiple
+                                            onChange={handleFileChange}
+                                            className="hidden"
+                                        />
+                                    </div>
+
+                                    {/* File List */}
+                                    {files.length > 0 && (
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Files to Upload
+                                            </h3>
+                                            {files.map((file, index) => (
+                                                <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                                                    <div className="flex items-center">
+                                                        <FileText className="w-5 h-5 text-slate-400 mr-2" />
+                                                        <div>
+                                                            <p className="text-sm font-medium text-slate-900 dark:text-white">{file.name}</p>
+                                                            <p className="text-xs text-slate-500 dark:text-slate-400">{(file.size / 1024).toFixed(2)} KB</p>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeFile(index)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            <div className="flex justify-end mt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={uploadFiles}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                                                >
+                                                    Upload Files
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Uploaded Files */}
+                                    {uploadedFiles.length > 0 && (
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                                                Uploaded Files
+                                            </h3>
+                                            {uploadedFiles.map((file, index) => (
+                                                <div key={index} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                                                    <div className="flex items-center">
+                                                        <FileText className="w-5 h-5 text-green-500 mr-2" />
+                                                        <div>
+                                                            <p className="text-sm font-medium text-slate-900 dark:text-white">{file.name}</p>
+                                                            <p className="text-xs text-slate-500 dark:text-slate-400">{file.size}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex space-x-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => viewFile(file)}
+                                                            className="text-blue-500 hover:text-blue-700"
+                                                        >
+                                                            <Eye className="w-4 h-4" />
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => downloadFile(file)}
+                                                            className="text-blue-500 hover:text-blue-700"
+                                                        >
+                                                            <Download className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Preview Tab */}
+                            {activeTab === 'preview' && (
+                                <div className="space-y-6">
+                                    <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-6">
+                                        <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-4">
+                                            Task Preview
+                                        </h3>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Title</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.title || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Description</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.description || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Category</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.category || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Priority</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.priority || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Due Date</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.dueDate ? new Date(taskData.dueDate).toLocaleDateString() : 'Not specified'}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Story Point</h4>
+                                                    <p className="text-slate-900 dark:text-white">
+                                                        {taskData.estimatedHours || 'Not specified'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Assigned To</h4>
+                                                <p className="text-slate-900 dark:text-white">
+                                                    {taskData.assignedTo || 'Not specified'}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Tags</h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {taskData.tags.length > 0 ? (
+                                                        taskData.tags.map((tag, index) => (
+                                                            <span key={index} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                                                {tag}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-slate-500 dark:text-slate-400">No tags</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Progress</h4>
+                                                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
+                                                    <div
+                                                        className="bg-blue-600 h-2.5 rounded-full"
+                                                        style={{ width: `${taskData.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                                <p className="text-slate-900 dark:text-white mt-1">{taskData.progress}%</p>
+                                            </div>
+                                            <div>
+                                                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">Files</h4>
+                                                <div className="space-y-2">
+                                                    {uploadedFiles.length > 0 ? (
+                                                        uploadedFiles.map((file, index) => (
+                                                            <div key={index} className="flex items-center">
+                                                                <FileText className="w-4 h-4 text-green-500 mr-2" />
+                                                                <span className="text-sm text-slate-900 dark:text-white">{file.name}</span>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-slate-500 dark:text-slate-400">No files uploaded</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                     </div>
                                 </div>
                             </div>

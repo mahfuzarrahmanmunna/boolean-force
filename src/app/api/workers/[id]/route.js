@@ -9,7 +9,11 @@ export async function PUT(request, { params }) {
     // Await params since it's a Promise in Next.js 13+
     const { id } = await params;
     
+<<<<<<< HEAD
     console.log(`PUT /api/projects/${id} called`);
+=======
+    console.log(`PUT /api/workers/${id} called`);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     try {
         const { status, jobTitle, skills, experience, skillLevel, name, email, phone } = await request.json();
         
@@ -50,7 +54,11 @@ export async function PUT(request, { params }) {
         return NextResponse.json({ success: true, data: serializedWorker });
     }
     catch (err) {
+<<<<<<< HEAD
         console.error(`Error in PUT /api/projects/${id}:`, err);
+=======
+        console.error(`Error in PUT /api/workers/${id}:`, err);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return NextResponse.json(
             { success: false, error: "Failed to update worker." },
             { status: 500 }
@@ -63,7 +71,11 @@ export async function DELETE(request, { params }) {
     // Await params since it's a Promise in Next.js 13+
     const { id } = await params;
     
+<<<<<<< HEAD
     console.log(`DELETE /api/projects/${id} called`);
+=======
+    console.log(`DELETE /api/workers/${id} called`);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     try {
         const collection = await dbConnect('users');
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
@@ -75,7 +87,11 @@ export async function DELETE(request, { params }) {
         return NextResponse.json({ success: true, message: "Worker deleted successfully." });
     }
     catch (err) {
+<<<<<<< HEAD
         console.error(`Error in DELETE /api/projects/${id}:`, err);
+=======
+        console.error(`Error in DELETE /api/workers/${id}:`, err);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return NextResponse.json(
             { success: false, error: "Failed to delete worker." },
             { status: 500 }
@@ -109,7 +125,11 @@ export async function GET(request, { params }) {
         return NextResponse.json({ success: true, data: workerWithoutPassword });
     }
     catch (err) {
+<<<<<<< HEAD
         console.error(`Error in GET /api/projects/${id}:`, err);
+=======
+        console.error(`Error in GET /api/workers/${id}:`, err);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return NextResponse.json(
             { success: false, error: "Failed to fetch worker." },
             { status: 500 }

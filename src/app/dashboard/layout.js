@@ -228,6 +228,40 @@ export default function AdminLayout({ children }) {
         }
     });
 
+    // State for user permissions
+    const [userPermissions, setUserPermissions] = useState({
+        project: {
+            create_project: false,
+            edit_project: false,
+            delete_project: false,
+            view_all_projects: false,
+            assign_project: false,
+            monetize_project: false,
+            view_revenue: false,
+            manage_payments: false,
+            set_pricing: false
+        },
+        task: {
+            create_task: false,
+            edit_task: false,
+            delete_task: false,
+            submit_task: false,
+            approve_task: false,
+            assign_task: false
+        },
+        team: {
+            add_member: false,
+            remove_member: false,
+            edit_member_role: false,
+            view_team_stats: false
+        },
+        system: {
+            view_analytics: false,
+            export_data: false,
+            manage_settings: false
+        }
+    });
+
     const pathname = usePathname();
     const router = useRouter();
 
@@ -282,6 +316,7 @@ export default function AdminLayout({ children }) {
 
     // Load user permissions from localStorage or API
     useEffect(() => {
+<<<<<<< HEAD
         const loggedInUser = JSON.parse(localStorage.getItem("user"));
         if (!loggedInUser) {
             setLoading(false); // no user → stop loading
@@ -299,14 +334,37 @@ export default function AdminLayout({ children }) {
                 console.error("Error loading user permissions:", err);
             } finally {
                 setLoading(false); // ✅ stop loading once fetch finishes
+=======
+        const loadUserPermissions = async () => {
+            try {
+                // Try to get permissions from localStorage first
+                const savedPermissions = localStorage.getItem('userPermissions');
+                if (savedPermissions) {
+                    setUserPermissions(JSON.parse(savedPermissions));
+                    return;
+                }
+
+                // If not in localStorage, fetch from API
+                const response = await fetch('/api/users/permissions');
+                if (response.ok) {
+                    const permissions = await response.json();
+                    setUserPermissions(permissions);
+                    localStorage.setItem('userPermissions', JSON.stringify(permissions));
+                }
+            } catch (error) {
+                console.error('Error loading user permissions:', error);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
             }
         };
 
         loadUserPermissions();
     }, []);
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     // Close dropdowns when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -402,11 +460,16 @@ export default function AdminLayout({ children }) {
     const hasPermission = (permission) => {
         // Admin has all permissions
         if (session.user.role === "admin") return true;
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         // Check specific permission
         if (permission.startsWith('project.') && userPermissions.project[permission.split('.')[1]]) {
             return true;
         }
+<<<<<<< HEAD
 
         if (permission.startsWith('task.') && userPermissions.task[permission.split('.')[1]]) {
             return true;
@@ -420,6 +483,21 @@ export default function AdminLayout({ children }) {
             return true;
         }
 
+=======
+        
+        if (permission.startsWith('task.') && userPermissions.task[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        if (permission.startsWith('team.') && userPermissions.team[permission.split('.')[1]]) {
+            return true;
+        }
+        
+        if (permission.startsWith('system.') && userPermissions.system[permission.split('.')[1]]) {
+            return true;
+        }
+        
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return false;
     };
 
@@ -770,7 +848,11 @@ export default function AdminLayout({ children }) {
         },
         {
             title: "All Employee",
+<<<<<<< HEAD
             icon: <UserPlus2Icon />,
+=======
+            icon: <UserPlus2Icon/>,
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
             href: "/dashboard/all-emplyee",
             budge: null,
             color: 'gray',
@@ -982,6 +1064,7 @@ export default function AdminLayout({ children }) {
                         {adminMenuItems.map((item, index) => {
                             // Check if user has permission to access this menu item
                             const hasRequiredPermission = item.permission ? hasPermission(item.permission) : true;
+<<<<<<< HEAD
 
                             return (
                                 <li key={item.title}>
@@ -994,6 +1077,20 @@ export default function AdminLayout({ children }) {
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
 
+=======
+                            
+                            return (
+                                <li key={item.title}>
+                                    <div>
+                                        {item.onClick ? (
+                                            <button
+                                                onClick={item.onClick}
+                                                className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${!hasRequiredPermission ? 'opacity-50 cursor-not-allowed' : getColorClasses(item.color, false)} relative overflow-hidden w-full text-left`}
+                                                style={{ animationDelay: `${index * 50}ms` }}
+                                            >
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
+
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                                 <div className="flex items-center relative z-10">
                                                     <span className={`flex-shrink-0 transition-transform duration-300 group-hover:scale-110`}>
                                                         {item.icon}
@@ -1049,6 +1146,7 @@ export default function AdminLayout({ children }) {
                                             </Link>
                                         )}
 
+<<<<<<< HEAD
                                         {/* Enhanced Submenu */}
                                         {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
                                             <ul className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
@@ -1079,6 +1177,38 @@ export default function AdminLayout({ children }) {
                                         )}
                                     </div>
                                 </li>
+=======
+                                    {/* Enhanced Submenu */}
+                                    {item.submenu && activeSubmenu === item.title && !sidebarCollapsed && (
+                                        <ul className="mt-2 ml-4 space-y-1 animate-in slide-in-from-top-2 duration-300">
+                                            {item.submenu.map((subitem, subIndex) => {
+                                                // Check if user has permission to access this submenu item
+                                                const hasSubPermission = subitem.permission ? hasPermission(subitem.permission) : true;
+                                                
+                                                return (
+                                                    <li key={subitem.title}>
+                                                        <Link
+                                                            href={subitem.href}
+                                                            className={`group flex items-center p-2.5 rounded-lg transition-all duration-200 ${!hasSubPermission ? 'opacity-50 cursor-not-allowed' : pathname === subitem.href
+                                                                ? `${getColorClasses(item.color, true)} shadow-md`
+                                                                : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                                                                }`}
+                                                            style={{ animationDelay: `${subIndex * 30}ms` }}
+                                                        >
+                                                            <ChevronRightIcon className="w-3 h-3 mr-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                            <span className="text-sm font-medium">{subitem.title}</span>
+                                                            {!hasSubPermission && (
+                                                                <Lock className="w-3 h-3 text-amber-500 ml-2" />
+                                                            )}
+                                                        </Link>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+                                </div>
+                            </li>
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                             );
                         })}
                     </ul>
@@ -1169,31 +1299,31 @@ export default function AdminLayout({ children }) {
                                             {/* Search History */}
                                             {searchQuery === '' && searchHistory.length > 0 && (
                                                 <div className="p-4 border-b border-slate-200 dark:border-slate-700">
-                                                    <div className="flex items-center justify-between mb-2">
-                                                        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent Searches</h3>
-                                                        <button
-                                                            onClick={clearSearchHistory}
-                                                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                                                        >
-                                                            Clear
-                                                        </button>
-                                                    </div>
-                                                    <ul className="space-y-1">
-                                                        {searchHistory.map((query, index) => (
-                                                            <li key={index}>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setSearchQuery(query);
-                                                                        handleSearch(query);
-                                                                    }}
-                                                                    className="flex items-center w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
-                                                                >
-                                                                    <ClockIcon className="w-4 h-4 text-slate-400 mr-2" />
-                                                                    <span className="text-sm text-slate-700 dark:text-slate-300">{query}</span>
-                                                                </button>
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Recent Searches</h3>
+                                                            <button
+                                                                onClick={clearSearchHistory}
+                                                                className="text-xs text-slate-500 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+                                                            >
+                                                                Clear
+                                                            </button>
+                                                        </div>
+                                                        <ul className="space-y-1">
+                                                            {searchHistory.map((query, index) => (
+                                                                <li key={index}>
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSearchQuery(query);
+                                                                            handleSearch(query);
+                                                                        }}
+                                                                        className="flex items-center w-full p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors text-left"
+                                                                    >
+                                                                        <ClockIcon className="w-4 h-4 text-slate-400 mr-2" />
+                                                                        <span className="text-sm text-slate-700 dark:text-slate-300">{query}</span>
+                                                                    </button>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
                                                 </div>
                                             )}
 
@@ -1236,21 +1366,21 @@ export default function AdminLayout({ children }) {
                                             {/* Search Tips */}
                                             {searchQuery === '' && (
                                                 <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-                                                    <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Search Tips</h3>
-                                                    <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Type a URL to navigate directly to a website
-                                                        </li>
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Search for pages, settings, or features
-                                                        </li>
-                                                        <li className="flex items-start">
-                                                            <span className="text-blue-500 mr-2">•</span>
-                                                            Use <kbd className="px-1 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">Ctrl+K</kbd> to quickly open search
-                                                        </li>
-                                                    </ul>
+                                                        <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Search Tips</h3>
+                                                        <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Type a URL to navigate directly to a website
+                                                            </li>
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Search for pages, settings, or features
+                                                            </li>
+                                                            <li className="flex items-start">
+                                                                <span className="text-blue-500 mr-2">•</span>
+                                                                Use <kbd className="px-1 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600">Ctrl+K</kbd> to quickly open search
+                                                            </li>
+                                                        </ul>
                                                 </div>
                                             )}
                                         </div>

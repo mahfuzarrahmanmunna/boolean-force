@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // app/api/projects/[id]/permissions/route.js
+=======
+// app/api/workers/[id]/permissions/route.js
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -61,7 +65,11 @@ export async function PUT(request, { params }) {
             data: updatedWorker
         });
     } catch (err) {
+<<<<<<< HEAD
         console.error(`Error in PUT /api/projects/${params.id}/permissions:`, err);
+=======
+        console.error(`Error in PUT /api/workers/${params.id}/permissions:`, err);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return NextResponse.json(
             { success: false, error: "An internal server error occurred.", details: err.message },
             { status: 500 }
