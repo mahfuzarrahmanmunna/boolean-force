@@ -14,12 +14,10 @@ import Chatbot from "./components/Chatbot/Chatbot";
 // import AnimatedCursor from "react-animated-cursor";
 // import AuthDebug from "./components/AuthDebug";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+const inter = Inter({ 
+  subsets: ['latin'],
+  preload: false // Add this temporarily
 });
-
 const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],

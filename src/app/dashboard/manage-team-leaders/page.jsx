@@ -61,6 +61,10 @@ const PERMISSION_CATEGORIES = [
             { id: 'delete_project', name: 'Delete Projects', description: 'Can delete projects' },
             { id: 'view_all_projects', name: 'View All Projects', description: 'Can view all projects in the system' },
             { id: 'assign_project', name: 'Assign Projects', description: 'Can assign projects to team members' },
+<<<<<<< HEAD
+            { id: 'submit_project', name: 'Submit Projects', description: 'Can submit projects for review' }, // ✅ নতুন permission যোগ করুন
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         ]
     },
     {
@@ -116,7 +120,11 @@ const PERMISSION_CATEGORIES = [
 
 // Default permissions for new team leaders
 const DEFAULT_PERMISSIONS = {
+<<<<<<< HEAD
+    project: ['create_project', 'edit_project', 'view_all_projects', 'assign_project', 'submit_project'], // ✅ submit_project যোগ করুন
+=======
     project: ['create_project', 'edit_project', 'view_all_projects', 'assign_project'],
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     task: ['create_task', 'edit_task', 'submit_task', 'approve_task', 'assign_task'],
     monetization: [],
     team: ['add_member', 'remove_member', 'view_team_stats'],
@@ -198,7 +206,10 @@ const AnimatedButton = ({ children, className, ...props }) => (
 export default function ManageTeamLeaders() {
     const [teamLeaders, setTeamLeaders] = useState([]);
     const [teams, setTeams] = useState([]);
+<<<<<<< HEAD
+=======
     const [workers, setWorkers] = useState([]);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     const [isLoading, setIsLoading] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [editingLeader, setEditingLeader] = useState(null);
@@ -206,7 +217,10 @@ export default function ManageTeamLeaders() {
     const [searchTerm, setSearchTerm] = useState('');
     const [teamFilter, setTeamFilter] = useState('all');
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+<<<<<<< HEAD
+=======
     // State for tab animation
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     const [activeTab, setActiveTab] = useState('permissions');
 
     // Show notification function
@@ -226,6 +240,42 @@ export default function ManageTeamLeaders() {
         },
     });
 
+<<<<<<< HEAD
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [teamsResponse, teamLeadersResponse] = await Promise.all([
+                    fetch('/api/teams'),
+                    fetch('/api/team-leaders')  // 
+                ]);
+
+                if (!teamsResponse.ok) throw new Error('Failed to fetch teams');
+                if (!teamLeadersResponse.ok) throw new Error('Failed to fetch team leaders');
+
+                const teamsData = await teamsResponse.json();
+                const teamLeadersData = await teamLeadersResponse.json();
+
+                setTeams(teamsData);
+                
+                // Process team leaders data
+                const processedLeaders = teamLeadersData.map(leader => {
+                    // Find the team where this user is leader
+                    const team = teamsData.find(t => 
+                        t.teamLeader && t.teamLeader.toString() === leader._id
+                    );
+                    
+                    return {
+                        ...leader,
+                        teamId: team?._id || null,
+                        teamName: team?.name || 'No Team Assigned',
+                        teamMembers: team?.teamMembers || [],
+                        // Ensure permissions is always defined with default values
+                        permissions: leader.permissions || { ...DEFAULT_PERMISSIONS }
+                    };
+                });
+
+                setTeamLeaders(processedLeaders);
+=======
     // Fetch data on component mount
     useEffect(() => {
         const fetchData = async () => {
@@ -260,6 +310,7 @@ export default function ManageTeamLeaders() {
                 }).filter(Boolean);
 
                 setTeamLeaders(leaders);
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
             } catch (error) {
                 console.error("Error fetching data:", error);
                 showNotification('Failed to load data. Please try again.', 'error');
@@ -271,7 +322,10 @@ export default function ManageTeamLeaders() {
         fetchData();
     }, []);
 
+<<<<<<< HEAD
+=======
     // Handle permission update
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     const handlePermissionsSubmit = async (data) => {
         setIsLoading(true);
         try {
@@ -283,7 +337,11 @@ export default function ManageTeamLeaders() {
                 );
             });
 
+<<<<<<< HEAD
+            const response = await fetch(`/api/team-leaders/${data.leaderId}/permissions`, {
+=======
             const response = await fetch(`/api/workers/${data.leaderId}/permissions`, {
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ permissions: formattedPermissions }),
@@ -318,9 +376,15 @@ export default function ManageTeamLeaders() {
     // Filter team leaders based on search and team filter
     const filteredLeaders = useMemo(() => {
         return teamLeaders.filter(leader => {
+<<<<<<< HEAD
+            const matchesSearch = leader.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                leader.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                leader.teamName?.toLowerCase().includes(searchTerm.toLowerCase());
+=======
             const matchesSearch = leader.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 leader.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 leader.teamName.toLowerCase().includes(searchTerm.toLowerCase());
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
             const matchesTeam = teamFilter === 'all' || leader.teamId === teamFilter;
             return matchesSearch && matchesTeam;
         });
@@ -328,6 +392,23 @@ export default function ManageTeamLeaders() {
 
     // Get team member details
     const getTeamMemberDetails = (memberIds) => {
+<<<<<<< HEAD
+        if (!memberIds || !Array.isArray(memberIds)) return [];
+        
+        // For now, return just the count
+        // In a real app, you would fetch user details for each memberId
+        return memberIds.map(id => ({ 
+            _id: id, 
+            name: `Member ${id.slice(0, 5)}...` 
+        }));
+    };
+
+    // Count permissions by category
+    const countPermissionsByCategory = (permissions, categoryId) => {
+        if (!permissions) return 0;
+        if (!permissions[categoryId]) return 0;
+        if (!Array.isArray(permissions[categoryId])) return 0;
+=======
         return memberIds.map(id => workers.find(w => w._id === id)).filter(Boolean);
     };
 
@@ -348,6 +429,7 @@ export default function ManageTeamLeaders() {
             return 0;
         }
         
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
         return permissions[categoryId].length;
     };
 
@@ -369,6 +451,30 @@ export default function ManageTeamLeaders() {
         }
     }, [editingLeader, permissionsForm]);
 
+<<<<<<< HEAD
+    // Function to promote a worker to team leader
+    const promoteToTeamLeader = async (workerId) => {
+        try {
+            const response = await fetch(`/api/users/${workerId}/promote-to-leader`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (response.ok) {
+                showNotification('Worker promoted to team leader successfully!', 'success');
+                // Refresh data
+                window.location.reload();
+            } else {
+                throw new Error('Failed to promote worker');
+            }
+        } catch (error) {
+            console.error("Error promoting worker:", error);
+            showNotification('Failed to promote worker.', 'error');
+        }
+    };
+
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
     if (isInitialLoading) return <LoadingSpinner message="Loading team leaders..." />;
 
     return (
@@ -394,9 +500,24 @@ export default function ManageTeamLeaders() {
                                         Manage Team Leaders
                                     </CardTitle>
                                     <CardDescription className="mt-2">
+<<<<<<< HEAD
+                                        Set permissions for team leaders. Only team leaders can submit projects.
+                                    </CardDescription>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button 
+                                        onClick={() => window.location.href = '/dashboard/manage-teams'}
+                                        variant="outline"
+                                    >
+                                        <FaUsers className="mr-2" />
+                                        Manage Teams
+                                    </Button>
+                                </div>
+=======
                                         Set permissions for team leaders
                                     </CardDescription>
                                 </div>
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                             </div>
                         </CardHeader>
                     </AnimatedCard>
@@ -444,10 +565,131 @@ export default function ManageTeamLeaders() {
                                         <TableHead>Team</TableHead>
                                         <TableHead>Members</TableHead>
                                         <TableHead>Permissions</TableHead>
+<<<<<<< HEAD
+                                        <TableHead>Submit Access</TableHead>
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
+<<<<<<< HEAD
+                                    {filteredLeaders.map((leader) => {
+                                        const hasSubmitPermission = leader.permissions?.project?.includes('submit_project');
+                                        
+                                        return (
+                                            <TableRow key={leader._id} className="hover:bg-muted/50 transition-all duration-200">
+                                                <TableCell>
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
+                                                            <FaUser className="h-5 w-5" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium">{leader.name || 'Unknown'}</div>
+                                                            <div className="text-sm text-muted-foreground">{leader.email || 'No email'}</div>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+                                                            <FaUsers className="h-4 w-4" />
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-medium">{leader.teamName}</div>
+                                                        </div>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center gap-1">
+                                                        <span>{getTeamMemberDetails(leader.teamMembers).length}</span>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                                                                    <FaUsers className="h-3 w-3" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <div className="space-y-1 max-w-xs">
+                                                                    <div className="font-medium">Team Members:</div>
+                                                                    {getTeamMemberDetails(leader.teamMembers).slice(0, 3).map(member => (
+                                                                        <div key={member._id}>{member.name}</div>
+                                                                    ))}
+                                                                    {getTeamMemberDetails(leader.teamMembers).length > 3 && (
+                                                                        <div className="text-xs text-muted-foreground">
+                                                                            ...and {getTeamMemberDetails(leader.teamMembers).length - 3} more
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {PERMISSION_CATEGORIES.map(category => (
+                                                            <PermissionBadge
+                                                                key={category.id}
+                                                                category={category.id}
+                                                                count={countPermissionsByCategory(leader.permissions, category.id)}
+                                                                total={category.permissions.length}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex items-center">
+                                                        {hasSubmitPermission ? (
+                                                            <Badge variant="default" className="bg-green-500">
+                                                                <FaCheck className="mr-1 h-3 w-3" />
+                                                                Can Submit
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="outline">
+                                                                <FaTimes className="mr-1 h-3 w-3" />
+                                                                Cannot Submit
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <AnimatedButton
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => setViewingLeader(leader)}
+                                                                    className="cursor-pointer"
+                                                                >
+                                                                    <FaEye className="h-4 w-4" />
+                                                                </AnimatedButton>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>View Permissions</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <AnimatedButton
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    onClick={() => setEditingLeader(leader)}
+                                                                    className="cursor-pointer"
+                                                                >
+                                                                    <FaEdit className="h-4 w-4" />
+                                                                </AnimatedButton>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Edit Permissions</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })}
+=======
                                     {filteredLeaders.map((leader) => (
                                         <TableRow key={leader._id} className="hover:bg-muted/50 transition-all duration-200">
                                             <TableCell>
@@ -544,6 +786,7 @@ export default function ManageTeamLeaders() {
                                             </TableCell>
                                         </TableRow>
                                     ))}
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                 </TableBody>
                             </Table>
                             {filteredLeaders.length === 0 && (
@@ -555,6 +798,28 @@ export default function ManageTeamLeaders() {
                         </CardContent>
                     </AnimatedCard>
 
+<<<<<<< HEAD
+                    {/* Important Notice Card */}
+                    <AnimatedCard className="border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
+                        <CardContent className="p-6">
+                            <div className="flex items-start">
+                                <FaExclamationTriangle className="h-6 w-6 text-yellow-600 mr-3 mt-1" />
+                                <div>
+                                    <h3 className="font-semibold text-yellow-800 dark:text-yellow-400">
+                                        Important: Project Submission Policy
+                                    </h3>
+                                    <p className="text-yellow-700 dark:text-yellow-500 mt-1">
+                                        • Only Team Leaders with "Submit Projects" permission can submit projects<br />
+                                        • Individual workers cannot submit projects directly<br />
+                                        • Ensure each team leader has the "submit_project" permission enabled
+                                    </p>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </AnimatedCard>
+
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                     {/* Edit Permissions Dialog */}
                     <Dialog open={!!editingLeader} onOpenChange={() => setEditingLeader(null)}>
                         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
@@ -629,6 +894,24 @@ export default function ManageTeamLeaders() {
                                     ))}
                                 </Tabs>
 
+<<<<<<< HEAD
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <div className="flex items-start">
+                                        <FaInfoCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-medium text-blue-800 dark:text-blue-400">
+                                                Submit Project Permission
+                                            </h4>
+                                            <p className="text-sm text-blue-700 dark:text-blue-500">
+                                                The "Submit Projects" permission allows team leaders to submit completed projects for admin review. 
+                                                Ensure this is enabled for team leaders who need to submit work.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+=======
+>>>>>>> 045201b2b3ff3301ceb45344a3816fe4f692766c
                                 <DialogFooter>
                                     <AnimatedButton type="button" variant="outline" onClick={() => setEditingLeader(null)}>
                                         Cancel

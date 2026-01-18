@@ -104,7 +104,7 @@ export default function WorkerDashboardPage() {
     const fetchWorkerData = async (user) => {
         try {
             // In a real app, you would fetch from your API:
-            // const response = await fetch(`/api/workers/${user.id}`);
+            // const response = await fetch(`/api/projects/${user.id}`);
             // const data = await response.json();
 
             // Mock data with additional fields
@@ -198,7 +198,7 @@ export default function WorkerDashboardPage() {
         setUpdating(true);
         try {
             // In a real app, you would update your API:
-            // const response = await fetch(`/api/workers/${session.user.id}`, {
+            // const response = await fetch(`/api/projects/${session.user.id}`, {
             //     method: 'PUT',
             //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify(profileForm)
