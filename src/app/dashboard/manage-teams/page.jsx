@@ -344,7 +344,7 @@ export default function ManageTeamsPage() {
           await Promise.all([
             fetch("/api/teams"),
             fetch("/api/workers"),
-            fetch("/api/work"), // Changed from /api/projects to /api/work
+            fetch("/api/projects"), // Changed from /api/projects to /api/work
           ]);
 
         if (!teamsResponse.ok) throw new Error("Failed to fetch teams");
@@ -401,69 +401,74 @@ export default function ManageTeamsPage() {
 
       // 1. Set the new/selected leader's status to true
       try {
-    console.log("Setting new team leader status to true for:", newLeaderId);
-    
-    // Log the full URL to make sure it's correct
-    const updateUrl = `/api/users/${newLeaderId}`;
-    console.log("Update URL:", updateUrl);
-    
-    const userResponse = await fetch(updateUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isTeamLeader: true }),
-    });
+        console.log("Setting new team leader status to true for:", newLeaderId);
 
-    console.log("New leader response status:", userResponse.status);
-    console.log("New leader response headers:", [...userResponse.headers.entries()]);
+        // Log the full URL to make sure it's correct
+        const updateUrl = `/api/users/${newLeaderId}`;
+        console.log("Update URL:", updateUrl);
 
-    if (userResponse.ok) {
-        const userResult = await userResponse.json();
-        console.log("New leader update result:", userResult);
+        const userResponse = await fetch(updateUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isTeamLeader: true }),
+        });
 
-        setWorkers((prevWorkers) =>
+        console.log("New leader response status:", userResponse.status);
+        console.log("New leader response headers:", [
+          ...userResponse.headers.entries(),
+        ]);
+
+        if (userResponse.ok) {
+          const userResult = await userResponse.json();
+          console.log("New leader update result:", userResult);
+
+          setWorkers((prevWorkers) =>
             prevWorkers.map((worker) =>
-                worker._id === newLeaderId
-                    ? { ...worker, isTeamLeader: true }
-                    : worker
-            )
-        );
+              worker._id === newLeaderId
+                ? { ...worker, isTeamLeader: true }
+                : worker,
+            ),
+          );
 
-        showNotification(
+          showNotification(
             "Team leader status updated successfully!",
-            "success"
-        );
-    } else {
-        // Try to get more detailed error information
-        const responseText = await userResponse.text();
-        console.error("Failed to set new team leader status. Response text:", responseText);
-        
-        let errorData;
-        try {
+            "success",
+          );
+        } else {
+          // Try to get more detailed error information
+          const responseText = await userResponse.text();
+          console.error(
+            "Failed to set new team leader status. Response text:",
+            responseText,
+          );
+
+          let errorData;
+          try {
             errorData = JSON.parse(responseText);
-        } catch (e) {
+          } catch (e) {
             errorData = { error: responseText };
+          }
+
+          console.error("Failed to set new team leader status:", errorData);
+          showNotification(
+            `Failed to update team leader status: ${errorData.error || "Unknown error"}`,
+            "error",
+          );
         }
-        
-        console.error("Failed to set new team leader status:", errorData);
+      } catch (error) {
+        console.error("Error setting new team leader status:", error);
         showNotification(
-            `Failed to update team leader status: ${errorData.error || 'Unknown error'}`,
-            "error"
+          `Error updating team leader status: ${error.message}`,
+          "error",
         );
-    }
-} catch (error) {
-    console.error("Error setting new team leader status:", error);
-    showNotification(
-        `Error updating team leader status: ${error.message}`,
-        "error"
-    );
-}
+      }
 
       // 2. If editing and the leader changed, set the old leader's status to false
       if (editingTeam && oldLeaderId && oldLeaderId !== newLeaderId) {
         try {
           console.log(
             "Setting old team leader status to false for:",
-            oldLeaderId
+            oldLeaderId,
           );
           const oldLeaderResponse = await fetch(`/api/users/${oldLeaderId}`, {
             method: "PUT",
@@ -481,22 +486,22 @@ export default function ManageTeamsPage() {
               prevWorkers.map((worker) =>
                 worker._id === oldLeaderId
                   ? { ...worker, isTeamLeader: false }
-                  : worker
-              )
+                  : worker,
+              ),
             );
           } else {
             const errorData = await oldLeaderResponse.json();
             console.error("Failed to demote old team leader:", errorData);
             showNotification(
               `Failed to update previous team leader: ${errorData.error}`,
-              "error"
+              "error",
             );
           }
         } catch (error) {
           console.error("Error demoting old team leader:", error);
           showNotification(
             `Error updating previous team leader: ${error.message}`,
-            "error"
+            "error",
           );
         }
       }
@@ -525,56 +530,66 @@ export default function ManageTeamsPage() {
   const handleProjectSubmit = async (data) => {
     setIsLoading(true);
     try {
-        const projectData = {
-            ...data,
-            budget: data.budget ? parseFloat(data.budget) : 0,
-            tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
-            status: editingProject ? data.status : 'planning',
-            progress: editingProject ? data.progress : 0,
-            createdAt: editingProject ? data.createdAt : new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
+      const projectData = {
+        ...data,
+        budget: data.budget ? parseFloat(data.budget) : 0,
+        tags: data.tags ? data.tags.split(",").map((tag) => tag.trim()) : [],
+        status: editingProject ? data.status : "planning",
+        progress: editingProject ? data.progress : 0,
+        createdAt: editingProject ? data.createdAt : new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
 
-        const url = editingProject ? `/api/projects/${editingProject._id}` : '/api/projects';
-        const method = editingProject ? 'PUT' : 'POST';
+      const url = editingProject
+        ? `/api/projects/${editingProject._id}`
+        : "/api/projects";
+      const method = editingProject ? "PUT" : "POST";
 
-        const response = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(projectData),
-        });
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projectData),
+      });
 
-        const result = await response.json();
+      const result = await response.json();
 
-        if (!response.ok) {
-            throw new Error(result.error || `Failed to ${editingProject ? 'update' : 'create'} project`);
-        }
+      if (!response.ok) {
+        throw new Error(
+          result.error ||
+            `Failed to ${editingProject ? "update" : "create"} project`,
+        );
+      }
 
-        if (editingProject) {
-            setProjects(projects.map(p => p._id === editingProject._id ? result.data : p));
-            setEditingProject(null);
-            showNotification('Project updated successfully!', 'success');
-        } else {
-            
-            setProjects(prev => [result.data, ...prev]);
-            showNotification('Project created successfully!', 'success');
-        }
+      if (editingProject) {
+        setProjects(
+          projects.map((p) => (p._id === editingProject._id ? result.data : p)),
+        );
+        setEditingProject(null);
+        showNotification("Project updated successfully!", "success");
+      } else {
+        setProjects((prev) => [result.data, ...prev]);
+        showNotification("Project created successfully!", "success");
+      }
 
-        projectForm.reset();
+      projectForm.reset();
     } catch (error) {
-        console.error("Error in handleProjectSubmit:", error);
-        showNotification(error.message || `Failed to ${editingProject ? 'update' : 'create'} project.`, 'error');
+      console.error("Error in handleProjectSubmit:", error);
+      showNotification(
+        error.message ||
+          `Failed to ${editingProject ? "update" : "create"} project.`,
+        "error",
+      );
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
-};
+  };
 
   // Handle team deletion
   // Handle team deletion
   const handleDeleteTeam = async (teamId) => {
     if (
       !confirm(
-        "Are you sure you want to delete this team? This action cannot be undone."
+        "Are you sure you want to delete this team? This action cannot be undone.",
       )
     )
       return;
@@ -597,7 +612,7 @@ export default function ManageTeamsPage() {
         try {
           console.log(
             "Setting deleted team leader status to false for:",
-            leaderIdToDemote
+            leaderIdToDemote,
           );
           const userResponse = await fetch(`/api/users/${leaderIdToDemote}`, {
             method: "PUT",
@@ -607,7 +622,7 @@ export default function ManageTeamsPage() {
 
           console.log(
             "Deleted team leader response status:",
-            userResponse.status
+            userResponse.status,
           );
 
           if (userResponse.ok) {
@@ -618,28 +633,28 @@ export default function ManageTeamsPage() {
               prevWorkers.map((worker) =>
                 worker._id === leaderIdToDemote
                   ? { ...worker, isTeamLeader: false }
-                  : worker
-              )
+                  : worker,
+              ),
             );
           } else {
             const errorData = await userResponse.json();
             console.error(
               "Failed to demote team leader after team deletion:",
-              errorData
+              errorData,
             );
             showNotification(
               `Failed to update team leader: ${errorData.error}`,
-              "error"
+              "error",
             );
           }
         } catch (error) {
           console.error(
             "Error demoting team leader after team deletion:",
-            error
+            error,
           );
           showNotification(
             `Error updating team leader: ${error.message}`,
-            "error"
+            "error",
           );
         }
       }
@@ -659,7 +674,7 @@ export default function ManageTeamsPage() {
   const handleDeleteProject = async (projectId) => {
     if (
       confirm(
-        "Are you sure you want to delete this project? This action cannot be undone."
+        "Are you sure you want to delete this project? This action cannot be undone.",
       )
     ) {
       setIsLoading(true);
@@ -687,7 +702,7 @@ export default function ManageTeamsPage() {
     if (selectedProjectsToAssign.length === 0) {
       showNotification(
         "Please select at least one project to assign.",
-        "error"
+        "error",
       );
       return;
     }
@@ -700,7 +715,7 @@ export default function ManageTeamsPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ projectIds: selectedProjectsToAssign }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -721,18 +736,18 @@ export default function ManageTeamsPage() {
                   ...result.data.assignedProjects.map((p) => p._id),
                 ],
               }
-            : t
-        )
+            : t,
+        ),
       );
 
       // Update projects with team assignment
       setProjects((prev) =>
         prev.map((project) => {
           const updatedProject = result.data.assignedProjects.find(
-            (p) => p._id === project._id
+            (p) => p._id === project._id,
           );
           return updatedProject || project;
-        })
+        }),
       );
 
       setAssigningProjectTo(null);
@@ -757,7 +772,7 @@ export default function ManageTeamsPage() {
   const getTeamProjects = (team) => {
     const allMemberIds = [team.teamLeader, ...(team.teamMembers || [])];
     return projects.filter((project) =>
-      allMemberIds.includes(project.assignedTo)
+      allMemberIds.includes(project.assignedTo),
     );
   };
 
@@ -779,14 +794,14 @@ export default function ManageTeamsPage() {
 
   // Filter workers for team leader selection
   const eligibleTeamLeaders = workers.filter(
-    (w) => w.status === "active" || w.status === "approved"
+    (w) => w.status === "active" || w.status === "approved",
   );
 
   // Filter workers for team member selection
   const eligibleTeamMembers = workers.filter(
     (w) =>
       (w.status === "active" || w.status === "approved") &&
-      w._id !== teamForm.watch("teamLeader")
+      w._id !== teamForm.watch("teamLeader"),
   );
 
   // Filter projects for assignment - Added safety check
@@ -813,11 +828,11 @@ export default function ManageTeamsPage() {
       projectForm.setValue("category", editingProject.category || "other");
       projectForm.setValue(
         "estimatedHours",
-        editingProject.estimatedHours || ""
+        editingProject.estimatedHours || "",
       );
       projectForm.setValue(
         "tags",
-        editingProject.tags ? editingProject.tags.join(", ") : ""
+        editingProject.tags ? editingProject.tags.join(", ") : "",
       );
       projectForm.setValue("assignedTo", editingProject.assignedTo || "");
       projectForm.setValue("status", editingProject.status || "pending");
@@ -914,10 +929,10 @@ export default function ManageTeamsPage() {
                 <TableBody>
                   {filteredTeams.map((team) => {
                     const teamLeader = workers.find(
-                      (w) => w._id === team.teamLeader
+                      (w) => w._id === team.teamLeader,
                     );
                     const teamMembers = getTeamMemberDetails(
-                      team.teamMembers || []
+                      team.teamMembers || [],
                     );
                     const teamProjects = getTeamProjects(team);
                     const teamTasks = getTeamTasks(team);
@@ -1178,14 +1193,14 @@ export default function ManageTeamsPage() {
                               {project.assignedTo &&
                                 (() => {
                                   const worker = workers.find(
-                                    (w) => w._id === project.assignedTo
+                                    (w) => w._id === project.assignedTo,
                                   );
                                   const team = teams.find(
                                     (t) =>
                                       t.teamLeader === project.assignedTo ||
                                       (t.teamMembers || []).includes(
-                                        project.assignedTo
-                                      )
+                                        project.assignedTo,
+                                      ),
                                   );
                                   return team
                                     ? `${team.name} - ${
@@ -1203,13 +1218,13 @@ export default function ManageTeamsPage() {
                           <Badge
                             className={`${
                               PRIORITY_OPTIONS.find(
-                                (p) => p.value === project.priority
+                                (p) => p.value === project.priority,
                               )?.color || "bg-gray-500"
                             } text-white`}
                           >
                             <span>
                               {PRIORITY_OPTIONS.find(
-                                (p) => p.value === project.priority
+                                (p) => p.value === project.priority,
                               )?.label || project.priority}
                             </span>
                           </Badge>
@@ -1377,7 +1392,7 @@ export default function ManageTeamsPage() {
                                   </Badge>
                                 </div>
                               </SelectItem>
-                            )
+                            ),
                         )
                       ) : (
                         <div className="p-2 text-sm text-muted-foreground">
@@ -1454,8 +1469,8 @@ export default function ManageTeamsPage() {
                                     teamForm.setValue(
                                       "teamMembers",
                                       currentMembers.filter(
-                                        (id) => id !== worker._id
-                                      )
+                                        (id) => id !== worker._id,
+                                      ),
                                     );
                                   }
                                 }}
@@ -1700,7 +1715,7 @@ export default function ManageTeamsPage() {
                       Created:{" "}
                       {editingProject
                         ? new Date(
-                            editingProject.createdAt
+                            editingProject.createdAt,
                           ).toLocaleDateString()
                         : new Date(currentDate).toLocaleDateString()}
                     </span>
@@ -1761,7 +1776,7 @@ export default function ManageTeamsPage() {
                                   Leader:{" "}
                                   {(() => {
                                     const leader = workers.find(
-                                      (w) => w._id === team.teamLeader
+                                      (w) => w._id === team.teamLeader,
                                     );
                                     return leader ? leader.name : "Unknown";
                                   })()}
@@ -1831,7 +1846,7 @@ export default function ManageTeamsPage() {
                         <Checkbox
                           id={`project-${project._id}`}
                           checked={selectedProjectsToAssign.includes(
-                            project._id
+                            project._id,
                           )}
                           onCheckedChange={() => {
                             if (
@@ -1839,8 +1854,8 @@ export default function ManageTeamsPage() {
                             ) {
                               setSelectedProjectsToAssign(
                                 selectedProjectsToAssign.filter(
-                                  (id) => id !== project._id
-                                )
+                                  (id) => id !== project._id,
+                                ),
                               );
                             } else {
                               setSelectedProjectsToAssign([
@@ -1867,12 +1882,12 @@ export default function ManageTeamsPage() {
                             <Badge
                               className={`${
                                 PRIORITY_OPTIONS.find(
-                                  (p) => p.value === project.priority
+                                  (p) => p.value === project.priority,
                                 )?.color || "bg-gray-500"
                               } text-white text-xs`}
                             >
                               {PRIORITY_OPTIONS.find(
-                                (p) => p.value === project.priority
+                                (p) => p.value === project.priority,
                               )?.label || project.priority}
                             </Badge>
                           </div>
@@ -1937,7 +1952,7 @@ export default function ManageTeamsPage() {
                     </h3>
                     {(() => {
                       const teamLeader = workers.find(
-                        (w) => w._id === viewingTeam.teamLeader
+                        (w) => w._id === viewingTeam.teamLeader,
                       );
                       return teamLeader ? (
                         <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-md">
@@ -1991,7 +2006,7 @@ export default function ManageTeamsPage() {
                     </h3>
                     {(() => {
                       const teamMembers = getTeamMemberDetails(
-                        viewingTeam.teamMembers || []
+                        viewingTeam.teamMembers || [],
                       );
                       return teamMembers.length > 0 ? (
                         <div className="space-y-2">
@@ -2041,7 +2056,7 @@ export default function ManageTeamsPage() {
                         <div className="space-y-2">
                           {teamProjects.map((project) => {
                             const assignedMember = workers.find(
-                              (w) => w._id === project.assignedTo
+                              (w) => w._id === project.assignedTo,
                             );
                             return (
                               <div
@@ -2076,12 +2091,12 @@ export default function ManageTeamsPage() {
                                     <Badge
                                       className={`${
                                         PRIORITY_OPTIONS.find(
-                                          (p) => p.value === project.priority
+                                          (p) => p.value === project.priority,
                                         )?.color || "bg-gray-500"
                                       } text-white`}
                                     >
                                       {PRIORITY_OPTIONS.find(
-                                        (p) => p.value === project.priority
+                                        (p) => p.value === project.priority,
                                       )?.label || project.priority}
                                     </Badge>
                                   </div>
@@ -2110,7 +2125,7 @@ export default function ManageTeamsPage() {
                         <div className="space-y-2">
                           {teamTasks.map((task) => {
                             const assignedMember = workers.find(
-                              (w) => w._id === task.assignedTo
+                              (w) => w._id === task.assignedTo,
                             );
                             return (
                               <div
@@ -2139,12 +2154,12 @@ export default function ManageTeamsPage() {
                                     <Badge
                                       className={`${
                                         PRIORITY_OPTIONS.find(
-                                          (p) => p.value === task.priority
+                                          (p) => p.value === task.priority,
                                         )?.color || "bg-gray-500"
                                       } text-white`}
                                     >
                                       {PRIORITY_OPTIONS.find(
-                                        (p) => p.value === task.priority
+                                        (p) => p.value === task.priority,
                                       )?.label || task.priority}
                                     </Badge>
                                   </div>
