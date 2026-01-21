@@ -343,8 +343,8 @@ export default function ManageTeamsPage() {
         const [teamsResponse, workersResponse, workResponse] =
           await Promise.all([
             fetch("/api/teams"),
-            fetch("/api/workers"),
-            fetch("/api/work"), // Changed from /api/projects to /api/work
+            fetch("/api/projects"),
+            fetch("/api/projects"), // Changed from /api/projects to /api/projects
           ]);
 
         if (!teamsResponse.ok) throw new Error("Failed to fetch teams");
@@ -665,7 +665,7 @@ export default function ManageTeamsPage() {
       setIsLoading(true);
       try {
         const response = await fetch(`/api/projects/${projectId}`, {
-          // Changed to /api/work
+          // Changed to /api/projects
           method: "DELETE",
         });
 

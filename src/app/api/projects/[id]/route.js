@@ -30,67 +30,27 @@ async function isTeamLeader(userId) {
 }
 
 // Helper function to check if a user has permission to access a project
-async function hasProjectPermission(userId, projectId, action = 'read') {
-    try {
-        // Admins have all permissions
-        const usersCollection = await dbConnect('users');
-        const user = await usersCollection.findOne({ _id: new ObjectId(userId) });
-        
-        if (!user) {
-            return false;
-        }
-        
-        if (user.role === 'admin') {
-            return true;
-        }
-        
-        // Check if user is a team leader
-        const isLeader = await isTeamLeader(userId);
-        if (!isLeader) {
-            return false;
-        }
-        
-        // Get the project to check which teams it's assigned to
-        const projectCollection = await dbConnect('projects');
-        const project = await projectCollection.findOne({ _id: new ObjectId(projectId) });
-        
-        if (!project) {
-            return false;
-        }
-        
-        // If the project is not assigned to any team, only admins can access it
-        if (!project.assignedTo || project.assignedTo.length === 0) {
-            return false;
-        }
-        
-        // Check if the user is a team leader of any team that the project is assigned to
-        const teamsCollection = await dbConnect('teams');
-        
-        // Convert assignedTo IDs to strings for consistent comparison
-        const assignedTeamIds = project.assignedTo.map(id => {
-            return typeof id === 'object' ? id.toString() : id.toString();
-        });
-        
-        // Try to find teams where the user is a leader and the team is assigned to the project
-        // First try with ObjectId comparison
-        let teams = await teamsCollection.find({
-            teamLeader: new ObjectId(userId),
-            _id: { $in: assignedTeamIds.map(id => new ObjectId(id)) }
-        }).toArray();
-        
-        // If no teams found, try with string comparison
-        if (teams.length === 0) {
-            teams = await teamsCollection.find({
-                teamLeader: userId,
-                _id: { $in: assignedTeamIds }
-            }).toArray();
-        }
-        
-        return teams.length > 0;
-    } catch (error) {
-        console.error('Error checking project permission:', error);
-        return false;
+async function hasProjectPermission(userId, projectId) {
+  const projects = await dbConnect("projects");
+  const teams = await dbConnect("teams");
+
+  const project = await projects.findOne({ _id: new ObjectId(projectId) });
+  if (!project) return false;
+
+  if (!project.assignedTo || project.assignedTo.length === 0) return false;
+
+  const userIdStr = String(userId);
+
+  for (const teamId of project.assignedTo) {
+    const team = await teams.findOne({ _id: new ObjectId(teamId) });
+    if (!team) continue;
+
+    if (String(team.teamLeader) === userIdStr) {
+      return true; 
     }
+  }
+
+  return false; //  PERMISSION DENIED
 }
 
 // GET - Fetch a specific project by ID

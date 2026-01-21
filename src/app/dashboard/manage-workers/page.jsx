@@ -230,7 +230,7 @@ export default function ManageWorkers() {
             try {
                 const [workersResponse, workResponse, teamsResponse] = await Promise.all([
                     fetch('/api/workers'),
-                    fetch('/api/work'),
+                    fetch('/api/projects'),
                     fetch('/api/teams')
                 ]);
 
@@ -316,6 +316,8 @@ export default function ManageWorkers() {
             const result = await response.json();
             console.log('Response data:', result);
 
+
+
             // Then check if response was successful
             if (!response.ok) {
                 // Extract error message from backend response
@@ -349,6 +351,9 @@ export default function ManageWorkers() {
             setIsLoading(false);
         }
     };
+
+console.log(workers);
+console.log(teams);
 
     // Handle worker deletion
     const handleDeleteWorker = async (workerId) => {
