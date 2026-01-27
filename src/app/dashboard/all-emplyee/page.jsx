@@ -240,7 +240,7 @@ export default function ManageWorkers() {
         const fetchData = async () => {
             try {
                 const [workersResponse, workResponse] = await Promise.all([
-                    fetch('/api/workers'),
+                    fetch('/api/projects'),
                     fetch('/api/projects')
                 ]);
 
@@ -286,14 +286,14 @@ export default function ManageWorkers() {
                     throw new Error('Invalid worker ID for update');
                 }
 
-                response = await fetch(`/api/workers/${editingWorker._id}`, {
+                response = await fetch(`/api/projects/${editingWorker._id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(workerData),
                 });
             } else {
                 // Create new worker
-                response = await fetch('/api/workers', {
+                response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(workerData),
@@ -334,7 +334,7 @@ export default function ManageWorkers() {
         if (confirm('Are you sure you want to delete this worker? This action cannot be undone.')) {
             setIsLoading(true);
             try {
-                const response = await fetch(`/api/workers/${workerId}`, {
+                const response = await fetch(`/api/projects/${workerId}`, {
                     method: 'DELETE',
                 });
 
@@ -355,7 +355,7 @@ export default function ManageWorkers() {
     const handleStatusChange = async (worker, newStatus) => {
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/workers/${worker._id}`, {
+            const response = await fetch(`/api/projects/${worker._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -389,7 +389,7 @@ export default function ManageWorkers() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/workers/${worker._id}`, {
+            const response = await fetch(`/api/projects/${worker._id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ jobTitle: newJobTitle }), // Only send jobTitle, not status
@@ -423,7 +423,7 @@ export default function ManageWorkers() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/workers/${assigningWorkTo._id}/assign`, {
+            const response = await fetch(`/api/projects/${assigningWorkTo._id}/assign`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ taskIds: selectedTasksToAssign }),

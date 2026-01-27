@@ -222,7 +222,7 @@ export default function WorkerTasks() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const response = await fetch('/api/work');
+                const response = await fetch('/api/projects');
 
                 if (!response.ok) throw new Error('Failed to fetch tasks');
 

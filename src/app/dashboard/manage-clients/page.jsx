@@ -468,7 +468,7 @@ export default function ManageClients() {
       try {
         const [clientsResponse, workResponse] = await Promise.all([
           fetch("/api/admin/clients"),
-          fetch("/api/work"),
+          fetch("/api/projects"),
         ]);
 
         if (!clientsResponse.ok) throw new Error("Failed to fetch clients");

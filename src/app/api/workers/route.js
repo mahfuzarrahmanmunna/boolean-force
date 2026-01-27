@@ -1,4 +1,4 @@
-// app/api/workers/route.js
+// app/api/projects/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodbAdapter";

@@ -226,8 +226,8 @@ export default function ManageTasks() {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                // Change from '/api/work' to '/api/work'
-                const response = await fetch('/api/work');
+                // Change from '/api/projects' to '/api/projects'
+                const response = await fetch('/api/projects');
                 if (!response.ok) throw new Error('Failed to fetch tasks');
                 const tasksData = await response.json();
                 setTasks(tasksData);
@@ -246,8 +246,8 @@ export default function ManageTasks() {
     const handleTaskSubmit = async (data) => {
         setIsLoading(true);
         try {
-            // Fixed the typo: changed from '/api/works' to '/api/work'
-            const url = editingTask ? `/api/projects/${editingTask._id}` : '/api/work';
+            // Fixed the typo: changed from '/api/projectss' to '/api/projects'
+            const url = editingTask ? `/api/projects/${editingTask._id}` : '/api/projects';
             const method = editingTask ? 'PUT' : 'POST';
             
             console.log(`Submitting ${method} request to ${url}`, data);
@@ -303,7 +303,7 @@ export default function ManageTasks() {
             setIsLoading(true);
             try {
                 console.log(`Deleting task with ID: ${taskId}`);
-                // Fixed the typo: changed from '/api/tasks' to '/api/work'
+                // Fixed the typo: changed from '/api/tasks' to '/api/projects'
                 const response = await fetch(`/api/projects/${taskId}`, {
                     method: 'DELETE',
                 });

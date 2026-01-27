@@ -1,4 +1,4 @@
-// app/api/workers/[id]/assign/route.js
+// app/api/projects/[id]/assign/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -142,7 +142,7 @@ export async function POST(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in POST /api/workers/${params.id}/assign:`, err);
+        console.error(`Error in POST /api/projects/${params.id}/assign:`, err);
         return NextResponse.json(
             { success: false, error: "An internal server error occurred.", details: err.message },
             { status: 500 }
