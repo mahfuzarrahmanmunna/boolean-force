@@ -171,11 +171,11 @@ src/
 **API Endpoints:**
 - `GET/POST /api/teams` - Team CRUD
 - `GET/PUT /api/teams/[id]` - Team details
-- `GET/POST /api/workers` - Worker management
-- `GET/PUT/DELETE /api/workers/[id]` - Individual worker ops
-- `POST /api/workers/[id]/assign` - Worker assignment
-- `GET /api/workers/[id]/tasks` - Worker tasks
-- `PUT /api/workers/[id]/permissions` - Permission management
+- `GET/POST /api/projects` - Worker management
+- `GET/PUT/DELETE /api/projects/[id]` - Individual worker ops
+- `POST /api/projects/[id]/assign` - Worker assignment
+- `GET /api/projects/[id]/tasks` - Worker tasks
+- `PUT /api/projects/[id]/permissions` - Permission management
 
 ### 3. **Project & Task Management**
 - Project creation and tracking
@@ -185,10 +185,10 @@ src/
 - Status tracking
 
 **API Endpoints:**
-- `GET/POST /api/work` - Work items
-- `GET/PUT/DELETE /api/work/[id]` - Work item CRUD
-- `POST /api/work/bulk` - Bulk operations
-- `POST /api/work/submit` - Task submission
+- `GET/POST /api/projects` - Work items
+- `GET/PUT/DELETE /api/projects/[id]` - Work item CRUD
+- `POST /api/projects/bulk` - Bulk operations
+- `POST /api/projects/submit` - Task submission
 - `GET/POST /api/projects` - Projects
 - `GET/PUT/DELETE /api/projects/[id]` - Project management
 

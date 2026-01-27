@@ -239,7 +239,7 @@ export default function ProjectDetails() {
             try {
                 const [projectResponse, workersResponse] = await Promise.all([
                     fetch(`/api/projects/${projectId}`),
-                    fetch('/api/workers')
+                    fetch('/api/projects')
                 ]);
 
                 if (!projectResponse.ok) throw new Error('Failed to fetch project');

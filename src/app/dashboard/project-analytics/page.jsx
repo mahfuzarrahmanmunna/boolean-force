@@ -1335,7 +1335,7 @@ export default function ProjectWorkAnalytics() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const workResponse = await fetch("/api/work");
+        const workResponse = await fetch("/api/projects");
 
         if (!workResponse.ok) throw new Error("Failed to fetch work items");
 
@@ -1373,7 +1373,7 @@ export default function ProjectWorkAnalytics() {
 
         // Try to fetch project names from an API if available
         try {
-          const projectResponse = await fetch("http://localhost:3000/api/work");
+          const projectResponse = await fetch("http://localhost:3000/api/projects");
           if (projectResponse.ok) {
             const projectData = await projectResponse.json();
             const projectMap = {};
