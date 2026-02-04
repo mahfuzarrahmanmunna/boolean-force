@@ -182,7 +182,6 @@ export default function AdminLayout({ children }) {
   const [isHovering, setIsHovering] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [Loading, setLoading] = useState(true);
 
   // New states for client account management
   const [showClientAccountModal, setShowClientAccountModal] = useState(false);
@@ -192,7 +191,7 @@ export default function AdminLayout({ children }) {
   const [generatedPassword, setGeneratedPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [passwordCopied, setPasswordCopied] = useState(false);
-  const [user, setUser] = useState(null);
+  
   // State for user permissions
   const [userPermissions, setUserPermissions] = useState({
     project: {
@@ -226,40 +225,6 @@ export default function AdminLayout({ children }) {
       manage_settings: false,
     },
   });
-
-  // State for user permissions
-  //   const [userPermissions, setUserPermissions] = useState({
-  //     project: {
-  //       create_project: false,
-  //       edit_project: false,
-  //       delete_project: false,
-  //       view_all_projects: false,
-  //       assign_project: false,
-  //       monetize_project: false,
-  //       view_revenue: false,
-  //       manage_payments: false,
-  //       set_pricing: false,
-  //     },
-  //     task: {
-  //       create_task: false,
-  //       edit_task: false,
-  //       delete_task: false,
-  //       submit_task: false,
-  //       approve_task: false,
-  //       assign_task: false,
-  //     },
-  //     team: {
-  //       add_member: false,
-  //       remove_member: false,
-  //       edit_member_role: false,
-  //       view_team_stats: false,
-  //     },
-  //     system: {
-  //       view_analytics: false,
-  //       export_data: false,
-  //       manage_settings: false,
-  //     },
-  //   });
 
   const pathname = usePathname();
   const router = useRouter();
@@ -306,6 +271,8 @@ export default function AdminLayout({ children }) {
     },
   ];
 
+  const { data: session, status } = useSession();
+
   // Detect screen size
   useEffect(() => {
     const handleResize = () => {
@@ -329,35 +296,84 @@ export default function AdminLayout({ children }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load search history from localStorage
+  // Check authentication and role - simplified
   useEffect(() => {
-    const savedHistory = localStorage.getItem("searchHistory");
-    if (savedHistory) {
-      try {
-        setSearchHistory(JSON.parse(savedHistory));
-      } catch (error) {
-        console.error("Error parsing search history:", error);
-      }
+    if (status === "loading") return; // Still loading
+
+    if (!session) {
+      router.push("/login");
+      return;
     }
-  }, []);
+
+    if (session.user?.role !== "admin") {
+      router.push("/unauthorized");
+      return;
+    }
+  }, [session, status, router]);
 
   // Load user permissions from localStorage or API
   useEffect(() => {
+    // Only run when session is fully loaded and user is authenticated
+    if (status !== "authenticated" || !session?.user) {
+      return;
+    }
+
     const loadUserPermissions = async () => {
       try {
-        // Try to get permissions from localStorage first
-        const savedPermissions = localStorage.getItem("userPermissions");
-        if (savedPermissions) {
-          setUserPermissions(JSON.parse(savedPermissions));
+        // For admin users, set all permissions to true
+        if (session.user.role === "admin") {
+          const adminPermissions = {
+            project: {
+              create_project: true,
+              edit_project: true,
+              delete_project: true,
+              view_all_projects: true,
+              assign_project: true,
+              monetize_project: true,
+              view_revenue: true,
+              manage_payments: true,
+              set_pricing: true,
+            },
+            task: {
+              create_task: true,
+              edit_task: true,
+              delete_task: true,
+              submit_task: true,
+              approve_task: true,
+              assign_task: true,
+            },
+            team: {
+              add_member: true,
+              remove_member: true,
+              edit_member_role: true,
+              view_team_stats: true,
+            },
+            system: {
+              view_analytics: true,
+              export_data: true,
+              manage_settings: true,
+            },
+          };
+          setUserPermissions(adminPermissions);
           return;
         }
 
-        // If not in localStorage, fetch from API
-        const response = await fetch("/api/users/permissions");
-        if (response.ok) {
-          const permissions = await response.json();
-          setUserPermissions(permissions);
-          localStorage.setItem("userPermissions", JSON.stringify(permissions));
+        // For non-admin users, fetch permissions from API
+        const userId = session.user.id || session.user._id;
+        if (userId) {
+          // Check localStorage first
+          const cached = localStorage.getItem(`userPermissions_${userId}`);
+          if (cached) {
+            setUserPermissions(JSON.parse(cached));
+            return;
+          }
+
+          const response = await fetch(`/api/users/permissions?userId=${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            setUserPermissions(data.permissions);
+            localStorage.setItem(`userPermissions_${userId}`, JSON.stringify(data.permissions));
+          }
         }
       } catch (error) {
         console.error("Error loading user permissions:", error);
@@ -365,7 +381,7 @@ export default function AdminLayout({ children }) {
     };
 
     loadUserPermissions();
-  }, []);
+  }, [session, status]); // Depend on both session and status
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -416,35 +432,7 @@ export default function AdminLayout({ children }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const { data: session, status } = useSession();
-
-  // Check authentication and role
-  useEffect(() => {
-    if (status === "loading") return; // Still loading
-
-    if (!session) {
-      router.push("/login");
-      return;
-    }
-
-    // Save user role to localStorage for persistence
-    if (session.user?.role) {
-      localStorage.setItem("userRole", session.user.role);
-      localStorage.setItem("userName", session.user.name || "");
-      localStorage.setItem("userEmail", session.user.email || "");
-    }
-  }, [session, status, router, pathname]);
-
-  // Load user data from localStorage if session is not available yet
-  useEffect(() => {
-    if (status !== "loading" && !session) {
-      const savedRole = localStorage.getItem("userRole");
-      if (savedRole && savedRole !== "admin") {
-        router.push("/unauthorized");
-      }
-    }
-  }, [session, status, router]);
-
+  // Show loading screen while session is loading
   if (status === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -482,6 +470,7 @@ export default function AdminLayout({ children }) {
     );
   }
 
+  // Redirect if not authenticated or not admin
   if (!session || session.user.role !== "admin") {
     return null; // Will redirect
   }
@@ -540,17 +529,24 @@ export default function AdminLayout({ children }) {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      // Sign out from NextAuth
-      await signOut({ redirect: false });
-
-      // Clear all localStorage items
+      // Get userId for cleaning localStorage
+      const userId = session?.user?.id || session?.user?._id;
+      
+      // Clear user-specific localStorage
+      if (userId) {
+        localStorage.removeItem(`userPermissions_${userId}`);
+      }
+      
+      // Clear all general localStorage items
       localStorage.removeItem("userRole");
       localStorage.removeItem("userName");
       localStorage.removeItem("userEmail");
-      localStorage.removeItem("userPermissions");
 
       // Clear any session storage items
       sessionStorage.clear();
+
+      // Sign out from NextAuth
+      await signOut({ redirect: false });
 
       // Reset all state
       setSidebarOpen(true);
@@ -559,6 +555,38 @@ export default function AdminLayout({ children }) {
       setSearchQuery("");
       setNotificationsOpen(false);
       setProfileOpen(false);
+      setUserPermissions({
+        project: {
+          create_project: false,
+          edit_project: false,
+          delete_project: false,
+          view_all_projects: false,
+          assign_project: false,
+          monetize_project: false,
+          view_revenue: false,
+          manage_payments: false,
+          set_pricing: false,
+        },
+        task: {
+          create_task: false,
+          edit_task: false,
+          delete_task: false,
+          submit_task: false,
+          approve_task: false,
+          assign_task: false,
+        },
+        team: {
+          add_member: false,
+          remove_member: false,
+          edit_member_role: false,
+          view_team_stats: false,
+        },
+        system: {
+          view_analytics: false,
+          export_data: false,
+          manage_settings: false,
+        },
+      });
 
       // Close logout confirmation dialog
       setShowLogoutConfirm(false);
@@ -628,6 +656,7 @@ export default function AdminLayout({ children }) {
         // Reset form
         setClientEmail("");
         setClientName("");
+        setGeneratedPassword("");
         setShowClientAccountModal(false);
       } else {
         toast.error(data.message || "Failed to create client account");
@@ -699,7 +728,7 @@ export default function AdminLayout({ children }) {
         item.submenu.forEach((subitem) => {
           if (
             subitem.title.toLowerCase().includes(query.toLowerCase()) ||
-            subitem.href.toLowerCase().includes(query.toLowerCase())
+            (subitem.href && subitem.href.toLowerCase().includes(query.toLowerCase()))
           ) {
             submenuItems.push({
               ...subitem,
@@ -881,7 +910,7 @@ export default function AdminLayout({ children }) {
     {
       title: "Analytics",
       icon: <BarChart3 className="w-5 h-5" />,
-      href: "dashboard/manage-analytics",
+      href: "/dashboard/manage-analytics",
       badge: null,
       color: "orange",
       gradient: "from-orange-500 to-orange-600",
@@ -897,7 +926,7 @@ export default function AdminLayout({ children }) {
     {
       title: "Orders",
       icon: <ShoppingCart className="w-5 h-5" />,
-      href: "manage-orders",
+      href: "/dashboard/manage-orders",
       badge: "5",
       color: "pink",
       gradient: "from-pink-500 to-pink-600",
@@ -917,21 +946,20 @@ export default function AdminLayout({ children }) {
       badge: null,
       color: "amber",
       gradient: "from-amber-500 to-amber-600",
-      // onClick: () => setShowClientAccountModal(true)
     },
     {
       title: "Manage Clients",
       icon: <UserPenIcon className="w-5 h-5" />,
       href: "/dashboard/manage-clients",
-      budge: null,
+      badge: null,
       color: "cyan",
       gradient: "from-cyan-500 to-cyan-600",
     },
     {
       title: "All Employee",
-      icon: <UserPlus2Icon />,
-      href: "/dashboard/all-emplyee",
-      budge: null,
+      icon: <UserPlus2Icon className="w-5 h-5" />,
+      href: "/dashboard/all-employee",
+      badge: null,
       color: "gray",
       gradient: "from-gray-500 to-gray-600",
     },
@@ -970,7 +998,7 @@ export default function AdminLayout({ children }) {
     {
       title: "Settings",
       icon: <Settings className="w-5 h-5" />,
-      href: "manage-settings",
+      href: "/dashboard/manage-settings",
       badge: null,
       color: "gray",
       gradient: "from-gray-500 to-gray-600",
@@ -1074,8 +1102,8 @@ export default function AdminLayout({ children }) {
     if (pathname === "/dashboard/manage-pricing-card") return "Pricing Plans";
     if (pathname === "/dashboard/manage-and-post-blogs")
       return "Blog Management";
-    if (pathname === "dashboard/manage-analytics") return "Analytics";
-    if (pathname === "dashboard/manage-orders") return "Order Management";
+    if (pathname === "/dashboard/manage-analytics") return "Analytics";
+    if (pathname === "/dashboard/manage-orders") return "Order Management";
     if (pathname === "/dashboard/manage-messages") return "Messages";
     if (pathname === "/dashboard/manage-settings") return "Settings";
 

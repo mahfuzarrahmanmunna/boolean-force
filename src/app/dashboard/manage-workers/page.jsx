@@ -1,4 +1,3 @@
-// app/dashboard/manage-workers/page.jsx
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
@@ -41,9 +40,6 @@ import {
   FaLightbulb,
   FaUsers,
 } from "react-icons/fa";
-
-// Import the new component
-// import CreateWorkTaskModal from '@/app/dashboard/components/CreateWorkTaskModal';
 
 // shadcn/ui imports
 import {
@@ -308,12 +304,11 @@ export default function ManageWorkers() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [workersResponse, workResponse, teamsResponse] =
-          await Promise.all([
-            fetch("/api/workers"),
-            fetch("/api/work"),
-            fetch("/api/teams"),
-          ]);
+        const [workersResponse, workResponse, teamsResponse] = await Promise.all([
+          fetch("/api/workers"),
+          fetch("/api/work"),
+          fetch("/api/teams"),
+        ]);
 
         if (!workersResponse.ok) throw new Error("Failed to fetch workers");
         if (!workResponse.ok) throw new Error("Failed to fetch work tasks");
@@ -334,237 +329,133 @@ export default function ManageWorkers() {
       }
     };
 
-    // Forms
-    const statusForm = useForm({
-        resolver: zodResolver(statusFormSchema),
-        defaultValues: {
-            status: '',
-        },
-    });
+    fetchData();
+  }, []);
 
-    const teamForm = useForm({
-        resolver: zodResolver(teamFormSchema),
-        defaultValues: {
-            name: '',
-            teamLeader: '',
-            teamMembers: [],
-        },
-    });
+  // Update form when editingWorker changes
+  useEffect(() => {
+    if (editingWorker) {
+      statusForm.setValue("status", editingWorker.status || "");
+    }
+  }, [editingWorker, statusForm]);
 
-    // Fetch workers, available work, and teams from API on component mount
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [workersResponse, workResponse, teamsResponse] = await Promise.all([
-                    fetch('/api/workers'),
-                    fetch('/api/projects'),
-                    fetch('/api/teams')
-                ]);
+  // Update form when editingTeam changes
+  useEffect(() => {
+    if (editingTeam) {
+      teamForm.setValue("name", editingTeam.name || "");
+      teamForm.setValue("teamLeader", editingTeam.teamLeader || "");
+      teamForm.setValue("teamMembers", editingTeam.teamMembers || []);
+    }
+  }, [editingTeam, teamForm]);
 
-                if (!workersResponse.ok) throw new Error('Failed to fetch workers');
-                if (!workResponse.ok) throw new Error('Failed to fetch work tasks');
-                if (!teamsResponse.ok) throw new Error('Failed to fetch teams');
+  // Handle worker status update
+  const handleEditSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/workers/${editingWorker._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
-                const workersData = await workersResponse.json();
-                const workData = await workResponse.json();
-                const teamsData = await teamsResponse.json();
+      let errorMessage = "Failed to update worker status";
 
-                setWorkers(workersData);
-                setAvailableWork(workData);
-                setTeams(teamsData);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                showNotification('Failed to load data. Please try again.', 'error');
-            } finally {
-                setIsInitialLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    // Handle worker status update
-    const handleEditSubmit = async (data) => {
-        setIsLoading(true);
+      if (!response.ok) {
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          // If we can't parse JSON, use the status text
           errorMessage = response.statusText || errorMessage;
         }
-    };
+        throw new Error(errorMessage);
+      }
 
-    // Handle assigning work to a team
-    const handleAssignWork = async () => {
-        if (selectedTasksToAssign.length === 0) {
-            showNotification('Please select at least one task to assign.', 'error');
-            return;
-        }
+      const result = await response.json();
 
-        setIsLoading(true);
-        try {
-            console.log('Assigning tasks:', selectedTasksToAssign);
-            console.log('Team ID:', assigningWorkTo._id);
+      // Update workers list
+      setWorkers(
+        workers.map((w) => (w._id === editingWorker._id ? result.data : w))
+      );
 
-            const response = await fetch(`/api/teams/${assigningWorkTo._id}/assign`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ projectIds: selectedTasksToAssign }),
-            });
+      setEditingWorker(null);
+      showNotification("Worker status updated successfully!", "success");
+    } catch (error) {
+      console.error("Error updating worker status:", error);
+      showNotification(error.message || "Failed to update worker status.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
+  // Handle assigning work to a team
+  const handleAssignWork = async () => {
+    if (selectedTasksToAssign.length === 0) {
+      showNotification("Please select at least one task to assign.", "error");
+      return;
+    }
 
-            // Parse JSON response first
-            const result = await response.json();
-            console.log('Response data:', result);
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/teams/${assigningWorkTo._id}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectIds: selectedTasksToAssign }),
+      });
 
+      const result = await response.json();
 
+      if (!response.ok) {
+        const errorMessage = result.error || result.details || "Failed to assign work";
+        throw new Error(errorMessage);
+      }
 
-            // Then check if response was successful
-            if (!response.ok) {
-                // Extract error message from backend response
-                const errorMessage = result.error || result.details || 'Failed to assign work';
-                console.error('Error from backend:', errorMessage);
-                throw new Error(errorMessage);
-            }
+      // Update team's assigned work
+      setTeams(
+        teams.map((t) =>
+          t._id === assigningWorkTo._id
+            ? {
+                ...t,
+                assignedProjects: [
+                  ...(t.assignedProjects || []),
+                  ...result.data.assignedProjects.map((p) => p._id),
+                ],
+              }
+            : t
+        )
+      );
 
-            // Update team's assigned work
-            setTeams(teams.map(t =>
-                t._id === assigningWorkTo._id
-                    ? { ...t, assignedProjects: [...(t.assignedProjects || []), ...result.data.assignedProjects.map(p => p._id)] }
-                    : t
-            ));
+      // Update available work list with the updated tasks
+      setAvailableWork((prev) =>
+        prev.map((task) => {
+          const updatedTask = result.data.assignedProjects.find(
+            (p) => p._id === task._id
+          );
+          return updatedTask || task;
+        })
+      );
 
-            // Update available work list with the updated tasks
-            setAvailableWork(prev =>
-                prev.map(task => {
-                    const updatedTask = result.data.assignedProjects.find(p => p._id === task._id);
-                    return updatedTask || task;
-                })
-            );
+      setAssigningWorkTo(null);
+      setSelectedTasksToAssign([]);
+      showNotification("Work assigned successfully!", "success");
+    } catch (error) {
+      console.error("Error assigning work:", error);
+      showNotification(error.message || "Failed to assign work.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            setAssigningWorkTo(null);
-            setSelectedTasksToAssign([]);
-            showNotification('Work assigned successfully!', 'success');
-        } catch (error) {
-            console.error("Error assigning work:", error);
-            showNotification(error.message || 'Failed to assign work.', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-console.log(workers);
-console.log(teams);
-
-    // Handle worker deletion
-    const handleDeleteWorker = async (workerId) => {
-        if (confirm('Are you sure you want to delete this worker? This action cannot be undone.')) {
-            setIsLoading(true);
-            try {
-                const response = await fetch(`/api/workers/${workerId}`, {
-                    method: 'DELETE',
-                });
-
-                if (!response.ok) throw new Error('Failed to delete worker');
-
-                setWorkers(workers.filter(w => w._id !== workerId));
-                showNotification('Worker deleted successfully!', 'success');
-            } catch (error) {
-                console.error("Error deleting worker:", error);
-                showNotification(error.message || 'Failed to delete worker.', 'error');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
-
-    // Handle team creation/update
-    const handleTeamSubmit = async (data) => {
-        setIsLoading(true);
-        try {
-            const url = editingTeam ? `/api/teams/${editingTeam._id}` : '/api/teams';
-            const method = editingTeam ? 'PUT' : 'POST';
-
-            const response = await fetch(url, {
-                method,
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to save team');
-            }
-
-            const result = await response.json();
-
-            if (editingTeam) {
-                setTeams(teams.map(t => t._id === editingTeam._id ? result.data : t));
-                showNotification('Team updated successfully!', 'success');
-            } else {
-                setTeams([...teams, result.data]);
-                showNotification('Team created successfully!', 'success');
-            }
-
-            setIsAddingTeam(false);
-            setEditingTeam(null);
-            teamForm.reset();
-        } catch (error) {
-            console.error("Error saving team:", error);
-            showNotification(error.message || 'Failed to save team.', 'error');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Handle team deletion
-    const handleDeleteTeam = async (teamId) => {
-        if (confirm('Are you sure you want to delete this team? This action cannot be undone.')) {
-            setIsLoading(true);
-            try {
-                const response = await fetch(`/api/teams/${teamId}`, {
-                    method: 'DELETE',
-                });
-
-                if (!response.ok) throw new Error('Failed to delete team');
-
-                setTeams(teams.filter(t => t._id !== teamId));
-                showNotification('Team deleted successfully!', 'success');
-            } catch (error) {
-                console.error("Error deleting team:", error);
-                showNotification(error.message || 'Failed to delete team.', 'error');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    };
-
-    // Get team member details
-    const getTeamMemberDetails = (memberIds) => {
-        return memberIds.map(id => workers.find(w => w._id === id)).filter(Boolean);
-    };
-
-    // Get tasks assigned to team members
-    const getTeamTasks = (team) => {
-        const allMemberIds = [team.teamLeader, ...(team.teamMembers || [])];
-        return availableWork.filter(task => allMemberIds.includes(task.assignedTo));
-    };
-
-    // Get projects assigned to a team
-    const getTeamProjects = (team) => {
-        return availableWork.filter(task => team.assignedProjects?.includes(task._id));
-    };
-
-    // Filter workers based on search and status
-    const filteredWorkers = useMemo(() => {
-        return workers.filter(worker => {
-            const matchesSearch = worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                worker.email.toLowerCase().includes(searchTerm.toLowerCase());
-            const matchesStatus = statusFilter === 'all' || worker.status === statusFilter;
-            return matchesSearch && matchesStatus;
+  // Handle worker deletion
+  const handleDeleteWorker = async (workerId) => {
+    if (
+      confirm(
+        "Are you sure you want to delete this worker? This action cannot be undone."
+      )
+    ) {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`/api/workers/${workerId}`, {
+          method: "DELETE",
         });
 
         if (!response.ok) throw new Error("Failed to delete worker");
@@ -602,7 +493,7 @@ console.log(teams);
 
       if (editingTeam) {
         setTeams(
-          teams.map((t) => (t._id === editingTeam._id ? result.data : t)),
+          teams.map((t) => (t._id === editingTeam._id ? result.data : t))
         );
         showNotification("Team updated successfully!", "success");
       } else {
@@ -625,7 +516,7 @@ console.log(teams);
   const handleDeleteTeam = async (teamId) => {
     if (
       confirm(
-        "Are you sure you want to delete this team? This action cannot be undone.",
+        "Are you sure you want to delete this team? This action cannot be undone."
       )
     ) {
       setIsLoading(true);
@@ -658,14 +549,14 @@ console.log(teams);
   const getTeamTasks = (team) => {
     const allMemberIds = [team.teamLeader, ...(team.teamMembers || [])];
     return availableWork.filter((task) =>
-      allMemberIds.includes(task.assignedTo),
+      allMemberIds.includes(task.assignedTo)
     );
   };
 
   // Get projects assigned to a team
   const getTeamProjects = (team) => {
     return availableWork.filter((task) =>
-      team.assignedProjects?.includes(task._id),
+      team.assignedProjects?.includes(task._id)
     );
   };
 
@@ -681,25 +572,9 @@ console.log(teams);
     });
   }, [workers, searchTerm, statusFilter]);
 
-  console.log(filteredWorkers);
-  // Update form when editingWorker changes
-  useEffect(() => {
-    if (editingWorker) {
-      statusForm.setValue("status", editingWorker.status || "");
-    }
-  }, [editingWorker, statusForm]);
-
-  // Update form when editingTeam changes
-  useEffect(() => {
-    if (editingTeam) {
-      teamForm.setValue("name", editingTeam.name || "");
-      teamForm.setValue("teamLeader", editingTeam.teamLeader || "");
-      teamForm.setValue("teamMembers", editingTeam.teamMembers || []);
-    }
-  }, [editingTeam, teamForm]);
-
   if (isInitialLoading)
     return <LoadingSpinner message="Loading worker data..." />;
+
 
   return (
     <TooltipProvider>

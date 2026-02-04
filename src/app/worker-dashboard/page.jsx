@@ -45,7 +45,6 @@ import {
   Filter,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-
 import {
   AreaChart,
   Area,
@@ -57,6 +56,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import SubmitModal from "./components/SubmitModal/SubmitModal";
 
 export default function WorkerDashboardPage() {
   const { data: session, status } = useSession();
@@ -88,8 +88,10 @@ export default function WorkerDashboardPage() {
   // Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
-
-  // Form State
+// Submit Work Modal
+const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  
+// Form State
   const [profileForm, setProfileForm] = useState({
     name: "",
     email: "",
@@ -106,240 +108,11 @@ export default function WorkerDashboardPage() {
     { id: 3, name: "API Integration", color: "bg-purple-500" },
   ];
 
-<<<<<<< HEAD
-    useEffect(() => {
-        if (status === 'loading') return;
-        if (!session) {
-            router.push('/login');
-            return;
-        }
-        // Pass the session user data to the fetch functions
-        fetchWorkerData(session.user);
-        fetchTasks(session.user);
-        fetchTimeEntries(session.user);
-        fetchChartData(chartView);
-    }, [session, status, router, chartView]);
-
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
-                setIsProfileDropdownOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Modified to use session user data
-    useEffect(() => {
-        if (!session) return;
-
-        // Set user data from session
-        const data = {
-            id: session.user.id,
-            name: session.user.name,
-            email: session.user.email,
-            image: session.user.image || null,
-            // Add any additional fields you need
-        };
-
-        setWorkerData(data);
-        setLoading(false);
-    }, [session]);
-
-    // Modified to use session user data
-    const fetchWorkerData = async (user) => {
-        try {
-            // In a real app, you would fetch from your API:
-            // const response = await fetch(`/api/projects/${user.id}`);
-            // const data = await response.json();
-
-            // Mock data with additional fields
-            const mockWorkerData = {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                image: user.image || null,
-                hourlyRate: 25, // Default hourly rate
-                avgRating: 4.5, // Default rating
-                // Add any other fields you need
-            };
-
-            setWorkerData(mockWorkerData);
-        } catch (error) {
-            toast.error('Failed to fetch worker data');
-        }
-    };
-
-    // Modified to fetch real tasks from API
-    const fetchTasks = async (user) => {
-        try {
-            // Fetch real tasks from your API
-            const response = await fetch('/api/projects');
-            const data = await response.json();
-
-            // Filter tasks assigned to the current user
-            const userTasks = data.filter(task => task.assignedTo === user.id);
-
-            // Transform the data to match your component's expected format
-            const transformedTasks = userTasks.map(task => ({
-                id: task._id,
-                title: task.title,
-                description: task.description,
-                project: task.project || 'Default Project', // Add project field if not present
-                dueDate: task.dueDate,
-                priority: task.priority || 'medium', // Add priority field if not present
-                status: task.status,
-                progress: task.progress || 0
-            }));
-
-            setTasks(transformedTasks);
-        } catch (error) {
-            toast.error('Failed to fetch tasks');
-            console.error('Error fetching tasks:', error);
-        }
-    };
-
-    // Modified to use session user data
-    const fetchTimeEntries = async (user) => {
-        try {
-            // In a real app, you would fetch from your API:
-            // const response = await fetch(`/api/time-entries?userId=${user.id}`);
-            // const data = await response.json();
-
-            const mockEntries = [
-                { id: 'e1', project: 'Mobile App', task: 'Implement User Authentication', duration: '2h 30m', date: '2023-06-20' },
-                { id: 'e2', project: 'Website Redesign', task: 'Design Homepage Mockup', duration: '4h 15m', date: '2023-06-19' },
-            ];
-            setTimeEntries(mockEntries);
-        } catch (error) {
-            toast.error('Failed to fetch time entries');
-        }
-    };
-
-    const fetchChartData = (view) => {
-        let data = [];
-        if (view === 'weekly') {
-            data = [
-                { name: 'Mon', hours: 8 }, { name: 'Tue', hours: 7.5 }, { name: 'Wed', hours: 9 },
-                { name: 'Thu', hours: 6 }, { name: 'Fri', hours: 8.5 }, { name: 'Sat', hours: 4 }, { name: 'Sun', hours: 0 },
-            ];
-        } else if (view === 'monthly') {
-            data = [
-                { name: 'Week 1', hours: 42 }, { name: 'Week 2', hours: 38 }, { name: 'Week 3', hours: 45 }, { name: 'Week 4', hours: 40 },
-            ];
-        } else if (view === 'yearly') {
-            data = [
-                { name: 'Jan', hours: 160 }, { name: 'Feb', hours: 175 }, { name: 'Mar', hours: 150 },
-                { name: 'Apr', hours: 180 }, { name: 'May', hours: 165 }, { name: 'Jun', hours: 155 },
-                { name: 'Jul', hours: 0 }, { name: 'Aug', hours: 0 }, { name: 'Sep', hours: 0 },
-                { name: 'Oct', hours: 0 }, { name: 'Nov', hours: 0 }, { name: 'Dec', hours: 0 },
-            ];
-        }
-        setChartData(data);
-    };
-
-    // Modified to update user profile in a real API
-    const handleProfileUpdate = async (e) => {
-        e.preventDefault();
-        setUpdating(true);
-        try {
-            // In a real app, you would update your API:
-            // const response = await fetch(`/api/projects/${session.user.id}`, {
-            //     method: 'PUT',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(profileForm)
-            // });
-
-            setWorkerData(prev => ({ ...prev, ...profileForm }));
-            setIsProfileModalOpen(false);
-            toast.success('Profile updated successfully!');
-        } catch (error) {
-            toast.error('Failed to update profile.');
-        } finally {
-            setUpdating(false);
-        }
-    };
-
-    const startTracking = () => {
-        if (!currentTask || !currentProject) { toast.error('Please select a task and project to start tracking.'); return; }
-        setIsTracking(true);
-        const id = setInterval(() => setCurrentTime(prev => prev + 1), 1000);
-        setIntervalId(id);
-        toast.success('Time tracking started');
-    };
-
-    const pauseTracking = () => {
-        setIsTracking(false);
-        if (intervalId) clearInterval(intervalId);
-        setIntervalId(null);
-        toast.success('Time tracking paused');
-    };
-
-    // Modified to save time entry with user ID
-    const stopTracking = () => {
-        if (!isTracking) return;
-        setIsTracking(false);
-        if (intervalId) clearInterval(intervalId);
-        setIntervalId(null);
-        const duration = formatTime(currentTime);
-        const newEntry = {
-            id: `e${Date.now()}`,
-            project: currentProject,
-            task: currentTask,
-            duration,
-            date: new Date().toISOString().split('T')[0],
-            userId: session?.user?.id // Add user ID to the time entry
-        };
-
-        // In a real app, you would save to your API:
-        // await fetch('/api/time-entries', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(newEntry)
-        // });
-
-        setTimeEntries(prev => [newEntry, ...prev]);
-        setCurrentTime(0); setCurrentTask(''); setCurrentProject('');
-        toast.success(`Time entry saved: ${duration} for ${currentTask}`);
-    };
-
-    const formatTime = (seconds) => {
-        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
-        return `${h}:${m}:${s}`;
-    };
-
-    const getPriorityBadge = (priority) => {
-        const styles = { high: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', medium: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400', low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' };
-        return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${styles[priority]}`}>{priority}</span>;
-    };
-
-    const getStatusBadge = (status) => {
-        const styles = { 'in-progress': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400', pending: 'bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400', completed: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400', archived: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' };
-        return <span className={`px-2 py-1 text-xs font-semibold rounded-full ${styles[status]}`}>{status.replace('-', ' ')}</span>;
-    };
-
-    const calculateProfileCompletion = () => {
-        const fields = ['name', 'email', 'bio', 'phone', 'location', 'website'];
-        const completedFields = fields.filter(field => profileForm[field]).length;
-        return (completedFields / fields.length) * 100;
-    };
-
-    if (status === 'loading' || loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-                <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
-            </div>
-        );
-=======
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
       router.push("/login");
       return;
->>>>>>> 67984c85b80dbe0e621ac2b3479bcbc309a834ce
     }
     // Pass the session user data to the fetch functions
     fetchWorkerData(session.user);
@@ -347,6 +120,29 @@ export default function WorkerDashboardPage() {
     fetchTimeEntries(session.user);
     fetchChartData(chartView);
   }, [session, status, router, chartView]);
+  
+// submit work 
+
+const handleSubmitWork = async (formData) => {
+  try {
+    const res = await fetch("/api/tasks/submit", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Submit failed");
+
+    toast.success("Work submitted successfully");
+    setIsSubmitModalOpen(false);
+
+    // Refresh task list
+    fetchTasks(session.user);
+    setActiveTab("my-tasks");
+  } catch (err) {
+    toast.error("Failed to submit work");
+  }
+};
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -382,7 +178,7 @@ export default function WorkerDashboardPage() {
   const fetchWorkerData = async (user) => {
     try {
       // In a real app, you would fetch from your API:
-      // const response = await fetch(`/api/workers/${user.id}`);
+      // const response = await fetch(`/api/projects/${user.id}`);
       // const data = await response.json();
 
       // Mock data with additional fields
@@ -406,7 +202,7 @@ export default function WorkerDashboardPage() {
   const fetchTasks = async (user) => {
     try {
       // Fetch real tasks from your API
-      const response = await fetch("/api/work");
+      const response = await fetch("/api/projects");
       const data = await response.json();
 
       // Filter tasks assigned to the current user
@@ -504,7 +300,7 @@ export default function WorkerDashboardPage() {
     setUpdating(true);
     try {
       // In a real app, you would update your API:
-      // const response = await fetch(`/api/workers/${session.user.id}`, {
+      // const response = await fetch(`/api/projects/${session.user.id}`, {
       //     method: 'PUT',
       //     headers: { 'Content-Type': 'application/json' },
       //     body: JSON.stringify(profileForm)
@@ -632,44 +428,75 @@ export default function WorkerDashboardPage() {
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
-        {/* <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center py-4">
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Worker Dashboard</h1>
-                            <div className="flex items-center space-x-4">
-                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                    {isDarkMode ? <Sun className="w-5 h-5 text-slate-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-                                </button>
-                                <button className=" cursor-pointerp-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
-                                    <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                                    <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-                                </button>
-                                <div className="relative" ref={profileDropdownRef}>
-                                    <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="flex items-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                        {workerData.image ? (
-                                            <img src={workerData.image} alt={workerData.name} className="h-8 w-8 rounded-full mr-2" />
-                                        ) : (
-                                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mr-2">
-                                                {workerData.name?.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                        )}
-                                        <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                                    </button>
-                                    {isProfileDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-10">
-                                            <button onClick={() => { setIsProfileModalOpen(true); setIsProfileDropdownOpen(false); }} className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                                                <Settings className="w-4 h-4 mr-2" /> Settings
-                                            </button>
-                                            <button onClick={() => router.push('/api/auth/signout')} className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                                                <LogOut className="w-4 h-4 mr-2" /> Log Out
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+        {/* Header */}
+        <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                Worker Dashboard
+              </h1>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-slate-600" />
+                  )}
+                </button>
+                <button className="cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
+                  <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    onClick={() =>
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                    }
+                    className="flex items-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    {workerData.image ? (
+                      <img
+                        src={workerData.image}
+                        alt={workerData.name}
+                        className="h-8 w-8 rounded-full mr-2"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mr-2">
+                        {workerData.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    )}
+                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-10">
+                      <button
+                        onClick={() => {
+                          setIsProfileModalOpen(true);
+                          setIsProfileDropdownOpen(false);
+                        }}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      >
+                        <Settings className="w-4 h-4 mr-2" /> Settings
+                      </button>
+                      <button
+                        onClick={() => router.push("/api/auth/signout")}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" /> Log Out
+                      </button>
                     </div>
-                </header> */}
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Welcome Section */}
@@ -763,13 +590,15 @@ export default function WorkerDashboardPage() {
                   >
                     {tab.replace("-", " ")}
                   </button>
-                ),
+                )
               )}
               <div
                 className="absolute bottom-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300"
                 style={{
                   width: "25%",
-                  transform: `translateX(${["overview", "my-tasks", "time-tracking", "performance"].indexOf(activeTab) * 100}%)`,
+                  transform: `translateX(${
+                    ["overview", "my-tasks", "time-tracking", "performance"].indexOf(activeTab) * 100
+                  }%)`,
                 }}
               ></div>
             </div>
@@ -790,7 +619,11 @@ export default function WorkerDashboardPage() {
                         <button
                           key={view}
                           onClick={() => setChartView(view)}
-                          className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${chartView === view ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${
+                            chartView === view
+                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`}
                         >
                           {view}
                         </button>
@@ -857,7 +690,7 @@ export default function WorkerDashboardPage() {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived",
+                          t.status !== "completed" && t.status !== "archived"
                       )
                       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
                       .slice(0, 5)
@@ -879,64 +712,90 @@ export default function WorkerDashboardPage() {
               </div>
             )}
 
-            {/* My Tasks Tab */}
-            {activeTab === "my-tasks" && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                  <thead className="bg-slate-50 dark:bg-slate-900/50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Task
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Project
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Due Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Priority
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="relative px-6 py-3">
-                        <span className="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                    {tasks.map((task) => (
-                      <tr
-                        key={task.id}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
-                          {task.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                          {task.project}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getPriorityBadge(task.priority)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(task.status)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button className=" cursor-pointertext-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+       {/* My Tasks Tab */}
+{activeTab === "my-tasks" && (
+  <div>
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-semibold">My Tasks</h3>
+      <button
+        onClick={() => setIsSubmitModalOpen(true)}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        + Submit Work
+      </button>
+    </div>
+
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+        {/* Table header */}
+        <thead className="bg-slate-50 dark:bg-slate-900/50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Task
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Project
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Due Date
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Priority
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="relative px-6 py-3">
+              <span className="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        {/* Table body */}
+        <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+          {tasks.map((task) => (
+            <tr
+              key={task.id}
+              className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
+                {task.title}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                {task.project}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                {new Date(task.dueDate).toLocaleDateString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {getPriorityBadge(task.priority)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {getStatusBadge(task.status)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Submit Work Modal */}
+    <SubmitModal
+      isOpen={isSubmitModalOpen}
+      onClose={() => setIsSubmitModalOpen(false)}
+      onSubmit={handleSubmitWork}
+      title="Submit Work"
+      submitButtonText="Submit"
+    />
+  </div>
+)}
+
+
+
 
             {/* Time Tracking Tab */}
             {activeTab === "time-tracking" && (
@@ -971,7 +830,7 @@ export default function WorkerDashboardPage() {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived",
+                          t.status !== "completed" && t.status !== "archived"
                       )
                       .map((t) => (
                         <option key={t.id} value={t.title}>
@@ -1048,7 +907,11 @@ export default function WorkerDashboardPage() {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-6 h-6 ${i < Math.floor(workerData.avgRating || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                      className={`w-6 h-6 ${
+                        i < Math.floor(workerData.avgRating || 0)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
