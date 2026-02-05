@@ -45,7 +45,6 @@ import {
   Filter,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-
 import {
   AreaChart,
   Area,
@@ -57,6 +56,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import SubmitModal from "./components/SubmitModal/SubmitModal";
 
 export default function WorkerDashboardPage() {
   const { data: session, status } = useSession();
@@ -88,8 +88,10 @@ export default function WorkerDashboardPage() {
   // Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
-
-  // Form State
+// Submit Work Modal
+const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+  
+// Form State
   const [profileForm, setProfileForm] = useState({
     name: "",
     email: "",
@@ -118,6 +120,29 @@ export default function WorkerDashboardPage() {
     fetchTimeEntries(session.user);
     fetchChartData(chartView);
   }, [session, status, router, chartView]);
+  
+// submit work 
+
+const handleSubmitWork = async (formData) => {
+  try {
+    const res = await fetch("/api/tasks/submit", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Submit failed");
+
+    toast.success("Work submitted successfully");
+    setIsSubmitModalOpen(false);
+
+    // Refresh task list
+    fetchTasks(session.user);
+    setActiveTab("my-tasks");
+  } catch (err) {
+    toast.error("Failed to submit work");
+  }
+};
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -153,7 +178,7 @@ export default function WorkerDashboardPage() {
   const fetchWorkerData = async (user) => {
     try {
       // In a real app, you would fetch from your API:
-      // const response = await fetch(`/api/workers/${user.id}`);
+      // const response = await fetch(`/api/projects/${user.id}`);
       // const data = await response.json();
 
       // Mock data with additional fields
@@ -177,7 +202,7 @@ export default function WorkerDashboardPage() {
   const fetchTasks = async (user) => {
     try {
       // Fetch real tasks from your API
-      const response = await fetch("/api/work");
+      const response = await fetch("/api/projects");
       const data = await response.json();
 
       // Filter tasks assigned to the current user
@@ -275,7 +300,7 @@ export default function WorkerDashboardPage() {
     setUpdating(true);
     try {
       // In a real app, you would update your API:
-      // const response = await fetch(`/api/workers/${session.user.id}`, {
+      // const response = await fetch(`/api/projects/${session.user.id}`, {
       //     method: 'PUT',
       //     headers: { 'Content-Type': 'application/json' },
       //     body: JSON.stringify(profileForm)
@@ -403,44 +428,75 @@ export default function WorkerDashboardPage() {
   return (
     <div className={`min-h-screen ${isDarkMode ? "dark" : ""}`}>
       <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-100">
-        {/* <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="flex justify-between items-center py-4">
-                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Worker Dashboard</h1>
-                            <div className="flex items-center space-x-4">
-                                <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                    {isDarkMode ? <Sun className="w-5 h-5 text-slate-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
-                                </button>
-                                <button className=" cursor-pointerp-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
-                                    <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
-                                    <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
-                                </button>
-                                <div className="relative" ref={profileDropdownRef}>
-                                    <button onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)} className="flex items-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                                        {workerData.image ? (
-                                            <img src={workerData.image} alt={workerData.name} className="h-8 w-8 rounded-full mr-2" />
-                                        ) : (
-                                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mr-2">
-                                                {workerData.name?.split(' ').map(n => n[0]).join('')}
-                                            </div>
-                                        )}
-                                        <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-                                    </button>
-                                    {isProfileDropdownOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-10">
-                                            <button onClick={() => { setIsProfileModalOpen(true); setIsProfileDropdownOpen(false); }} className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                                                <Settings className="w-4 h-4 mr-2" /> Settings
-                                            </button>
-                                            <button onClick={() => router.push('/api/auth/signout')} className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                                                <LogOut className="w-4 h-4 mr-2" /> Log Out
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+        {/* Header */}
+        <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                Worker Dashboard
+              </h1>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-slate-400" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-slate-600" />
+                  )}
+                </button>
+                <button className="cursor-pointer p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 relative transition-colors">
+                  <Bell className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                  <span className="absolute top-1 right-1 h-2 w-2 bg-red-500 rounded-full"></span>
+                </button>
+                <div className="relative" ref={profileDropdownRef}>
+                  <button
+                    onClick={() =>
+                      setIsProfileDropdownOpen(!isProfileDropdownOpen)
+                    }
+                    className="flex items-center p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    {workerData.image ? (
+                      <img
+                        src={workerData.image}
+                        alt={workerData.name}
+                        className="h-8 w-8 rounded-full mr-2"
+                      />
+                    ) : (
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm mr-2">
+                        {workerData.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                    )}
+                    <ChevronDown className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  </button>
+                  {isProfileDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 z-10">
+                      <button
+                        onClick={() => {
+                          setIsProfileModalOpen(true);
+                          setIsProfileDropdownOpen(false);
+                        }}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      >
+                        <Settings className="w-4 h-4 mr-2" /> Settings
+                      </button>
+                      <button
+                        onClick={() => router.push("/api/auth/signout")}
+                        className="flex items-center w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" /> Log Out
+                      </button>
                     </div>
-                </header> */}
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Welcome Section */}
@@ -534,13 +590,15 @@ export default function WorkerDashboardPage() {
                   >
                     {tab.replace("-", " ")}
                   </button>
-                ),
+                )
               )}
               <div
                 className="absolute bottom-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300"
                 style={{
                   width: "25%",
-                  transform: `translateX(${["overview", "my-tasks", "time-tracking", "performance"].indexOf(activeTab) * 100}%)`,
+                  transform: `translateX(${
+                    ["overview", "my-tasks", "time-tracking", "performance"].indexOf(activeTab) * 100
+                  }%)`,
                 }}
               ></div>
             </div>
@@ -561,7 +619,11 @@ export default function WorkerDashboardPage() {
                         <button
                           key={view}
                           onClick={() => setChartView(view)}
-                          className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${chartView === view ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"}`}
+                          className={`px-4 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${
+                            chartView === view
+                              ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          }`}
                         >
                           {view}
                         </button>
@@ -628,7 +690,7 @@ export default function WorkerDashboardPage() {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived",
+                          t.status !== "completed" && t.status !== "archived"
                       )
                       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
                       .slice(0, 5)
@@ -650,64 +712,90 @@ export default function WorkerDashboardPage() {
               </div>
             )}
 
-            {/* My Tasks Tab */}
-            {activeTab === "my-tasks" && (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-                  <thead className="bg-slate-50 dark:bg-slate-900/50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Task
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Project
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Due Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Priority
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="relative px-6 py-3">
-                        <span className="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-                    {tasks.map((task) => (
-                      <tr
-                        key={task.id}
-                        className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                      >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
-                          {task.title}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                          {task.project}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                          {new Date(task.dueDate).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getPriorityBadge(task.priority)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {getStatusBadge(task.status)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button className=" cursor-pointertext-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                            <MoreHorizontal className="w-5 h-5" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+       {/* My Tasks Tab */}
+{activeTab === "my-tasks" && (
+  <div>
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-lg font-semibold">My Tasks</h3>
+      <button
+        onClick={() => setIsSubmitModalOpen(true)}
+        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+      >
+        + Submit Work
+      </button>
+    </div>
+
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+        {/* Table header */}
+        <thead className="bg-slate-50 dark:bg-slate-900/50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Task
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Project
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Due Date
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Priority
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="relative px-6 py-3">
+              <span className="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        {/* Table body */}
+        <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+          {tasks.map((task) => (
+            <tr
+              key={task.id}
+              className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+            >
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
+                {task.title}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                {task.project}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                {new Date(task.dueDate).toLocaleDateString()}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {getPriorityBadge(task.priority)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {getStatusBadge(task.status)}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <button className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                  <MoreHorizontal className="w-5 h-5" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Submit Work Modal */}
+    <SubmitModal
+      isOpen={isSubmitModalOpen}
+      onClose={() => setIsSubmitModalOpen(false)}
+      onSubmit={handleSubmitWork}
+      title="Submit Work"
+      submitButtonText="Submit"
+    />
+  </div>
+)}
+
+
+
 
             {/* Time Tracking Tab */}
             {activeTab === "time-tracking" && (
@@ -742,7 +830,7 @@ export default function WorkerDashboardPage() {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived",
+                          t.status !== "completed" && t.status !== "archived"
                       )
                       .map((t) => (
                         <option key={t.id} value={t.title}>
@@ -819,7 +907,11 @@ export default function WorkerDashboardPage() {
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
-                      className={`w-6 h-6 ${i < Math.floor(workerData.avgRating || 0) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                      className={`w-6 h-6 ${
+                        i < Math.floor(workerData.avgRating || 0)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                 </div>
