@@ -544,7 +544,7 @@ const handleSubmitWork = async (formData) => {
                 <div>
                   <p className="text-amber-100">Current Earnings</p>
                   <p className="text-3xl font-bold">
-                    $
+                    ${" "}
                     {workerData.hourlyRate
                       ? (workerData.hourlyRate * 32.5).toFixed(2)
                       : "0.00"}
