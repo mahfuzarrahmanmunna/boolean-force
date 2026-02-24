@@ -275,14 +275,16 @@ export default function WorkerLayout({ children }) {
   }, [session, status, router, pathname]);
 
   // Load user data from localStorage if session is not available yet
-  useEffect(() => {
-    if (status !== "loading" && !session) {
-      const savedRole = localStorage.getItem("userRole");
-      if (savedRole && savedRole !== "worker") {
-        router.push("/unauthorized");
-      }
-    }
-  }, [session, status, router]);
+ if (!session) {
+  router.push("/login");
+  return null;
+}
+
+if (session.user?.role !== "worker") {
+  router.push("/unauthorized");
+  return null;
+}
+
 
   if (status === "loading") {
     return (

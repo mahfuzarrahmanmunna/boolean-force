@@ -161,6 +161,7 @@ import {
   FolderTreeDot as FolderTreeDotIcon,
   FolderQuestionDot as FolderQuestionDotIcon,
   FolderKanbanDot as FolderKanbanDotIcon,
+  Upload,
 } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
 import { toast } from "react-hot-toast";
@@ -296,43 +297,78 @@ export default function AdminLayout({ children }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Check authentication and role - simplified
+  // Check authentication and role - FIXED VERSION
   useEffect(() => {
-    if (status === "loading") return; // Still loading
+    console.log("Auth check - Status:", status);
+    console.log("Auth check - Session:", session);
+    
+    if (status === "loading") {
+      console.log("Auth check - Still loading");
+      return;
+    }
 
     if (!session) {
+      console.log("Auth check - No session, redirecting to login");
       router.push("/login");
       return;
     }
 
-    if (session.user?.role !== "admin") {
+    // Check if user is admin OR team leader
+    const isAdmin = session.user?.role === "admin";
+    const isTeamLeader = session.user?.isTeamLeader === true || 
+                        session.user?.isTeamLeader === "true" ||
+                        session.user?.isTeamLeader === "1" ||
+                        session.user?.isTeamLeader === true;
+
+    console.log("Auth check - isAdmin:", isAdmin);
+    console.log("Auth check - isTeamLeader:", isTeamLeader);
+    console.log("Auth check - User data:", session.user);
+
+    // Allow access for both admin and team leader
+    if (!isAdmin && !isTeamLeader) {
+      console.log("Auth check - Not admin or team leader, redirecting to unauthorized");
       router.push("/unauthorized");
       return;
     }
+
+    console.log("Auth check - Access granted");
   }, [session, status, router]);
 
-  // Load user permissions from localStorage or API
+  // Load user permissions from localStorage or API - SIMPLIFIED VERSION
   useEffect(() => {
-    // Only run when session is fully loaded and user is authenticated
+    console.log("Permission load - Status:", status);
+    
     if (status !== "authenticated" || !session?.user) {
+      console.log("Permission load - Not authenticated or no user");
       return;
     }
 
-    const loadUserPermissions = async () => {
+    console.log("Permission load - User:", session.user);
+    
+    const loadUserPermissions = () => {
       try {
-        // For admin users, set all permissions to true
-        if (session.user.role === "admin") {
-          const adminPermissions = {
+        const isAdmin = session.user.role === "admin";
+        const isTeamLeader = session.user?.isTeamLeader === true || 
+                           session.user?.isTeamLeader === "true" ||
+                           session.user?.isTeamLeader === "1" ||
+                           session.user?.isTeamLeader === true;
+
+        console.log("Permission load - isAdmin:", isAdmin);
+        console.log("Permission load - isTeamLeader:", isTeamLeader);
+
+        if (isAdmin || isTeamLeader) {
+          console.log("Permission load - Setting admin/team leader permissions");
+          const permissions = {
             project: {
               create_project: true,
               edit_project: true,
-              delete_project: true,
+              delete_project: isAdmin, // Team leaders might not delete projects
               view_all_projects: true,
               assign_project: true,
-              monetize_project: true,
+              monetize_project: isAdmin,
               view_revenue: true,
-              manage_payments: true,
-              set_pricing: true,
+              manage_payments: isAdmin,
+              set_pricing: isAdmin,
             },
             task: {
               create_task: true,
@@ -351,28 +387,22 @@ export default function AdminLayout({ children }) {
             system: {
               view_analytics: true,
               export_data: true,
-              manage_settings: true,
+              manage_settings: isAdmin,
             },
           };
-          setUserPermissions(adminPermissions);
+          
+          console.log("Permission load - Permissions set:", permissions);
+          setUserPermissions(permissions);
           return;
         }
 
-        // For non-admin users, fetch permissions from API
+        // For regular users, try to load from localStorage
         const userId = session.user.id || session.user._id;
         if (userId) {
-          // Check localStorage first
           const cached = localStorage.getItem(`userPermissions_${userId}`);
           if (cached) {
+            console.log("Permission load - Loaded from cache");
             setUserPermissions(JSON.parse(cached));
-            return;
-          }
-
-          const response = await fetch(`/api/users/permissions?userId=${userId}`);
-          if (response.ok) {
-            const data = await response.json();
-            setUserPermissions(data.permissions);
-            localStorage.setItem(`userPermissions_${userId}`, JSON.stringify(data.permissions));
           }
         }
       } catch (error) {
@@ -381,7 +411,7 @@ export default function AdminLayout({ children }) {
     };
 
     loadUserPermissions();
-  }, [session, status]); // Depend on both session and status
+  }, [session, status]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -471,45 +501,60 @@ export default function AdminLayout({ children }) {
   }
 
   // Redirect if not authenticated or not admin
-  if (!session || session.user.role !== "admin") {
-    return null; // Will redirect
+  if (!session) {
+    console.log("No session, returning null");
+    return null;
   }
 
-  // Check if user has permission to access current route
+  const isAdmin = session.user.role === "admin";
+  const isTeamLeader = session.user?.isTeamLeader === true || 
+                      session.user?.isTeamLeader === "true" ||
+                      session.user?.isTeamLeader === "1" ||
+                      session.user?.isTeamLeader === true;
+
+  console.log("User check - isAdmin:", isAdmin);
+  console.log("User check - isTeamLeader:", isTeamLeader);
+  console.log("User check - Full user data:", session.user);
+
+  if (!isAdmin && !isTeamLeader) {
+    console.log("Not admin or team leader, redirecting");
+    router.push("/unauthorized");
+    return null;
+  }
+
+  console.log("User authenticated and authorized");
+
+  // Check if user has permission to access current route - SIMPLIFIED
   const hasPermission = (permission) => {
-    // Admin has all permissions
-    if (session.user.role === "admin") return true;
-
-    // Check specific permission
-    if (
-      permission.startsWith("project.") &&
-      userPermissions.project[permission.split(".")[1]]
-    ) {
+    console.log("hasPermission called with:", permission);
+    
+    // Admin and Team Leader both have all permissions
+    if (isAdmin || isTeamLeader) {
+      console.log("User is admin or team leader, returning true");
       return true;
     }
 
-    if (
-      permission.startsWith("task.") &&
-      userPermissions.task[permission.split(".")[1]]
-    ) {
-      return true;
+    // For regular users, check specific permissions
+    console.log("Checking permission for regular user");
+    
+    // Extract category and permission name
+    const parts = permission.split('.');
+    if (parts.length !== 2) return false;
+    
+    const [category, permName] = parts;
+    
+    switch(category) {
+      case 'project':
+        return userPermissions.project[permName] || false;
+      case 'task':
+        return userPermissions.task[permName] || false;
+      case 'team':
+        return userPermissions.team[permName] || false;
+      case 'system':
+        return userPermissions.system[permName] || false;
+      default:
+        return false;
     }
-
-    if (
-      permission.startsWith("team.") &&
-      userPermissions.team[permission.split(".")[1]]
-    ) {
-      return true;
-    }
-
-    if (
-      permission.startsWith("system.") &&
-      userPermissions.system[permission.split(".")[1]]
-    ) {
-      return true;
-    }
-
-    return false;
   };
 
   // Get user initials for avatar
@@ -522,33 +567,26 @@ export default function AdminLayout({ children }) {
         .toUpperCase()
         .slice(0, 2);
     }
-    return "AD"; // Default for admin
+    return "AD";
   };
 
   // Handle logout with confirmation
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      // Get userId for cleaning localStorage
       const userId = session?.user?.id || session?.user?._id;
       
-      // Clear user-specific localStorage
       if (userId) {
         localStorage.removeItem(`userPermissions_${userId}`);
       }
       
-      // Clear all general localStorage items
       localStorage.removeItem("userRole");
       localStorage.removeItem("userName");
       localStorage.removeItem("userEmail");
-
-      // Clear any session storage items
       sessionStorage.clear();
 
-      // Sign out from NextAuth
       await signOut({ redirect: false });
 
-      // Reset all state
       setSidebarOpen(true);
       setSidebarCollapsed(false);
       setActiveSubmenu("");
@@ -588,14 +626,10 @@ export default function AdminLayout({ children }) {
         },
       });
 
-      // Close logout confirmation dialog
       setShowLogoutConfirm(false);
-
-      // Redirect to login page
       router.push("/login");
     } catch (error) {
       console.error("Logout error:", error);
-      // Even if there's an error, try to redirect to login
       router.push("/login");
     } finally {
       setIsLoggingOut(false);
@@ -631,7 +665,6 @@ export default function AdminLayout({ children }) {
       const tempPassword = generateRandomPassword();
       setGeneratedPassword(tempPassword);
 
-      // Create client account in your database
       const response = await fetch("/api/admin/create-client", {
         method: "POST",
         headers: {
@@ -642,7 +675,6 @@ export default function AdminLayout({ children }) {
           email: clientEmail,
           password: tempPassword,
           role: "client",
-          // Send password reset email
           sendResetEmail: true,
         }),
       });
@@ -653,7 +685,6 @@ export default function AdminLayout({ children }) {
         toast.success(
           "Client account created successfully! Password reset email sent.",
         );
-        // Reset form
         setClientEmail("");
         setClientName("");
         setGeneratedPassword("");
@@ -686,11 +717,9 @@ export default function AdminLayout({ children }) {
       return;
     }
 
-    // Check if query is a URL
     const urlRegex =
       /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
     if (urlRegex.test(query.trim())) {
-      // Add protocol if missing
       let url = query.trim();
       if (!url.startsWith("http://") && !url.startsWith("https://")) {
         url = "https://" + url;
@@ -714,14 +743,12 @@ export default function AdminLayout({ children }) {
       return;
     }
 
-    // Filter menu items based on query
     const filteredItems = adminMenuItems.filter(
       (item) =>
         item.title.toLowerCase().includes(query.toLowerCase()) ||
         (item.href && item.href.toLowerCase().includes(query.toLowerCase())),
     );
 
-    // Flatten submenu items
     const submenuItems = [];
     adminMenuItems.forEach((item) => {
       if (item.submenu) {
@@ -740,7 +767,6 @@ export default function AdminLayout({ children }) {
       }
     });
 
-    // Combine results
     const results = [
       ...filteredItems.map((item) => ({
         type: "menu",
@@ -795,7 +821,7 @@ export default function AdminLayout({ children }) {
     localStorage.removeItem("searchHistory");
   };
 
-  // Admin menu items
+  // Admin menu items - FIXED VERSION
   const adminMenuItems = [
     {
       title: "Dashboard",
@@ -914,6 +940,7 @@ export default function AdminLayout({ children }) {
       badge: null,
       color: "orange",
       gradient: "from-orange-500 to-orange-600",
+      permission: "system.view_analytics",
     },
     {
       title: "All Projects",
@@ -922,6 +949,7 @@ export default function AdminLayout({ children }) {
       badge: null,
       color: "purple",
       gradient: "from-purple-500 to-purple-600",
+      permission: "project.view_all_projects",
     },
     {
       title: "Orders",
@@ -986,6 +1014,7 @@ export default function AdminLayout({ children }) {
       badge: null,
       color: "lime",
       gradient: "from-lime-500 to-lime-600",
+      permission: "system.view_analytics",
     },
     {
       title: "Project Analytics",
@@ -994,6 +1023,27 @@ export default function AdminLayout({ children }) {
       badge: null,
       color: "cyan",
       gradient: "from-cyan-500 to-cyan-600",
+      permission: "system.view_analytics",
+    },
+       {
+      title: "Submit Task",
+      icon:  <Upload className="w-5 h-5" /> ,
+      href: "/dashboard/manage-submit-task",
+      badge: null,
+      color: "green",
+      gradient: "from-green-500 to-green-600",
+      // ALWAYS SHOW TO ADMIN AND TEAM LEADERS
+      permission: "system.view_analytics",
+    },
+    {
+      title: "Performance",
+      icon: <TrendingUp className="w-5 h-5" />,
+      href: "/dashboard/manage-performance",
+      badge: null,
+      color: "green",
+      gradient: "from-green-500 to-green-600",
+      // ALWAYS SHOW TO ADMIN AND TEAM LEADERS
+      permission: "system.view_analytics",
     },
     {
       title: "Settings",
@@ -1106,6 +1156,7 @@ export default function AdminLayout({ children }) {
     if (pathname === "/dashboard/manage-orders") return "Order Management";
     if (pathname === "/dashboard/manage-messages") return "Messages";
     if (pathname === "/dashboard/manage-settings") return "Settings";
+    if (pathname === "/dashboard/manage-performance") return "Performance";
 
     return "Admin Dashboard";
   };
@@ -1129,6 +1180,8 @@ export default function AdminLayout({ children }) {
   if (pathname === "/dashboard/free-chat-support") {
     return <>{children}</>;
   }
+
+  console.log("Rendering layout, userPermissions:", userPermissions);
 
   return (
     <div
@@ -1212,6 +1265,16 @@ export default function AdminLayout({ children }) {
                 ? hasPermission(item.permission)
                 : true;
 
+              // Debug for Performance menu
+              if (item.title === "Performance") {
+                console.log("Performance Menu Debug:");
+                console.log("- item.permission:", item.permission);
+                console.log("- hasRequiredPermission:", hasRequiredPermission);
+                console.log("- isAdmin:", isAdmin);
+                console.log("- isTeamLeader:", isTeamLeader);
+                console.log("- userPermissions.system.view_analytics:", userPermissions.system.view_analytics);
+              }
+
               return (
                 <li key={item.title}>
                   <div>
@@ -1253,14 +1316,21 @@ export default function AdminLayout({ children }) {
                         href={item.href}
                         className={`group flex items-center justify-between p-3 rounded-xl transition-all duration-300 border ${
                           !hasRequiredPermission
-                            ? "opacity-50 cursor-not-allowed"
+                            ? "opacity-50 cursor-not-allowed pointer-events-none"
                             : isActive(item.href)
                               ? `${getColorClasses(item.color, true)} border-2`
                               : `${getColorClasses(item.color, false)} border-transparent`
                         } relative overflow-hidden`}
-                        onClick={() =>
-                          item.submenu && toggleSubmenu(item.title)
-                        }
+                        onClick={(e) => {
+                          if (!hasRequiredPermission) {
+                            e.preventDefault();
+                            toast.error("You don't have permission to access this page");
+                            return;
+                          }
+                          if (item.submenu) {
+                            toggleSubmenu(item.title);
+                          }
+                        }}
                         style={{ animationDelay: `${index * 50}ms` }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-x-full group-hover:translate-x-full"></div>
@@ -1320,6 +1390,12 @@ export default function AdminLayout({ children }) {
                                         ? `${getColorClasses(item.color, true)} shadow-md`
                                         : "text-slate-300 hover:text-white hover:bg-slate-800/50"
                                   }`}
+                                  onClick={(e) => {
+                                    if (!hasSubPermission) {
+                                      e.preventDefault();
+                                      toast.error("You don't have permission to access this page");
+                                    }
+                                  }}
                                   style={{
                                     animationDelay: `${subIndex * 30}ms`,
                                   }}
@@ -1647,7 +1723,7 @@ export default function AdminLayout({ children }) {
                             <div className="flex items-center mt-1">
                               <Crown className="w-3 h-3 text-amber-500 mr-1" />
                               <span className="text-xs font-medium text-purple-600 dark:text-purple-400 capitalize">
-                                Admin
+                                {isTeamLeader ? "Team Leader" : "Admin"}
                               </span>
                             </div>
                           </div>

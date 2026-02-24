@@ -343,13 +343,9 @@ export default function ManageTeamsPage() {
         const [teamsResponse, workersResponse, workResponse] =
           await Promise.all([
             fetch("/api/teams"),
-<<<<<<< HEAD
+            fetch("/api/users"),
             fetch("/api/projects"),
-            fetch("/api/projects"), // Changed from /api/projects to /api/projects
-=======
-            fetch("/api/workers"),
-            fetch("/api/projects"), // Changed from /api/projects to /api/work
->>>>>>> 67984c85b80dbe0e621ac2b3479bcbc309a834ce
+            // fetch("/api/projects"), // Changed from /api/projects to /api/projects
           ]);
 
         if (!teamsResponse.ok) throw new Error("Failed to fetch teams");

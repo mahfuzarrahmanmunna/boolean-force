@@ -18,6 +18,20 @@ export async function GET() {
         status: "approved",
         submittedAt: "2026-02-01",
       },
+        {
+        id: "3",
+        taskTitle: "API Integration",
+        workerName: "Jane Smithas",
+        status: "approved",
+        submittedAt: "2026-02-01",
+      },
+       {
+        id: "3",
+        taskTitle: "API Integration",
+        workerName: "Jane Smithas",
+        status: "approved",
+        submittedAt: "2026-02-01",
+      },
     ];
 
     return NextResponse.json(submissions, { status: 200 });

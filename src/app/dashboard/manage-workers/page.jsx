@@ -305,7 +305,7 @@ export default function ManageWorkers() {
     const fetchData = async () => {
       try {
         const [workersResponse, workResponse, teamsResponse] = await Promise.all([
-          fetch("/api/workers"),
+          fetch("/api/projects"),
           fetch("/api/work"),
           fetch("/api/teams"),
         ]);
@@ -352,7 +352,7 @@ export default function ManageWorkers() {
   const handleEditSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/workers/${editingWorker._id}`, {
+      const response = await fetch(`/api/projects/${editingWorker._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -454,7 +454,7 @@ export default function ManageWorkers() {
     ) {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/workers/${workerId}`, {
+        const response = await fetch(`/api/projects/${workerId}`, {
           method: "DELETE",
         });
 
