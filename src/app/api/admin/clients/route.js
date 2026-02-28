@@ -17,10 +17,20 @@ export async function GET(request) {
         // Return success response
         return NextResponse.json(clients);
     } catch (error) {
-        console.error("Error fetching clients:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        const code = error?.code ?? error?.cause?.code;
+        const msg = error?.message ?? "";
+        if (!msg.includes("ECONNREFUSED") && !msg.includes("querySrv")) {
+            console.error("Error fetching clients:", error);
+        }
+        const isConnectionError =
+            code === "ECONNREFUSED" ||
+            code === "ENOTFOUND" ||
+            msg.includes("ECONNREFUSED") ||
+            msg.includes("querySrv");
+        const message = isConnectionError
+            ? "Database unavailable. Check your connection and try again."
+            : "Failed to load clients.";
+        const status = isConnectionError ? 503 : 500;
+        return NextResponse.json({ error: message }, { status });
     }
 }

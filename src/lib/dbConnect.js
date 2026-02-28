@@ -1,7 +1,10 @@
+import "./registerDbRejection";
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 let cachedClient = null;
 let cachedDb = null;
+/** Single connection promise so we never create multiple connect() calls (avoids extra unhandled rejections) */
+let connectionPromise = null;
 
 const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME;
@@ -18,9 +21,18 @@ const client = new MongoClient(uri, {
   },
 });
 
+function getConnectionPromise() {
+  if (!connectionPromise) {
+    connectionPromise = client.connect().catch((err) => {
+      throw err;
+    });
+  }
+  return connectionPromise;
+}
+
 export async function dbConnect(collectionName) {
   if (!cachedClient || !cachedDb) {
-    await client.connect();
+    await getConnectionPromise();
     cachedClient = client;
     cachedDb = client.db(dbName);
   }

@@ -1,57 +1,57 @@
-"use client"
-import React from 'react'
+"use client";
+import React from "react";
 
 const ScrollStack = () => {
   const cards = [
-    { title: 'All on React Bits!', color: '#5338FF' },
-    { title: 'Components', color: '#5338FF' },
-    { title: 'Backgrounds', color: '#FF1E9C' },
-    { title: 'Components', color: '#5338FF' },
-    { title: 'Animations', color: '#FF1E9C' },
-  ]
+    { title: "All on React Bits!", color: "#5338FF" },
+    { title: "Components", color: "#5338FF" },
+    { title: "Backgrounds", color: "#FF1E9C" },
+    { title: "Components", color: "#5338FF" },
+    { title: "Animations", color: "#FF1E9C" },
+  ];
 
   const renderIcon = (index) => {
     const baseProps = {
       width: 120,
       height: 120,
-      viewBox: '0 0 120 120',
-      fill: 'none',
-      stroke: 'white',
+      viewBox: "0 0 120 120",
+      fill: "none",
+      stroke: "white",
       strokeWidth: 10,
-      strokeLinecap: 'round',
-      strokeLinejoin: 'round',
-    }
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+    };
 
-    const type = index % 3
+    const type = index % 3;
     if (type === 0) {
       // 4 diamonds
       return (
         <svg aria-hidden="true" {...baseProps}>
-          <rect x="48" y="10" width="24" height="24" rx="6"/>
-          <rect x="86" y="48" width="24" height="24" rx="6"/>
-          <rect x="10" y="48" width="24" height="24" rx="6"/>
-          <rect x="48" y="86" width="24" height="24" rx="6"/>
+          <rect x="48" y="10" width="24" height="24" rx="6" />
+          <rect x="86" y="48" width="24" height="24" rx="6" />
+          <rect x="10" y="48" width="24" height="24" rx="6" />
+          <rect x="48" y="86" width="24" height="24" rx="6" />
         </svg>
-      )
+      );
     }
     if (type === 1) {
       // image placeholder
       return (
         <svg aria-hidden="true" {...baseProps}>
-          <rect x="10" y="10" width="100" height="100" rx="16"/>
-          <circle cx="44" cy="44" r="7" fill="white" stroke="none"/>
+          <rect x="10" y="10" width="100" height="100" rx="16" />
+          <circle cx="44" cy="44" r="7" fill="white" stroke="none" />
           <path d="M22 90 L56 58 L98 98" />
         </svg>
-      )
+      );
     }
     // play icon
     return (
       <svg aria-hidden="true" {...baseProps}>
-        <rect x="10" y="10" width="100" height="100" rx="16"/>
+        <rect x="10" y="10" width="100" height="100" rx="16" />
         <polygon points="52,44 82,60 52,76" fill="white" stroke="none" />
       </svg>
-    )
-  }
+    );
+  };
 
   return (
     <section className="scrollStack" aria-label="Stacked cards on scroll">
@@ -60,15 +60,13 @@ const ScrollStack = () => {
           key={index}
           className="card"
           style={{
-            ['--offset']: `${index * 88}px`,
-            ['--bg']: card.color,
+            ["--offset"]: `${index * 88}px`,
+            ["--bg"]: card.color,
           }}
         >
           <div className="cardInner">
             <h3 className="title">{card.title}</h3>
-            <div className="accentBox">
-              {renderIcon(index)}
-            </div>
+            <div className="accentBox">{renderIcon(index)}</div>
           </div>
         </article>
       ))}
@@ -94,7 +92,7 @@ const ScrollStack = () => {
           color: #fff;
           box-shadow:
             0 30px 80px rgba(10, 6, 20, 0.45),
-            inset 0 0 0 2px rgba(255,255,255,0.06);
+            inset 0 0 0 2px rgba(255, 255, 255, 0.06);
           transform-origin: center top;
         }
 
@@ -111,7 +109,7 @@ const ScrollStack = () => {
           font-weight: 800;
           letter-spacing: 0.2px;
           margin: 0;
-          text-shadow: 0 2px 0 rgba(0,0,0,0.06);
+          text-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
         }
 
         .accentBox {
@@ -119,19 +117,25 @@ const ScrollStack = () => {
           place-items: center;
           min-height: clamp(160px, 32vh, 320px);
           border-radius: 28px;
-          border: 14px solid rgba(255,255,255,0.96);
-          background: rgba(255,255,255,0.05);
+          border: 14px solid rgba(255, 255, 255, 0.96);
+          background: rgba(255, 255, 255, 0.05);
         }
 
-        .spacer { height: 40vh; }
+        .spacer {
+          height: 40vh;
+        }
 
         @media (max-width: 860px) {
-          .cardInner { grid-template-columns: 1fr; }
-          .accentBox { order: 2; }
+          .cardInner {
+            grid-template-columns: 1fr;
+          }
+          .accentBox {
+            order: 2;
+          }
         }
       `}</style>
     </section>
-  )
-}
+  );
+};
 
-export default ScrollStack
+export default ScrollStack;

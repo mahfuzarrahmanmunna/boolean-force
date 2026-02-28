@@ -22,8 +22,9 @@ const OurServicesOnlySlider = () => {
     const services = [
         {
             id: 1,
-            title: "Brand Visual Identity",
-            description: "Create a powerful brand presence that resonates with your audience and drives recognition.",
+            title: "Brand Visual Identity = (Design + Emotion)",
+            description:  "Your brand deserves logic and love. We shape visual identities that connect emotionally and communicate clearly. In addition, we always ensure that your design meets precision.",
+
             code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
             features: [
                 "Logo Design & Branding",
@@ -38,8 +39,8 @@ const OurServicesOnlySlider = () => {
         },
         {
             id: 2,
-            title: "Website Development",
-            description: "Build responsive, SEO-optimized websites that convert visitors into customers.",
+            title: "Web Development = (Speed × Functionality)",
+            description: "We build responsive, high-performing websites that speak your brand’s language. Because in our code, performance is always TRUE",
             code: "IF (Responsive AND SEO) THEN (Conversions++)",
             features: [
                 "Custom Web Development",
@@ -54,8 +55,8 @@ const OurServicesOnlySlider = () => {
         },
         {
             id: 3,
-            title: "ERP Software Solutions",
-            description: "Streamline your business operations with custom ERP systems tailored to your needs.",
+            title: "ERP Software Solutions = (Automation + Control)",
+            description: "We create intelligent ERP systems that streamline your workflow and give you full command.Because we believe that when operations are optimized, efficiency = TRUE.",
             code: "WHILE (Process != Automated) { Optimize() }",
             features: [
                 "Custom ERP Development",
@@ -70,8 +71,8 @@ const OurServicesOnlySlider = () => {
         },
         {
             id: 4,
-            title: "POS System",
-            description: "Modern point-of-sale solutions that enhance customer experience and boost sales.",
+            title: "POS Systems = (Ease + Efficiency)",
+            description: "We provide modern point-of-sale systems tailored for your business logic. Because smoothtransactions = Happy Customers.",
             code: "IF (POS == Modern) THEN (Sales = MAX)",
             features: [
                 "Custom POS Development",
@@ -83,6 +84,23 @@ const OurServicesOnlySlider = () => {
             image: "https://picsum.photos/seed/possystem/1200/800.jpg",
             icon: "🛒",
             color: PRIMARY_COLOR
+        },
+
+        {
+            id: 5,
+            title: "AI Chat Bots = (Intelligence = Conversion)",
+            description: "We build smart, conversational interfaces that understand user intent and automate engagement.Because when AI handles the noise, your team can focus on the signal.",
+            code: "IF (AI == Intelligent) THEN (Engagement = MAX)",
+            features: [
+                "Custom AI Chat Bot Development",
+                "Natural Language Processing",
+                "Automated Customer Support",
+                "Integration with Existing Systems"
+            ],
+            detail: "Our AI chatbots are designed to understand and respond to customer queries intelligently, providing seamless support and enhancing user engagement.",
+            image: "https://picsum.photos/seed/aichatbot/1200/800.jpg",
+            icon: "🤖",
+            color: ACCENT_COLOR
         }
     ];
 

@@ -72,12 +72,25 @@ export async function GET(request) {
 
         return NextResponse.json(serializedData);
     } catch (err) {
-        console.error("Error in GET /api/projects:", err);
+        const code = err?.code ?? err?.cause?.code;
+        const msg = err?.message ?? "";
+        if (!msg.includes("ECONNREFUSED") && !msg.includes("querySrv")) {
+            console.error("Error in GET /api/projects:", err);
+        }
+        const isConnectionError =
+            code === "ECONNREFUSED" ||
+            code === "ENOTFOUND" ||
+            msg.includes("ECONNREFUSED") ||
+            msg.includes("querySrv");
+        const message = isConnectionError
+            ? "Database unavailable. Check your connection and try again."
+            : "Something went wrong while fetching projects. Please try again later.";
+        const status = isConnectionError ? 503 : 500;
         return NextResponse.json({
             success: false,
-            error: "Something went wrong while fetching projects. Please try again later.",
-            details: err.message
-        }, { status: 500 });
+            error: message,
+            details: msg
+        }, { status });
     }
 }
 
@@ -195,10 +208,21 @@ export async function POST(request) {
         }, { status: 201 });
     } catch (err) {
         console.error("Error in POST /api/projects:", err);
+        const code = err?.code ?? err?.cause?.code;
+        const msg = err?.message ?? "";
+        const isConnectionError =
+            code === "ECONNREFUSED" ||
+            code === "ENOTFOUND" ||
+            msg.includes("ECONNREFUSED") ||
+            msg.includes("querySrv");
+        const message = isConnectionError
+            ? "Database unavailable. Check your connection and try again."
+            : "Something went wrong while creating project. Please try again later.";
+        const status = isConnectionError ? 503 : 500;
         return NextResponse.json({
             success: false,
-            error: "Something went wrong while creating project. Please try again later.",
-            details: err.message
-        }, { status: 500 });
+            error: message,
+            details: msg
+        }, { status });
     }
 }

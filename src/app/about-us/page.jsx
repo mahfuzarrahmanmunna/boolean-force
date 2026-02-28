@@ -33,17 +33,309 @@ import {
     Cpu,
     Cloud,
     Database,
-    Smartphone
+    Smartphone,
+    Bot,
+    Palette as PaletteIcon,
+    Code as CodeIcon,
+    Database as DatabaseIcon,
+    Smartphone as SmartphoneIcon,
+    Bot as BotIcon,
+    Cpu as CpuIcon,
+    GitBranch,
+    MapPin,
+    Mail,
+    Phone,
+    Send,
+    X,
+    Linkedin as LinkedinIcon,
+    Twitter as TwitterIcon,
+    Instagram
 } from 'lucide-react';
-// import OrbAnimation from './OrbAnimation';
 
+
+
+// ==================== What We Do Section Component ====================
+const WhatWeDoSection = () => {
+    const [activeService, setActiveService] = useState(null);
+    const [hoveredService, setHoveredService] = useState(null);
+
+    const services = [
+        {
+            id: 1,
+            number: "01",
+            title: "Brand Visual Identity",
+            formula: "IF (Architecture == Precise) && (Story == Emotive) THEN (Impact = TRUE)",
+            description: "We engineer identities where strategic logic meets human connection, ensuring your brand is both seen and felt.",
+            icon: <PaletteIcon className="w-8 h-8" />,
+            gradient: "from-pink-500/20 to-purple-500/20",
+            borderColor: "border-pink-500/30",
+            accentColor: "text-pink-400",
+            features: [
+                "Strategic Brand Architecture",
+                "Emotive Visual Storytelling",
+                "Comprehensive Identity Systems",
+                "Brand Guidelines & Assets"
+            ],
+            metrics: [
+                { label: "Brand Recall", value: "+85%" },
+                { label: "Engagement", value: "+70%" }
+            ]
+        },
+        {
+            id: 2,
+            number: "02",
+            title: "Web Development",
+            formula: "IF (Load_Time < 2s) && (UX == Frictionless) THEN (Engagement = TRUE)",
+            description: "We deploy high-performance digital hubs that prioritize velocity and scalability to keep your users locked in.",
+            icon: <CodeIcon className="w-8 h-8" />,
+            gradient: "from-blue-500/20 to-cyan-500/20",
+            borderColor: "border-blue-500/30",
+            accentColor: "text-blue-400",
+            features: [
+                "High-Performance Architecture",
+                "Frictionless UX Design",
+                "Scalable Infrastructure",
+                "SEO-Optimized Development"
+            ],
+            metrics: [
+                { label: "Load Time", value: "<2s" },
+                { label: "Conversion", value: "+60%" }
+            ]
+        },
+        {
+            id: 3,
+            number: "03",
+            title: "ERP Software Solutions",
+            formula: "IF (Workflow == Automated) || (Data == Unified) THEN (Efficiency = TRUE)",
+            description: "We replace operational chaos with centralized intelligence, building custom ERPs that act as your business's central nervous system.",
+            icon: <DatabaseIcon className="w-8 h-8" />,
+            gradient: "from-green-500/20 to-emerald-500/20",
+            borderColor: "border-green-500/30",
+            accentColor: "text-green-400",
+            features: [
+                "Automated Workflows",
+                "Unified Data Architecture",
+                "Real-time Analytics",
+                "Custom Module Development"
+            ],
+            metrics: [
+                { label: "Efficiency", value: "+95%" },
+                { label: "Cost Reduction", value: "-40%" }
+            ]
+        },
+        {
+            id: 4,
+            number: "04",
+            title: "POS Systems",
+            formula: "IF (Transaction == Instant) && (Stock == Realtime) THEN (Satisfaction = TRUE)",
+            description: "We streamline the point of purchase with smart POS logic, turning every transaction into a seamless data point.",
+            icon: <SmartphoneIcon className="w-8 h-8" />,
+            gradient: "from-orange-500/20 to-amber-500/20",
+            borderColor: "border-orange-500/30",
+            accentColor: "text-orange-400",
+            features: [
+                "Instant Transaction Processing",
+                "Real-time Inventory Sync",
+                "Multi-location Management",
+                "Customer Analytics"
+            ],
+            metrics: [
+                { label: "Speed", value: "<1s" },
+                { label: "Accuracy", value: "99.9%" }
+            ]
+        },
+        {
+            id: 5,
+            number: "05",
+            title: "AI Chat Bots",
+            formula: "IF (Intelligence == Adaptive) && (Response == Instant) THEN (Conversion = TRUE)",
+            description: "We deploy smart conversational interfaces that automate engagement and resolve queries in real-time, turning every interaction into a growth opportunity.",
+            icon: <BotIcon className="w-8 h-8" />,
+            gradient: "from-purple-500/20 to-indigo-500/20",
+            borderColor: "border-purple-500/30",
+            accentColor: "text-purple-400",
+            features: [
+                "Adaptive AI Intelligence",
+                "Instant Response Systems",
+                "Multi-channel Integration",
+                "Conversational Analytics"
+            ],
+            metrics: [
+                { label: "Response Time", value: "<0.5s" },
+                { label: "Resolution Rate", value: "85%" }
+            ]
+        }
+    ];
+
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15,
+                delayChildren: 0.2,
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { y: 30, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 15
+            }
+        }
+    };
+
+    return (
+        <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+            <div className="absolute inset-0">
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+                <div className="absolute top-20 right-10 w-64 h-64 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+                <div className="absolute bottom-20 left-10 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+            </div>
+
+            <div className="max-w-7xl mx-auto relative z-10">
+                <motion.div
+                    className="text-center mb-16"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.2 }}
+                    variants={containerVariants}
+                >
+                    <motion.h2 
+                        className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6"
+                        variants={itemVariants}
+                    >
+                        Decoding{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                            Complex Problems
+                        </span>
+                    </motion.h2>
+                    <motion.h2 
+                        className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8"
+                        variants={itemVariants}
+                    >
+                        Delivering{' '}
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400">
+                            Logical Solutions
+                        </span>
+                    </motion.h2>
+                </motion.div>
+
+                <motion.div
+                    className="grid grid-cols-1 gap-8"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, amount: 0.1 }}
+                    variants={containerVariants}
+                >
+                    {services.map((service) => (
+                        <motion.div
+                            key={service.id}
+                            className="relative group"
+                            variants={itemVariants}
+                            onHoverStart={() => setHoveredService(service.id)}
+                            onHoverEnd={() => setHoveredService(null)}
+                            onClick={() => setActiveService(activeService === service.id ? null : service.id)}
+                        >
+                            <div className={`absolute inset-0 bg-gradient-to-r ${service.gradient} rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl`}></div>
+                            
+                            <div className={`relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border ${service.borderColor} hover:border-opacity-100 transition-all duration-300 cursor-pointer overflow-hidden`}>
+                                <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                                
+                                <div className="relative z-10">
+                                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                                        <div className="flex items-center space-x-4 mb-4 lg:mb-0">
+                                            <span className={`text-4xl font-bold ${service.accentColor} opacity-50`}>
+                                                {service.number}
+                                            </span>
+                                            <div className="p-3 bg-white/5 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
+                                                {service.icon}
+                                            </div>
+                                            <h3 className={`text-2xl font-bold text-white group-hover:${service.accentColor} transition-colors duration-300`}>
+                                                {service.title}
+                                            </h3>
+                                        </div>
+                                        
+                                        <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-lg px-4 py-2 font-mono text-sm lg:text-base">
+                                            <code>
+                                                <span className="text-blue-300">IF</span>
+                                                <span className="text-gray-400"> (</span>
+                                                {service.formula.split('IF')[1]}
+                                            </code>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-gray-300 text-lg mb-6 max-w-3xl">
+                                        {service.description}
+                                    </p>
+
+                                    <AnimatePresence>
+                                        {(hoveredService === service.id || activeService === service.id) && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: "auto", opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="overflow-hidden"
+                                            >
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-white/10">
+                                                    <div>
+                                                        <h4 className="text-white font-semibold mb-3 flex items-center">
+                                                            <CheckCircle className={`w-4 h-4 mr-2 ${service.accentColor}`} />
+                                                            Key Capabilities
+                                                        </h4>
+                                                        <ul className="space-y-2">
+                                                            {service.features.map((feature, idx) => (
+                                                                <li key={idx} className="flex items-start">
+                                                                    <ArrowRight className={`w-4 h-4 ${service.accentColor} mr-2 mt-1 flex-shrink-0`} />
+                                                                    <span className="text-gray-300 text-sm">{feature}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+
+                                                    <div>
+                                                        <h4 className="text-white font-semibold mb-3 flex items-center">
+                                                            <Zap className={`w-4 h-4 mr-2 ${service.accentColor}`} />
+                                                            Performance Metrics
+                                                        </h4>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            {service.metrics.map((metric, idx) => (
+                                                                <div key={idx} className="bg-white/5 rounded-lg p-3">
+                                                                    <div className={`text-2xl font-bold ${service.accentColor}`}>
+                                                                        {metric.value}
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-400">{metric.label}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </div>
+        </section>
+    );
+};
+
+// ==================== Main AboutUs Component ====================
 const AboutUs = () => {
     const [scrollY, setScrollY] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [activeTeamMember, setActiveTeamMember] = useState(null);
-    const [isClient, setIsClient] = useState(false);
     const [showScrollTop, setShowScrollTop] = useState(false);
-    const [activeTab, setActiveTab] = useState('mission');
 
     const containerRef = useRef(null);
     const { scrollYProgress } = useScroll();
@@ -51,8 +343,6 @@ const AboutUs = () => {
     const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -50]);
 
     useEffect(() => {
-        setIsClient(true);
-
         const handleScroll = () => {
             setScrollY(window.scrollY);
             setShowScrollTop(window.scrollY > 500);
@@ -62,7 +352,6 @@ const AboutUs = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Enhanced Data
     const teamMembers = [
         {
             id: 1,
@@ -70,54 +359,38 @@ const AboutUs = () => {
             position: "CEO & Founder",
             bio: "Visionary leader with 15+ years of experience in digital transformation and business strategy. Harvard MBA with a track record of successful exits.",
             image: "https://picsum.photos/seed/alexjohnson/400/400.jpg",
-            social: {
-                twitter: "#",
-                linkedin: "#",
-                github: "#"
-            },
-            skills: ["Leadership", "Strategy", "Innovation"],
+            social: { twitter: "#", linkedin: "#", github: "#" },
+            skills: ["Vision", "Product Strategy", "Innovation"],
             achievements: ["Forbes 30 Under 30", "TechCrunch Disrupt Winner", "3x Founder"]
         },
         {
             id: 2,
             name: "Sarah Williams",
-            position: "CTO",
+            position: "Creative Director",
             bio: "Tech enthusiast passionate about building scalable solutions and leading development teams. Former Google engineer with expertise in distributed systems.",
             image: "https://picsum.photos/seed/sarahwilliams/400/400.jpg",
-            social: {
-                twitter: "#",
-                linkedin: "#",
-                github: "#"
-            },
-            skills: ["Architecture", "Cloud", "AI/ML"],
+            social: { twitter: "#", linkedin: "#", github: "#" },
+            skills: ["Branding", "Design Systems & Visual Identity"],
             achievements: ["AWS Certified Architect", "Kubernetes Contributor", "Patent Holder"]
         },
         {
             id: 3,
             name: "Michael Chen",
-            position: "Head of Design",
+            position: "Lead Developer",
             bio: "Creative mind focused on user experience and creating visually stunning interfaces. Former Apple designer with multiple design awards.",
             image: "https://picsum.photos/seed/michaelchen/400/400.jpg",
-            social: {
-                twitter: "#",
-                linkedin: "#",
-                github: "#"
-            },
-            skills: ["UI/UX", "Branding", "Animation"],
+            social: { twitter: "#", linkedin: "#", github: "#" },
+            skills: ["Web Development", "API Architecture"],
             achievements: ["Red Dot Design Award", "Awwwards Site of the Day", "D&AD Pencil Winner"]
         },
         {
             id: 4,
             name: "Emily Rodriguez",
-            position: "Marketing Director",
+            position: "Project Manager",
             bio: "Strategic marketer with a proven track record of growing brands and reaching audiences. Former VP of Marketing at a unicorn startup.",
             image: "https://picsum.photos/seed/emilyrodriguez/400/400.jpg",
-            social: {
-                twitter: "#",
-                linkedin: "#",
-                github: "#"
-            },
-            skills: ["Strategy", "Content", "Analytics"],
+            social: { twitter: "#", linkedin: "#", github: "#" },
+            skills: ["Client Communication & Workflow Optimization"],
             achievements: ["Clio Award Winner", "AdAge 40 Under 40", "Marketing Book Author"]
         }
     ];
@@ -125,29 +398,29 @@ const AboutUs = () => {
     const values = [
         {
             id: 1,
-            title: "Innovation",
-            description: "We constantly push boundaries and explore new possibilities to deliver cutting-edge solutions that transform industries.",
+            title: "Impact > Hype",
+            description: "We bypass fleeting trends to engineer meaningful work with long-term survival logic.",
             icon: <Lightbulb className="w-8 h-8" />,
             color: "#3B85FE"
         },
         {
             id: 2,
-            title: "Excellence",
-            description: "We are committed to delivering the highest quality in everything we do, exceeding expectations at every turn.",
+            title: "Human-First Input",
+            description: "We prioritize empathy and user experience, because technology is only as powerful as the people it serves.",
             icon: <Award className="w-8 h-8" />,
             color: "#A9DBDC"
         },
         {
             id: 3,
-            title: "Integrity",
-            description: "We conduct business with honesty, transparency, and ethical principles that build lasting trust with our clients.",
+            title: "Infinite Loop Learning",
+            description: "Our relentless curiosity ensures every project is a new opportunity to master emerging frontiers.",
             icon: <Target className="w-8 h-8" />,
             color: "#6366F1"
         },
         {
             id: 4,
-            title: "Collaboration",
-            description: "We believe in the power of teamwork and diverse perspectives to create solutions that no single individual could achieve alone.",
+            title: "Atomic Collaboration",
+            description: "We build with you in a synchronized partnership, turning shared vision into hardcoded reality.",
             icon: <Users className="w-8 h-8" />,
             color: "#3B85FE"
         }
@@ -189,78 +462,38 @@ const AboutUs = () => {
     const testimonials = [
         {
             id: 1,
-            name: "John Smith",
-            position: "CEO, TechCorp",
+            name: "Redwan Hasan",
+            position: "Founder, StudioNest",
             image: "https://picsum.photos/seed/client1/50/50.jpg",
-            content: "Working with this team has been an absolute game-changer for our business. Their expertise and dedication are unmatched. They delivered our complex project ahead of schedule and under budget.",
+            content: "Working with BooleanForce felt effortless. They understood our idea from day one and delivered a design that finally matched our brand's personality.",
             rating: 5,
             project: "Enterprise Cloud Migration"
         },
         {
             id: 2,
-            name: "Sarah Johnson",
-            position: "Marketing Director, InnovateCo",
+            name: "Farzana Hossain",
+            position: "Owner, Bliss Organics",
             image: "https://picsum.photos/seed/client2/50/50.jpg",
-            content: "The team delivered exceptional results beyond our expectations. They truly understand our needs and deliver solutions that work. Our conversion rates increased by 40% after their redesign.",
+            content: "They're new, but their work speaks like a seasoned team. Clean design, clear communication, and a genuine passion for what they do",
             rating: 5,
             project: "E-commerce Platform Redesign"
         },
         {
             id: 3,
-            name: "Michael Brown",
-            position: "Founder, StartupXYZ",
+            name: "Maisha Rahman",
+            position: "Co-founder, Bloom Hub",
             image: "https://picsum.photos/seed/client3/50/50.jpg",
-            content: "From concept to execution, they were with us every step of the way. Our new platform has transformed how we do business. We couldn't have launched without their expertise.",
+            content: "A young team with fresh ideas. They gave our business the push it needed with a beautiful brand identity and a smart digital layout.",
             rating: 5,
             project: "MVP Development & Launch"
         }
     ];
 
     const stats = [
-        { value: "500+", label: "Happy Clients", icon: <Users className="w-6 h-6" /> },
-        { value: "1000+", label: "Projects Completed", icon: <CheckCircle className="w-6 h-6" /> },
-        { value: "50+", label: "Team Members", icon: <Briefcase className="w-6 h-6" /> },
-        { value: "8", label: "Years of Excellence", icon: <Clock className="w-6 h-6" /> }
-    ];
-
-    const services = [
-        {
-            id: 1,
-            title: "Web Development",
-            description: "Custom web applications built with cutting-edge technologies",
-            icon: <Code className="w-8 h-8" />,
-            color: "#3B85FE"
-        },
-        {
-            id: 2,
-            title: "UI/UX Design",
-            description: "Beautiful, intuitive interfaces that users love",
-            icon: <Palette className="w-8 h-8" />,
-            color: "#A9DBDC"
-        },
-        {
-            id: 3,
-            title: "Digital Marketing",
-            description: "Strategic campaigns that drive growth and engagement",
-            icon: <Megaphone className="w-8 h-8" />,
-            color: "#6366F1"
-        },
-        {
-            id: 4,
-            title: "Cloud Solutions",
-            description: "Scalable infrastructure that grows with your business",
-            icon: <Cloud className="w-8 h-8" />,
-            color: "#3B85FE"
-        }
-    ];
-
-    const technologies = [
-        { name: "React", level: 95 },
-        { name: "Node.js", level: 90 },
-        { name: "TypeScript", level: 85 },
-        { name: "Python", level: 80 },
-        { name: "AWS", level: 88 },
-        { name: "Docker", level: 75 }
+        { value: "10+", label: "Successful Projects", icon: <Users className="w-6 h-6" /> },
+        { value: "6+", label: "Happy Clients", icon: <CheckCircle className="w-6 h-6" /> },
+        { value: "100%", label: "Dedication", icon: <Briefcase className="w-6 h-6" /> },
+        { value: "120+", label: "Hours of Research & Brainstorming", icon: <Clock className="w-6 h-6" /> }
     ];
 
     const scrollToTop = () => {
@@ -269,26 +502,16 @@ const AboutUs = () => {
 
     return (
         <div ref={containerRef} className="relative min-h-screen overflow-hidden bg-black" id="about">
-            {/* Hero Section with Enhanced Orb Animation */}
+            {/* Hero Section */}
             <motion.section
                 className="relative min-h-screen flex items-center justify-center overflow-hidden"
                 style={{ opacity: heroOpacity, y: heroY }}
             >
-                {/* Enhanced Orb Animation Background */}
                 <div className="absolute inset-0 z-0">
-                    {/* <OrbAnimation
-                        hue={220}
-                        hoverIntensity={0.3}
-                        rotateOnHover={true}
-                        forceHoverState={isHovered}
-                        scale={1.2}
-                        opacity={0.8}
-                        autoRotate={true}
-                        rotationSpeed={0.2}
-                    /> */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900"></div>
+                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
                 </div>
 
-                {/* Enhanced Content Overlay */}
                 <div className="relative z-10 container mx-auto px-6 text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -304,9 +527,10 @@ const AboutUs = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-bold mb-6 text-white"
+                        className="text-4xl md:text-6xl font-bold mb-6 text-white"
                     >
-                        We Create <span className="text-blue-400">Digital</span> Experiences
+                        Where Human Logic Meets  
+                        <span className="text-blue-400"> Digital Force</span>
                     </motion.h1>
 
                     <motion.p
@@ -315,7 +539,20 @@ const AboutUs = () => {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="text-xl max-w-3xl mx-auto text-gray-300 mb-8"
                     >
-                        We are a team of passionate creators, developers, and strategists dedicated to transforming ideas into powerful digital solutions that drive growth and innovation.
+                        At BooleanForce, we believe IF (Brave_Ideas == TRUE) &&
+                        (Cutting_Edge_Tech == TRUE) THEN (Market_Evolution = INEVITABLE)
+                    </motion.p>
+
+                    <motion.p
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="text-xl max-w-5xl mx-auto text-gray-300 mb-8"
+                    >
+                        BooleanForce is a new-age creative technology business born to bridge the gap between
+                        high-level imagination and binary intelligence. Our mindset is simple: Like Boolean logic, a
+                        digital solution should be clear, precise, and purposeful. We specialize in transforming 
+                        abstract concepts into high-performance digital realities.
                     </motion.p>
 
                     <motion.div
@@ -331,7 +568,7 @@ const AboutUs = () => {
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                         >
-                            Our Story
+                            The BooleanForce Journey
                             <ArrowRight className="w-4 h-4 ml-2" />
                         </motion.button>
                         <motion.button
@@ -341,12 +578,11 @@ const AboutUs = () => {
                             onMouseEnter={() => setIsHovered(true)}
                             onMouseLeave={() => setIsHovered(false)}
                         >
-                            Contact Us
+                            Start Your Project
                         </motion.button>
                     </motion.div>
                 </div>
 
-                {/* Enhanced Animated scroll indicator */}
                 <motion.div
                     className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10"
                     animate={{ y: [0, 10, 0] }}
@@ -358,7 +594,11 @@ const AboutUs = () => {
                 </motion.div>
             </motion.section>
 
-            {/* Enhanced Stats Section */}
+         
+
+            
+
+            {/* Stats Section */}
             <section className="relative py-20 px-6 bg-gradient-to-b from-black to-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -372,7 +612,7 @@ const AboutUs = () => {
                             Our <span className="text-blue-400">Impact</span>
                         </h2>
                         <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                            Numbers that speak for themselves
+                            Every business begins small but the right work creates results that matter.
                         </p>
                     </motion.div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -401,7 +641,7 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Enhanced Our Story Section */}
+            {/* Our Story Section */}
             <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -414,11 +654,14 @@ const AboutUs = () => {
                             <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
                                 Our <span className="text-blue-400">Story</span>
                             </h2>
+
+                            <h2 className='text-gray-300 mb-6 font-bold text-3xl'>Building Beyond the Deliverable</h2>
                             <p className="text-lg text-gray-300 mb-6">
-                                Founded in 2015, our journey began with a simple mission: to bridge the gap between innovative ideas and practical digital solutions. What started as a small team of passionate individuals has grown into a full-service digital agency serving clients worldwide.
-                            </p>
-                            <p className="text-lg text-gray-300 mb-6">
-                                Over the years, we've helped hundreds of businesses transform their digital presence, streamline operations, and achieve remarkable growth. Our success is built on a foundation of technical expertise, creative thinking, and a deep understanding of our clients' needs.
+                                BooleanForce was founded by a collective of creators who realized that the world didn't
+                                need more finished projects; it needed more meaningful experiences. We launched with a
+                                singular mission: to provide the technical force and creative logic required to move businesses
+                                from potential to production. For us, every project isn't just a task; it's the next logical step in our
+                                shared evolution.
                             </p>
                             <p className="text-lg text-gray-300 mb-8">
                                 Today, we continue to push boundaries and explore new possibilities, always staying true to our core values of innovation, excellence, and integrity.
@@ -456,7 +699,7 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Enhanced Values Section */}
+            {/* Values Section */}
             <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -497,8 +740,9 @@ const AboutUs = () => {
                     </div>
                 </div>
             </section>
-
-            {/* Enhanced Team Section */}
+   {/* What We Do Section */}
+            <WhatWeDoSection />
+            {/* Team Section */}
             <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -512,7 +756,8 @@ const AboutUs = () => {
                             Meet Our <span className="text-blue-400">Team</span>
                         </h2>
                         <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                            The talented individuals behind our success.
+                            Behind every BooleanForce project is a passionate team of creators, thinkers, and innovators;
+                            each dedicated to turning ideas into real, logical outcomes.
                         </p>
                     </motion.div>
 
@@ -565,7 +810,7 @@ const AboutUs = () => {
                                                 whileHover={{ scale: 1.2, backgroundColor: '#3B85FE' }}
                                                 whileTap={{ scale: 0.9 }}
                                             >
-                                                <Twitter className="w-4 h-4 text-white" />
+                                                <TwitterIcon className="w-4 h-4 text-white" />
                                             </motion.a>
                                             <motion.a
                                                 href={member.social.linkedin}
@@ -573,7 +818,7 @@ const AboutUs = () => {
                                                 whileHover={{ scale: 1.2, backgroundColor: '#3B85FE' }}
                                                 whileTap={{ scale: 0.9 }}
                                             >
-                                                <Linkedin className="w-4 h-4 text-white" />
+                                                <LinkedinIcon className="w-4 h-4 text-white" />
                                             </motion.a>
                                             <motion.a
                                                 href={member.social.github}
@@ -589,10 +834,13 @@ const AboutUs = () => {
                             </motion.div>
                         ))}
                     </div>
+                    <p className='text-gray-300 text-center mt-4 text-xl'>
+                        <i>Our team operates with a shared principle: IF (Teamwork = TRUE) THEN (Success = CERTAIN)</i>
+                    </p>
                 </div>
             </section>
 
-            {/* Enhanced Timeline Section */}
+            {/* Timeline Section */}
             <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -602,16 +850,21 @@ const AboutUs = () => {
                         viewport={{ once: true }}
                         className="text-center mb-12"
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                        <h2 className="text-4xl md:text-5xl font-bold mb-10 text-white">
                             Our <span className="text-blue-400">Journey</span>
                         </h2>
-                        <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                            The milestones that shaped our company.
+
+                        <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white text-start">Initializing the Force</h2>
+                        <p className="text-xl text-gray-300 text-start mb-10">
+                            BooleanForce was initialized in 2025 with a clear intent: to fuse architectural logic with
+                            emotive design. We are a lean team of builders and strategists who believe that high-tier digital
+                            experiences shouldn't just be viewed; they should be felt. As a 2025 business, we are currently in
+                            our high-growth phase, refining our vision through real-world deployments and rapid iteration.
+                            Every collaboration is a new data point that makes our framework stronger.
                         </p>
                     </motion.div>
 
                     <div className="relative">
-                        {/* Timeline line */}
                         <div className="absolute left-1/2 transform -translate-x-1/2 h-full w-1 bg-gray-700"></div>
 
                         {timeline.map((item, index) => (
@@ -644,7 +897,7 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Enhanced Testimonial Section */}
+            {/* Testimonials Section */}
             <section className="relative py-20 px-6 bg-gray-900">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -704,7 +957,7 @@ const AboutUs = () => {
                 </div>
             </section>
 
-            {/* Enhanced CTA Section */}
+            {/* CTA Section */}
             <section className="relative py-20 px-6 bg-black">
                 <div className="container mx-auto max-w-6xl z-10">
                     <motion.div
@@ -718,27 +971,29 @@ const AboutUs = () => {
                         }}
                     >
                         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">
-                            Ready to Start Your <span className="text-blue-400">Journey</span> With Us?
+                            Your Next Big Idea <span className="text-blue-400">Starts Here</span> 
                         </h2>
                         <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-                            Let's work together to bring your ideas to life and create something amazing.
+                            Tell us what you're dreaming of. We will shape it, design it, and bring it to life.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <motion.button
+                            <motion.a
+                                href="#contact"
                                 className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl flex items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                Get In Touch
+                                Let's Connect
                                 <ArrowRight className="w-4 h-4 ml-2" />
-                            </motion.button>
-                            <motion.button
+                            </motion.a>
+                            <motion.a
+                                href="#projects"
                                 className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 border flex items-center justify-center hover:bg-white/10 border-white/20"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                View Our Work
-                            </motion.button>
+                                Explore Our Projects
+                            </motion.a>
                         </div>
                     </motion.div>
                 </div>

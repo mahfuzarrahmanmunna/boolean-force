@@ -80,8 +80,10 @@ const Navbar1 = () => {
         { name: "Services", href: "/services" },
         { name: "Portfolio", href: "/portfolio" },
         { name: "Blog", href: "/blog" },
+          { name: "Partnership", href: "/partnership" },
         { name: "About", href: "/about-us" },
         { name: "Contact", href: "/contact" },
+      
     ];
 
     const services = [

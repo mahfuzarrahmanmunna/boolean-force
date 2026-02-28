@@ -403,6 +403,7 @@ export default function ManageClients() {
   const [availableWork, setAvailableWork] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [editingClient, setEditingClient] = useState(null);
   const [isAddingClient, setIsAddingClient] = useState(false);
   const [isAddingProject, setIsAddingProject] = useState(false);
@@ -462,31 +463,48 @@ export default function ManageClients() {
     },
   });
 
-  // Fetch clients and work from API on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [clientsResponse, workResponse] = await Promise.all([
-          fetch("/api/admin/clients"),
-          fetch("/api/projects"),
-        ]);
+  // Fetch clients and work from API (used on mount and on retry)
+  const fetchData = async () => {
+    setFetchError(null);
+    setIsInitialLoading(true);
+    try {
+      const [clientsResponse, workResponse] = await Promise.all([
+        fetch("/api/admin/clients"),
+        fetch("/api/projects"),
+      ]);
 
-        if (!clientsResponse.ok) throw new Error("Failed to fetch clients");
-        if (!workResponse.ok) throw new Error("Failed to fetch work tasks");
-
-        const clientsData = await clientsResponse.json();
-        const workData = await workResponse.json();
-
-        setClients(clientsData);
-        setAvailableWork(workData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        showNotification("Failed to load data. Please try again.", "error");
-      } finally {
+      if (!clientsResponse.ok) {
+        const errBody = await clientsResponse.json().catch(() => ({}));
+        const msg = errBody?.error || "Failed to fetch clients";
+        setFetchError(msg);
         setIsInitialLoading(false);
+        return;
       }
-    };
+      if (!workResponse.ok) {
+        const errBody = await workResponse.json().catch(() => ({}));
+        const msg = errBody?.error || "Failed to fetch projects";
+        setFetchError(msg);
+        setIsInitialLoading(false);
+        return;
+      }
 
+      const clientsData = await clientsResponse.json();
+      const workData = await workResponse.json();
+
+      setClients(Array.isArray(clientsData) ? clientsData : []);
+      setAvailableWork(Array.isArray(workData) ? workData : []);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      const message =
+        error.message || "Failed to load data. Check your connection and try again.";
+      setFetchError(message);
+      showNotification(message, "error");
+    } finally {
+      setIsInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -794,6 +812,28 @@ console.log(selectedTasksToAssign);
 
   if (isInitialLoading)
     return <LoadingSpinner message="Loading client data..." />;
+
+  if (fetchError) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+            <FaExclamationCircle className="h-16 w-16 text-destructive mb-4" />
+            <CardTitle className="text-xl mb-2">Could not load clients</CardTitle>
+            <CardDescription className="mb-6">
+              {fetchError}
+            </CardDescription>
+            <p className="text-sm text-muted-foreground mb-6">
+              This often happens when the database is unreachable. Check your connection and try again.
+            </p>
+            <Button onClick={() => fetchData()} variant="default" size="lg">
+              Try again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <TooltipProvider>

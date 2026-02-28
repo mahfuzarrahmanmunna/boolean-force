@@ -88,10 +88,10 @@ export default function WorkerDashboardPage() {
   // Modal State
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [updating, setUpdating] = useState(false);
-// Submit Work Modal
-const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  
-// Form State
+  // Submit Work Modal
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+
+  // Form State
   const [profileForm, setProfileForm] = useState({
     name: "",
     email: "",
@@ -120,29 +120,28 @@ const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
     fetchTimeEntries(session.user);
     fetchChartData(chartView);
   }, [session, status, router, chartView]);
-  
-// submit work 
 
-const handleSubmitWork = async (formData) => {
-  try {
-    const res = await fetch("/api/tasks/submit", {
-      method: "POST",
-      body: formData,
-    });
+  // submit work
 
-    if (!res.ok) throw new Error("Submit failed");
+  const handleSubmitWork = async (formData) => {
+    try {
+      const res = await fetch("/api/tasks/submit", {
+        method: "POST",
+        body: formData,
+      });
 
-    toast.success("Work submitted successfully");
-    setIsSubmitModalOpen(false);
+      if (!res.ok) throw new Error("Submit failed");
 
-    // Refresh task list
-    fetchTasks(session.user);
-    setActiveTab("my-tasks");
-  } catch (err) {
-    toast.error("Failed to submit work");
-  }
-};
+      toast.success("Work submitted successfully");
+      setIsSubmitModalOpen(false);
 
+      // Refresh task list
+      fetchTasks(session.user);
+      setActiveTab("my-tasks");
+    } catch (err) {
+      toast.error("Failed to submit work");
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -590,14 +589,19 @@ const handleSubmitWork = async (formData) => {
                   >
                     {tab.replace("-", " ")}
                   </button>
-                )
+                ),
               )}
               <div
                 className="absolute bottom-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300"
                 style={{
                   width: "25%",
                   transform: `translateX(${
-                    ["overview", "my-tasks", "time-tracking", "performance"].indexOf(activeTab) * 100
+                    [
+                      "overview",
+                      "my-tasks",
+                      "time-tracking",
+                      "performance",
+                    ].indexOf(activeTab) * 100
                   }%)`,
                 }}
               ></div>
@@ -690,7 +694,7 @@ const handleSubmitWork = async (formData) => {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived"
+                          t.status !== "completed" && t.status !== "archived",
                       )
                       .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
                       .slice(0, 5)
@@ -712,90 +716,87 @@ const handleSubmitWork = async (formData) => {
               </div>
             )}
 
-       {/* My Tasks Tab */}
-{activeTab === "my-tasks" && (
-  <div>
-    <div className="flex justify-between items-center mb-4">
-      <h3 className="text-lg font-semibold">My Tasks</h3>
-      <button
-        onClick={() => setIsSubmitModalOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-      >
-        + Submit Work
-      </button>
-    </div>
+            {/* My Tasks Tab */}
+            {activeTab === "my-tasks" && (
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">My Tasks</h3>
+                  <button
+                    onClick={() => setIsSubmitModalOpen(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                  >
+                    + Submit Work
+                  </button>
+                </div>
 
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-        {/* Table header */}
-        <thead className="bg-slate-50 dark:bg-slate-900/50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Task
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Project
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Due Date
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Priority
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="relative px-6 py-3">
-              <span className="sr-only">Actions</span>
-            </th>
-          </tr>
-        </thead>
-        {/* Table body */}
-        <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
-          {tasks.map((task) => (
-            <tr
-              key={task.id}
-              className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-            >
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
-                {task.title}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                {task.project}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
-                {new Date(task.dueDate).toLocaleDateString()}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getPriorityBadge(task.priority)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getStatusBadge(task.status)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-                  <MoreHorizontal className="w-5 h-5" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+                    {/* Table header */}
+                    <thead className="bg-slate-50 dark:bg-slate-900/50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Task
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Project
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Due Date
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Priority
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="relative px-6 py-3">
+                          <span className="sr-only">Actions</span>
+                        </th>
+                      </tr>
+                    </thead>
+                    {/* Table body */}
+                    <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                      {tasks.map((task) => (
+                        <tr
+                          key={task.id}
+                          className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-white">
+                            {task.title}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                            {task.project}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
+                            {new Date(task.dueDate).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getPriorityBadge(task.priority)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(task.status)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <button className="cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
+                              <MoreHorizontal className="w-5 h-5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-    {/* Submit Work Modal */}
-    <SubmitModal
-      isOpen={isSubmitModalOpen}
-      onClose={() => setIsSubmitModalOpen(false)}
-      onSubmit={handleSubmitWork}
-      title="Submit Work"
-      submitButtonText="Submit"
-    />
-  </div>
-)}
-
-
-
+                {/* Submit Work Modal */}
+                <SubmitModal
+                  isOpen={isSubmitModalOpen}
+                  onClose={() => setIsSubmitModalOpen(false)}
+                  onSubmit={handleSubmitWork}
+                  title="Submit Work"
+                  submitButtonText="Submit"
+                />
+              </div>
+            )}
 
             {/* Time Tracking Tab */}
             {activeTab === "time-tracking" && (
@@ -830,7 +831,7 @@ const handleSubmitWork = async (formData) => {
                     {tasks
                       .filter(
                         (t) =>
-                          t.status !== "completed" && t.status !== "archived"
+                          t.status !== "completed" && t.status !== "archived",
                       )
                       .map((t) => (
                         <option key={t.id} value={t.title}>

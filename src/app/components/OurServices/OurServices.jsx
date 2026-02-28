@@ -10,7 +10,7 @@ const OurServices = () => {
         {
             id: 1,
             icon: "🎨",
-            title: "Brand Visual Identity",
+            title: "Brand Visual Identity123",
             description: "Create a powerful brand presence that resonates with your audience and drives recognition.",
             code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
             features: [

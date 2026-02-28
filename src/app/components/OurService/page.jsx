@@ -38,7 +38,7 @@ const OurService = ({ onNavigateToSection }) => {
     const services = [
         {
             id: 1,
-            title: "Brand Visual Identity",
+            title: "Brand Visual Identity123",
             subtitle: "Crafting Memorable Experiences",
             description: "Create a powerful brand presence that resonates with your audience and drives recognition.",
             code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
@@ -255,8 +255,8 @@ const OurService = ({ onNavigateToSection }) => {
         {
             id: 1,
             url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80',
-            title: 'Innovative Solutions',
-            subtitle: 'Transform your business with cutting-edge technology'
+            title: 'Our Core Logic',
+            subtitle: "We don't just provide services; we solve for growth using a refined digital stack"
         },
         {
             id: 2,

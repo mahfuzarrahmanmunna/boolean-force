@@ -55,6 +55,19 @@ export const authOptions = {
                         role: user.role || "worker", // Default to worker if no role specified
                     };
                 } catch (error) {
+                    const msg = error?.message ?? "";
+                    const isDbUnavailable =
+                        msg.includes("ECONNREFUSED") ||
+                        msg.includes("querySrv") ||
+                        msg.includes("ENOTFOUND");
+                    if (isDbUnavailable) {
+                        if (process.env.NODE_ENV === "development") {
+                            console.error("Auth error (DB unreachable):", msg);
+                        }
+                        throw new Error(
+                            "Database is unavailable. Check your internet connection and try again."
+                        );
+                    }
                     console.error("Auth error:", error);
                     throw new Error("Invalid credentials");
                 }
@@ -99,7 +112,10 @@ export const authOptions = {
                         user.role = existingUser.role || "worker";
                     }
                 } catch (error) {
-                    console.error("Error during social sign in:", error);
+                    const msg = error?.message ?? "";
+                    if (!msg.includes("ECONNREFUSED") && !msg.includes("querySrv")) {
+                        console.error("Error during social sign in:", error);
+                    }
                     return false;
                 }
             }
