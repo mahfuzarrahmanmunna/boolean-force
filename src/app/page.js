@@ -18,6 +18,7 @@ import PricingCart from "./components/PricingCart/PricingCart";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import HeroSection from "./components/HeroSection/HeroSection";
+import WhyUs from "./components/WhyUs";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -43,6 +44,7 @@ export default function Home() {
       {/* <PricingCard /> */}
       <PricingCart />
       <Partnership />
+     
     </div>
   );
 }

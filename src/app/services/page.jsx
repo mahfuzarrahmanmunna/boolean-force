@@ -51,14 +51,15 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
         {
             id: 1,
             title: "Brand Visual Identity",
-            subtitle: "Crafting Memorable Experiences",
-            description: "Create a powerful brand presence that resonates with your audience and drives recognition.",
+            subtitle: "(Design + Emotion) == Brand_Authority",
+            description: "Your brand deserves both logic and love. We engineer visual identities that bridge the gap between human connection and technical precision. We don't just design; we define how the world interacts with your vision.",
             code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
             features: [
-                "Logo Design & Branding",
-                "Brand Guidelines",
-                "Marketing Materials",
-                "Digital Asset Creation"
+                "Logo Design, Brand Identity & Strategy",
+                "Marketing Collaterals (Brochures, Business Cards, Social Media Kits)",
+                "Visual / UI / UX Design",
+                "Rebranding for Established Companies",
+                "360° Marketing for Brand Positioning"
             ],
             benefits: [
                 "Increased brand recognition",
@@ -86,19 +87,21 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 { phase: "Concept", duration: "2-3 weeks" },
                 { phase: "Design", duration: "3-4 weeks" },
                 { phase: "Implementation", duration: "2-3 weeks" }
-            ]
+            ],
+            primaryButtonText: "Build My Brand ",
+            secondaryButtonText: "Find Out More"
         },
         {
             id: 2,
             title: "Website Development",
-            subtitle: "Building Digital Experiences",
-            description: "Build responsive, SEO-optimized websites that convert visitors into customers.",
-            code: "IF (Responsive AND SEO) THEN (Conversions++)",
+            subtitle: "(Speed × Functionality) == User_Retention",
+            description: "We build high-velocity, responsive digital hubs that speak your brand's native language. Our code is optimized for the edge, ensuring that in every deployment, performance is constant, not a variable.",
+              code: "FOR (User IN Audience) { IF (Experience == Exceptional) THEN (Retention++) }",
             features: [
-                "Custom Web Development",
-                "E-commerce Solutions",
-                "Mobile-First Design",
-                "SEO Optimization"
+                "Tailored Websites for Various Industries",
+                "Industry-Standard Tech Stack",
+                "E-Commerce, Business, Corporate & Portfolio Websites",
+                "Hosting Management, Security & Maintenance"
             ],
             benefits: [
                 "Enhanced user experience",
@@ -126,19 +129,21 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 { phase: "Design", duration: "2-3 weeks" },
                 { phase: "Development", duration: "4-6 weeks" },
                 { phase: "Testing", duration: "1-2 weeks" }
-            ]
+            ],
+            primaryButtonText: "Let’s Build It",
+            secondaryButtonText: "Decode More"
         },
         {
             id: 3,
             title: "ERP Software Solutions",
-            subtitle: "Streamlining Business Operations",
-            description: "Streamline your business operations with custom ERP systems tailored to your needs.",
+            subtitle: "(Automation + Control) == Scale",
+            description: "Complexity simplified. We develop intelligent ERP systems that eliminate bottlenecks and grant you total command over your data. We believe that when operations are optimized, efficiency becomes the default state.",
             code: "WHILE (Process != Automated) { Optimize() }",
             features: [
-                "Custom ERP Development",
-                "Business Process Automation",
-                "Data Integration",
-                "Cloud-Based Solutions"
+                "Custom ERP for Accounting, HR, Inventory, and Sales",
+                "Integration with Any Custom Website",
+                "Cloud-Based Dashboard and Reports",
+              
             ],
             benefits: [
                 "Operational efficiency",
@@ -166,19 +171,21 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 { phase: "Architecture", duration: "2-3 weeks" },
                 { phase: "Development", duration: "6-8 weeks" },
                 { phase: "Deployment", duration: "2-3 weeks" }
-            ]
+            ],
+            primaryButtonText: "Streamline My Workflow",
+            secondaryButtonText: "Explore more"
         },
         {
             id: 4,
             title: "POS System",
-            subtitle: "Modern Retail Solutions",
-            description: "Modern point-of-sale solutions that enhance customer experience and boost sales.",
+            subtitle: "(Ease + Efficiency) == Revenue_Velocity",
+            description: "Modern point-of-sale systems tailored to your unique business logic. We eliminate friction at the checkout, ensuring that every transaction is a seamless bridge between you and your customer",
             code: "IF (POS == Modern) THEN (Sales = MAX)",
             features: [
-                "Custom POS Development",
-                "Inventory Management",
-                "Payment Integration",
-                "Analytics & Reporting"
+                "POS for Retail & Restaurant",
+                "Real-Time Sales & Inventory Tracking",
+                "Quick & Secure Payment Processing",
+              
             ],
             benefits: [
                 "Faster transactions",
@@ -206,8 +213,55 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                 { phase: "Design", duration: "2 weeks" },
                 { phase: "Development", duration: "3-4 weeks" },
                 { phase: "Implementation", duration: "1-2 weeks" }
-            ]
-        }
+            ],
+            primaryButtonText: " Simplify My Sales",
+            secondaryButtonText: " See What’s Possible"
+        },
+
+         {
+            id: 5,
+            title: "AI Chat Bots",
+            subtitle: "(Intelligence + Interaction) == Conversion_Growth",
+            description: "Growth Your customer support should never sleep. We architect adaptive AI interfaces that bridge the gap between instant response and human-like understanding. We don’t justautomate chats; we engineer high-converting digital assistants that learn from every interaction.",
+            code: "WHILE (Process != Automated) { Optimize() }",
+            features: [
+                "Custom LLM & NLP Integration (GPT-driven or Private Models)",
+                "24/7 Automated Customer Support & Lead Generation",
+                "Seamless CRM & Database Syncing",
+                "Multilingual Support for Global Scalability",
+                "Sentiment Analysis for Personalized User Journeys"
+              
+            ],
+            benefits: [
+                "24/7 Customer Support",
+                "Lead Generation",
+                "Personalized User Experience",
+                "Scalable Customer Interaction"
+            ],
+            process: [
+                "Requirements Analysis",
+                "Model Selection & Training",
+                "Development & Integration",
+                "Testing & Optimization"
+            ],
+            stats: [
+                { label: "Customer Satisfaction", value: "92%" },
+                { label: "Lead Conversion Rate", value: "42%" },
+                { label: "Bot Accuracy", value: "95%" }
+            ],
+            detail: "Our AI chat bot solutions provide intelligent, responsive customer interactions that enhance satisfaction and drive conversions, all while learning and improving over time.",
+            image: "https://picsum.photos/seed/aichatbot/1200/800.jpg",
+            icon: <Code className="w-8 h-8" />,
+            color: SECONDARY_COLOR,
+            timeline: [
+                { phase: "Consultation", duration: "1 week" },
+                { phase: "Model Selection & Training", duration: "2-3 weeks" },
+                { phase: "Development & Integration", duration: "3-4 weeks" },
+                { phase: "Testing & Optimization", duration: "1-2 weeks" }
+            ],
+            primaryButtonText: "Deploy My Bot",
+            secondaryButtonText: "Find Out More"
+        },
     ];
 
     // Update first/last service states when index changes
@@ -419,7 +473,6 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
             className="relative min-h-screen overflow-hidden"
             id="services"
         >
-
             {/* Hero Section with Slider */}
             <section className="relative h-[50vh] md:h-[55vh] overflow-hidden">
                 <div className="absolute inset-0">
@@ -638,12 +691,29 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                     </div>
 
                     <h2 className="text-5xl md:text-7xl font-bold mb-6 text-white">
-                        What We Offer
+                       Our Core Logic
                     </h2>
 
                     <p className="text-xl max-w-3xl mx-auto text-gray-300">
-                        We provide comprehensive digital solutions to help your business thrive in the modern landscape
+                         We don't just provide services; we solve for growth using a refined digital stack
                     </p>
+
+                    <div className="overflow-hidden">
+                        <div className="mt-10 justify-center flex flex-col sm:flex-row gap-3 md:gap-4 transform transition-all duration-1000 delay-500 translate-y-0 opacity-100">
+                            <a
+                                href="#contact-form"
+                                className="px-6 py-2 md:px-8 md:py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 text-sm md:text-base"
+                            >
+                                Execute My Project
+                            </a>
+                            <a
+                                href="#services"
+                                className="px-6 py-2 md:px-8 md:py-3 bg-transparent text-white font-semibold rounded-lg shadow-lg border-2 border-white hover:bg-white hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1 text-sm md:text-base"
+                            >
+                               Reach out to Us
+                            </a>
+                        </div>
+                    </div>
                 </motion.div>
             </motion.div>
 
@@ -845,24 +915,34 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                             )}
                                         </div>
 
+                                        {/* Service-specific buttons */}
                                         <div className="flex flex-col sm:flex-row gap-4">
                                             <motion.button
                                                 onClick={() => setSelectedService(services[currentServiceIndex])}
                                                 className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
-                                                style={{ background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`, boxShadow: `0 10px 25px -5px ${services[currentServiceIndex].color}40` }}
+                                                style={{ 
+                                                    background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`, 
+                                                    boxShadow: `0 10px 25px -5px ${services[currentServiceIndex].color}40` 
+                                                }}
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                             >
-                                                Learn More
+                                                {services[currentServiceIndex].primaryButtonText}
                                                 <ArrowRight className="w-4 h-4 ml-2" />
                                             </motion.button>
                                             <motion.button
                                                 className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 border flex items-center justify-center hover:bg-white/10"
-                                                style={{ background: 'rgba(51, 65, 85, 0.5)', borderColor: 'rgba(255, 255, 255, 0.1)' }}
+                                                style={{ 
+                                                    background: 'rgba(51, 65, 85, 0.5)', 
+                                                    borderColor: 'rgba(255, 255, 255, 0.1)' 
+                                                }}
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
+                                                onClick={() => {
+                                                    console.log(`Secondary button clicked for ${services[currentServiceIndex].title}`);
+                                                }}
                                             >
-                                                Contact Us
+                                                {services[currentServiceIndex].secondaryButtonText}
                                             </motion.button>
                                         </div>
                                     </div>
@@ -1206,6 +1286,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                     </div>
                                 </div>
 
+                                {/* Modal buttons with service-specific text */}
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     <motion.button
                                         className={`flex-1 py-3 px-6 rounded-lg text-white font-medium transition-all duration-300 hover:shadow-lg`}
@@ -1213,7 +1294,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                     >
-                                        Get Started
+                                        {selectedService.primaryButtonText}
                                     </motion.button>
                                     <motion.button
                                         onClick={() => setSelectedService(null)}
@@ -1222,7 +1303,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                     >
-                                        Close
+                                        {selectedService.secondaryButtonText}
                                     </motion.button>
                                 </div>
                             </div>

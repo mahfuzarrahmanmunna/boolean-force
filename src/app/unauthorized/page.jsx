@@ -2,7 +2,8 @@
 'use client'; // Add this line to use client-side hooks like signOut
 import Link from "next/link";
 import { signOut } from "next-auth/react"; // Import signOut
-import { FaExclamationTriangle, FaSignOutAlt } from "react-icons/fa"; // Import a logout icon
+import { FaExclamationTriangle, FaSignOutAlt } from "react-icons/fa"; 
+// Import a logout icon
 
 export default function Unauthorized() {
     // Function to handle the logout process

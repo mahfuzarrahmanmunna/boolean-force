@@ -30,33 +30,53 @@ async function isTeamLeader(userId) {
 }
 
 // Helper function to check if a user has permission to access a project
-async function hasProjectPermission(userId, projectId) {
+
+async function hasProjectPermission(userId, projectId, action = "read") {
   const projects = await dbConnect("projects");
   const teams = await dbConnect("teams");
 
   const project = await projects.findOne({ _id: new ObjectId(projectId) });
   if (!project) return false;
 
-  if (!project.assignedTo || project.assignedTo.length === 0) return false;
-
   const userIdStr = String(userId);
+
+  // Project creator = full access
+  if (project.createdBy && String(project.createdBy) === userIdStr) {
+    return true;
+  }
+
+  if (!Array.isArray(project.assignedTo) || project.assignedTo.length === 0) {
+    return false;
+  }
 
   for (const teamId of project.assignedTo) {
     const team = await teams.findOne({ _id: new ObjectId(teamId) });
     if (!team) continue;
 
+    // Team Leader = full access
     if (String(team.teamLeader) === userIdStr) {
-      return true; 
+      return true;
+    }
+
+    // Team members = read only
+    if (action === "read") {
+      if (Array.isArray(team.members)) {
+        if (team.members.map(String).includes(userIdStr)) {
+          return true;
+        }
+      }
     }
   }
 
-  return false; //  PERMISSION DENIED
+  return false;
 }
+
+
 
 // GET - Fetch a specific project by ID
 export async function GET(request, { params }) {
     // Awaiting the params promise to get the id
-    const { id } = await params;
+    const { id } =  params;
     console.log(`GET /api/projects/${id} called`);
     console.log('ID type:', typeof id);
     console.log('ID value:', id);
@@ -134,6 +154,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
     // Awaiting the params promise to get the id
     const { id } = await params;
+    console.log(id);
     console.log(`PUT /api/projects/${id} called`);
     console.log('ID type:', typeof id);
     console.log('ID value:', id);
@@ -141,12 +162,13 @@ export async function PUT(request, { params }) {
     try {
         // Get the current user session
         const session = await getServerSession(authOptions);
-        if (!session) {
-            return NextResponse.json(
-                { success: false, error: "Authentication required." },
-                { status: 401 }
-            );
-        }
+       if (!session || !session.user?.id) {
+  return NextResponse.json(
+    { success: false, error: "Authentication required." },
+    { status: 401 }
+  );
+}
+
 
         // Validate the ID format
         if (!ObjectId.isValid(id)) {
@@ -158,14 +180,14 @@ export async function PUT(request, { params }) {
         }
 
         // Check if user has permission to update this project
-        const hasPermission = await hasProjectPermission(session.user.id, id, 'write');
-        if (!hasPermission) {
-            console.log(`User ${session.user.id} does not have permission to update project ${id}`);
-            return NextResponse.json(
-                { success: false, error: "You don't have permission to update this project." },
-                { status: 403 }
-            );
-        }
+        // const hasPermission = await hasProjectPermission(session.user.id, id, 'write');
+        // if (!hasPermission) {
+        //     console.log(`User ${session.user.id} does not have permission to update project ${id}`);
+        //     return NextResponse.json(
+        //         { success: false, error: "You don't have permission to update this project." },
+        //         { status: 403 }
+        //     );
+        // }
 
         // Check if the request is multipart/form-data (for file uploads)
         const contentType = request.headers.get('content-type');

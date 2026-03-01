@@ -1,5 +1,7 @@
 // components/Partnership.jsx
 import React, { useState } from 'react';
+import { FaPhone } from 'react-icons/fa';
+import WhyUs from '../../components/WhyUs';
 
 const Partnership = () => {
     const [hoveredCard, setHoveredCard] = useState(null);
@@ -74,8 +76,10 @@ const Partnership = () => {
                     </p>
                 </div>
 
+
+
                 {/* Partnership Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
                     {partnershipOptions.map((option) => (
                         <div
                             key={option.id}
@@ -125,6 +129,10 @@ const Partnership = () => {
                     ))}
                 </div>
 
+                <div  >
+    <WhyUs></WhyUs>
+</div>
+
                 {/* Enhanced CTA Section */}
                 <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#3B85FE]/20 to-[#A9DBDC]/20 backdrop-blur-lg border border-white/10 p-12 text-center">
                     {/* Background decoration */}
@@ -133,21 +141,33 @@ const Partnership = () => {
                         <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-[#A9DBDC] rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
                     </div>
 
-                    <div className="relative z-10">
-                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Partner With Us?</h2>
+                    <div className="relative z-10"> 
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to Initialize?
+</h2>
                         <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-                            Whether you're an agency, freelancer, or tech provider, we have a partnership opportunity that fits your needs.
+                            IF (Contact == Today) THEN (Solution == Tomorrow)
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <button className=" cursor-pointerbg-gradient-to-r from-[#A9DBDC] to-[#3B85FE] hover:from-opacity-90 hover:to-opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg relative overflow-hidden group">
-                                <span className="relative z-10">Get in Touch</span>
-                                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                            </button>
+                        <div className="sm:flex-row gap-4 justify-center items-center">
+                           
 
                             <button className=" cursor-pointerbg-transparent border-2 border-white/30 hover:border-white/50 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:-translate-y-1">
-                                Download Partnership Guide
+                               Send_Request
+
                             </button>
+                            <div>
+    <p  className='text-white font-lg mt-4 font-bold'
+    >
+                                    📧 info@booleanforce.com
+<span className='flex items-center gap-2 justify-center mt-2'>
+    <FaPhone /> 
+
+<p>+1 (555) 123-4567</p>
+</span>
+                    
+        </p>       
+        
+         </div>
                         </div>
 
                         {/* Stats or testimonials could go here */}

@@ -660,50 +660,95 @@ export default function ManageClients() {
     }
   };
 
+const getAuthToken = () => {
+ 
+  return localStorage.getItem('token') || document.cookie.split('=')[1];
+};
+
+
   // Handle assigning work to a client
-  const handleAssignWork = async () => {
-    if (selectedTasksToAssign.length === 0) {
-      showNotification(
-        "Please select at least one project to assign.",
-        "error"
-      );
-      return;
+
+const handleAssignWork = async () => {
+  if (selectedTasksToAssign.length === 0) {
+    showNotification("Please select at least one project to assign.", "error");
+    return;
+  }
+console.log(selectedTasksToAssign);
+  setIsLoading(true);
+  try {
+    const updatePromises = selectedTasksToAssign.map((taskId) =>
+     
+      fetch(`/api/projects/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include', 
+        body: JSON.stringify({
+          clientId: assigningWorkTo._id,
+        }),
+      })
+    );
+
+    const updateResults = await Promise.all(updatePromises);
+
+    // Check each response for errors
+    const failedUpdates = [];
+    const successfulUpdates = [];
+
+    for (let i = 0; i < updateResults.length; i++) {
+      const result = updateResults[i];
+      const taskId = selectedTasksToAssign[i];
+      
+      if (!result.ok) {
+        failedUpdates.push(taskId);
+        try {
+          const errorData = await result.json();
+          console.error(`Failed to update project ${taskId}:`, errorData);
+        } catch (e) {
+          console.error(`Failed to update project ${taskId}:`, result.statusText);
+        }
+      } else {
+        successfulUpdates.push(taskId);
+      }
     }
 
-    setIsLoading(true);
-    try {
-      console.log("Assigning projects:", selectedTasksToAssign);
-      console.log("Client ID:", assigningWorkTo._id);
-
-      // Update each project to add the client
-      const updatePromises = selectedTasksToAssign.map((taskId) =>
-        fetch(`/api/projects/${taskId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            clientId: assigningWorkTo._id,
-            status: "in-progress",
-          }),
-        })
+    if (failedUpdates.length > 0) {
+      console.error("Some projects were not updated:", failedUpdates);
+      showNotification(
+        `${failedUpdates.length} project(s) could not be assigned. Please try again.`,
+        "error"
       );
-
-      const updateResults = await Promise.all(updatePromises);
-
-      // Check if any updates failed
-      const failedUpdates = updateResults.filter((result) => !result.ok);
-      if (failedUpdates.length > 0) {
-        console.error("Some projects were not updated");
-        showNotification(
-          "Some projects could not be assigned. Please try again.",
-          "error"
+      
+      // Still update the successful ones in the UI
+      if (successfulUpdates.length > 0) {
+        // Update available work list with the updated projects
+        const updatedProjects = await Promise.all(
+          successfulUpdates.map(async (projectId) => {
+            try {
+              const response = await fetch(`/api/projects/${projectId}`);
+              if (response.ok) {
+                const project = await response.json();
+                return project;
+              }
+            } catch (error) {
+              console.error(`Error fetching updated project ${projectId}:`, error);
+            }
+            return null;
+          })
         );
-        setIsLoading(false);
-        return;
-      }
 
-      // Update available work list with the updated projects
+        setAvailableWork((prev) =>
+          prev.map((project) => {
+            const updatedProject = updatedProjects.find(
+              (p) => p && p._id === project._id
+            );
+            return updatedProject || project;
+          })
+        );
+      }
+    } else {
+      // All updates were successful
       const updatedProjects = await Promise.all(
-        selectedTasksToAssign.map(async (projectId) => {
+        successfulUpdates.map(async (projectId) => {
           const response = await fetch(`/api/projects/${projectId}`);
           if (response.ok) {
             const project = await response.json();
@@ -722,16 +767,18 @@ export default function ManageClients() {
         })
       );
 
-      setAssigningWorkTo(null);
-      setSelectedTasksToAssign([]);
       showNotification("Projects assigned successfully!", "success");
-    } catch (error) {
-      console.error("Error assigning work:", error);
-      showNotification(error.message || "Failed to assign projects.", "error");
-    } finally {
-      setIsLoading(false);
     }
-  };
+
+    setAssigningWorkTo(null);
+    setSelectedTasksToAssign([]);
+  } catch (error) {
+    console.error("Error assigning work:", error);
+    showNotification(error.message || "Failed to assign projects.", "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Filter clients based on search and status
   const filteredClients = useMemo(() => {

@@ -24,7 +24,10 @@ import {
     User,
     MessageSquare,
     Send,
-    X
+    X,
+    Linkedin,
+    Twitter,
+    Instagram
 } from 'lucide-react';
 
 const ContactPage = () => {
@@ -409,18 +412,24 @@ const ContactPage = () => {
                 </section>
 
                 {/* Contact Form and Information */}
-                <section id="contact-form" className="py-16 px-6">
-                    <div className="container mx-auto">
+                 <section id="contact-form" className="py-16 px-6 ">
+                    <div className="container mx-auto ">
                         <div className="text-center mb-12">
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Get In Touch</h2>
+                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to Push to Production?</h2>
                             <p className="text-gray-300 max-w-2xl mx-auto">
-                                Tell us about your project and we'll get back to you within 24 hours
+F (Idea == Ready) THEN (Connect == TRUE) Let’s calculate your next big
+move and turn your digital presence into a definitive success.
                             </p>
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            {/* Contact Form */}
+                            {/* Contact Form - Drop a Message section */}
                             <div className="lg:col-span-2 bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                                <h3 className="text-2xl font-bold text-white mb-6 flex items-center">
+                                    <MessageSquare className="w-6 h-6 mr-3 text-blue-400" />
+                                    Drop a Message
+                                </h3>
+                                
                                 {formStatus.submitted && (
                                     <div className={`p-4 rounded-lg mb-6 flex items-center ${formStatus.success ? 'bg-green-500/20 text-green-100' : 'bg-red-500/20 text-red-100'}`}>
                                         {formStatus.success ? (
@@ -479,131 +488,10 @@ const ContactPage = () => {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
-                                                <Phone className="w-4 h-4 mr-2" />
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="tel"
-                                                id="phone"
-                                                name="phone"
-                                                value={formData.phone}
-                                                onChange={handleChange}
-                                                onFocus={() => setFocusedField('phone')}
-                                                onBlur={() => setFocusedField(null)}
-                                                className={`w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${focusedField === 'phone' ? 'bg-white/15' : ''}`}
-                                                placeholder="+1 (555) 123-4567"
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="company" className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
-                                                <Building className="w-4 h-4 mr-2" />
-                                                Company
-                                            </label>
-                                            <input
-                                                type="text"
-                                                id="company"
-                                                name="company"
-                                                value={formData.company}
-                                                onChange={handleChange}
-                                                onFocus={() => setFocusedField('company')}
-                                                onBlur={() => setFocusedField(null)}
-                                                className={`w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${focusedField === 'company' ? 'bg-white/15' : ''}`}
-                                                placeholder="Your Company"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    {/* Multiple Service Selection */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-4">Services Interested In</label>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {services.map((service) => (
-                                                <div
-                                                    key={service.id}
-                                                    onClick={() => handleServiceToggle(service.id)}
-                                                    className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${formData.services.includes(service.id)
-                                                        ? 'bg-blue-500/20 border-blue-500'
-                                                        : 'bg-white/5 border-white/20 hover:bg-white/10'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center">
-                                                        <div className={`w-5 h-5 rounded-md border-2 mr-3 flex items-center justify-center ${formData.services.includes(service.id)
-                                                            ? 'bg-blue-500 border-blue-500'
-                                                            : 'border-gray-400'
-                                                            }`}>
-                                                            {formData.services.includes(service.id) && (
-                                                                <Check className="w-3 h-3 text-white" />
-                                                            )}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center">
-                                                                <span className="text-xl mr-2">{service.icon}</span>
-                                                                <h4 className="text-white font-medium">{service.name}</h4>
-                                                            </div>
-                                                            <p className="text-gray-400 text-sm mt-1">{service.description}</p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {formStatus.errors.services && (
-                                            <p className="mt-2 text-sm text-red-400">{formStatus.errors.services}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div>
-                                            <label htmlFor="budget" className="block text-sm font-medium text-gray-300 mb-2">Project Budget</label>
-                                            <select
-                                                id="budget"
-                                                name="budget"
-                                                value={formData.budget}
-                                                onChange={handleChange}
-                                                onFocus={() => setFocusedField('budget')}
-                                                onBlur={() => setFocusedField(null)}
-                                                className={`w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${focusedField === 'budget' ? 'bg-white/15' : ''}`}
-                                            >
-                                                <option value="" className="bg-slate-800">Select budget range</option>
-                                                {budgetOptions.map((option) => (
-                                                    <option key={option.value} value={option.value} className="bg-slate-800">
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        <div>
-                                            <label htmlFor="timeline" className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
-                                                <Calendar className="w-4 h-4 mr-2" />
-                                                Project Timeline
-                                            </label>
-                                            <select
-                                                id="timeline"
-                                                name="timeline"
-                                                value={formData.timeline}
-                                                onChange={handleChange}
-                                                onFocus={() => setFocusedField('timeline')}
-                                                onBlur={() => setFocusedField(null)}
-                                                className={`w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ${focusedField === 'timeline' ? 'bg-white/15' : ''}`}
-                                            >
-                                                <option value="" className="bg-slate-800">Select timeline</option>
-                                                {timelineOptions.map((option) => (
-                                                    <option key={option.value} value={option.value} className="bg-slate-800">
-                                                        {option.label}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    </div>
-
                                     <div>
                                         <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2 flex items-center">
                                             <MessageSquare className="w-4 h-4 mr-2" />
-                                            Project Details
+                                            Share your vision or your variables
                                         </label>
                                         <textarea
                                             id="message"
@@ -633,7 +521,7 @@ const ContactPage = () => {
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
-                                                Sending...
+                                                Processing...
                                             </>
                                         ) : (
                                             <>
@@ -645,93 +533,73 @@ const ContactPage = () => {
                                 </form>
                             </div>
 
-                            {/* Contact Information */}
+                            {/* Contact Information - Multiple sections */}
                             <div className="space-y-6">
+                                {/* Consult a Strategist */}
+                                <div id="consult" className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                                    <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
+                                        <Calendar className="w-6 h-6 mr-3 text-purple-400" />
+                                        Consult a Strategist
+                                    </h3>
+                                    <p className="text-gray-300 mb-4">
+                                        Prefer a direct sync? Request a call with our technical team to map out your project architecture in real-time.
+                                    </p>
+                                    <a
+                                        href="#"
+                                        className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors duration-300"
+                                    >
+                                        Schedule a call
+                                        <ArrowRight className="w-4 h-4 ml-2" />
+                                    </a>
+                                </div>
+
+                                {/* Partner with the Force */}
                                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                                    <h3 className="text-2xl font-bold text-white mb-6">Contact Information</h3>
+                                    <h3 className="text-2xl font-bold text-white mb-4 flex items-center">
+                                        <Building className="w-6 h-6 mr-3 text-green-400" />
+                                        Partner with the Force
+                                    </h3>
+                                    <p className="text-gray-300">
+                                        Built for founders and agencies looking to merge expertise. Let's explore how our frameworks can multiply your impact.
+                                    </p>
+                                </div>
 
-                                    <div className="space-y-6">
-                                        <div className="flex items-start">
-                                            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                                                <MapPin className="w-6 h-6 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h4 className="text-lg font-semibold text-white">Office Address</h4>
-                                                <p className="text-gray-300 mt-1">123 Tech Street, Silicon Valley, CA 94025</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start">
-                                            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                                <Phone className="w-6 h-6 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h4 className="text-lg font-semibold text-white">Phone</h4>
-                                                <p className="text-gray-300 mt-1">+1 (555) 123-4567</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start">
-                                            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                                                <Mail className="w-6 h-6 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h4 className="text-lg font-semibold text-white">Email</h4>
-                                                <p className="text-gray-300 mt-1">info@BooleanForce.com</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-start">
-                                            <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center">
-                                                <Clock className="w-6 h-6 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h4 className="text-lg font-semibold text-white">Business Hours</h4>
-                                                <p className="text-gray-300 mt-1">Monday - Friday: 9:00 AM - 6:00 PM</p>
-                                                <p className="text-gray-300">Saturday: 10:00 AM - 4:00 PM</p>
-                                                <p className="text-gray-300">Sunday: Closed</p>
-                                            </div>
-                                        </div>
+                                {/* Sync with our Feed */}
+                                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                                    <h3 className="text-2xl font-bold text-white mb-4">Sync with our Feed</h3>
+                                    <p className="text-gray-300 mb-6">
+                                        Follow our latest deployments and internal updates on:
+                                    </p>
+                                    <div className="flex space-x-4">
+                                        <a href="#" className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:scale-110">
+                                            <Linkedin className="w-6 h-6 text-blue-400" />
+                                        </a>
+                                        <a href="#" className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:scale-110">
+                                            <Twitter className="w-6 h-6 text-blue-400" />
+                                        </a>
+                                        <a href="#" className="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:scale-110">
+                                            <Instagram className="w-6 h-6 text-pink-400" />
+                                        </a>
                                     </div>
                                 </div>
 
-                                {/* FAQ Section */}
+                                {/* Email Contact */}
                                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                                    <h3 className="text-xl font-semibold text-white mb-4">Frequently Asked Questions</h3>
-                                    <div className="space-y-4">
-                                        <details className="group">
-                                            <summary className="flex justify-between items-center cursor-pointer text-white font-medium py-2">
-                                                How long does a typical project take?
-                                                <ChevronRight className="w-4 h-4 group-open:rotate-90 transition-transform" />
-                                            </summary>
-                                            <p className="text-gray-300 mt-2 pl-4">
-                                                Project timelines vary depending on complexity. A simple website might take 4-6 weeks, while a complex ERP system could take 3-6 months.
-                                            </p>
-                                        </details>
-                                        <details className="group">
-                                            <summary className="flex justify-between items-center cursor-pointer text-white font-medium py-2">
-                                                Do you provide ongoing support?
-                                                <ChevronRight className="w-4 h-4 group-open:rotate-90 transition-transform" />
-                                            </summary>
-                                            <p className="text-gray-300 mt-2 pl-4">
-                                                Yes, we offer various support packages including maintenance, updates, and technical assistance after project completion.
-                                            </p>
-                                        </details>
-                                        <details className="group">
-                                            <summary className="flex justify-between items-center cursor-pointer text-white font-medium py-2">
-                                                Can you work with our existing systems?
-                                                <ChevronRight className="w-4 h-4 group-open:rotate-90 transition-transform" />
-                                            </summary>
-                                            <p className="text-gray-300 mt-2 pl-4">
-                                                Absolutely! We specialize in integrating new solutions with existing systems to ensure seamless operations.
-                                            </p>
-                                        </details>
+                                    <div className="flex items-center">
+                                        <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                                            <Mail className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div className="ml-4">
+                                            <h4 className="text-lg font-semibold text-white">Email</h4>
+                                            <p className="text-blue-400 mt-1">info@BooleanForce.com</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
+
 
                 {/* Map Section */}
                 <section className="py-16 px-6">
