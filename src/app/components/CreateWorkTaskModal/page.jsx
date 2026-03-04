@@ -76,11 +76,41 @@ import {
 
 // Constants
 const STATUS_OPTIONS = [
-  { value: 'planning', label: 'Planning', description: 'Task is in planning phase', color: 'bg-gray-500', icon: FaHourglassHalf },
-  { value: 'in-progress', label: 'In Progress', description: 'Task is currently being worked on', color: 'bg-blue-500', icon: FaPlayCircle },
-  { value: 'on-hold', label: 'On Hold', description: 'Task is temporarily paused', color: 'bg-yellow-500', icon: FaPauseCircle },
-  { value: 'completed', label: 'Completed', description: 'Task has been completed', color: 'bg-green-500', icon: FaCheckCircle },
-  { value: 'cancelled', label: 'Cancelled', description: 'Task has been cancelled', color: 'bg-red-500', icon: FaStopCircle }
+  {
+    value: "planning",
+    label: "Planning",
+    description: "Task is in planning phase",
+    color: "bg-gray-500",
+    icon: FaHourglassHalf,
+  },
+  {
+    value: "in-progress",
+    label: "In Progress",
+    description: "Task is currently being worked on",
+    color: "bg-blue-500",
+    icon: FaPlayCircle,
+  },
+  {
+    value: "on-hold",
+    label: "On Hold",
+    description: "Task is temporarily paused",
+    color: "bg-yellow-500",
+    icon: FaPauseCircle,
+  },
+  {
+    value: "completed",
+    label: "Completed",
+    description: "Task has been completed",
+    color: "bg-green-500",
+    icon: FaCheckCircle,
+  },
+  {
+    value: "cancelled",
+    label: "Cancelled",
+    description: "Task has been cancelled",
+    color: "bg-red-500",
+    icon: FaStopCircle,
+  },
 ];
 
 const PRIORITY_OPTIONS = [
@@ -180,11 +210,14 @@ const workFormSchema = z.object({
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
-  const statusOption = STATUS_OPTIONS.find(s => s.value === status);
+  const statusOption = STATUS_OPTIONS.find((s) => s.value === status);
   const Icon = statusOption?.icon || FaExclamationTriangle;
 
   return (
-    <Badge variant="outline" className={`flex items-center gap-1 ${statusOption?.color} text-white`}>
+    <Badge
+      variant="outline"
+      className={`flex items-center gap-1 ${statusOption?.color} text-white`}
+    >
       <Icon className="h-3 w-3" />
       {statusOption?.label || status}
     </Badge>
@@ -193,7 +226,7 @@ const StatusBadge = ({ status }) => {
 
 // Priority Badge Component
 const PriorityBadge = ({ priority }) => {
-  const priorityOption = PRIORITY_OPTIONS.find(p => p.value === priority);
+  const priorityOption = PRIORITY_OPTIONS.find((p) => p.value === priority);
 
   return (
     <Badge variant="outline" className={`${priorityOption?.color} text-white`}>
@@ -308,7 +341,7 @@ const FileUpload = ({ files, setFiles, onRemoveFile }) => {
             url: null,
           };
         }
-      })
+      }),
     );
 
     setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]);
@@ -451,12 +484,14 @@ export default function CreateWorkTaskModal({
   // Filter teams for task assignment based on search term
   // FIXED: Added guard clause to prevent error when teams is undefined
   const filteredTeamsForTask = useMemo(() => {
-    if (!teams || !Array.isArray(teams)) return [];
-    
     return teams.filter((team) => {
-      const matchesSearch = team.name
+      // FIX: Add optional chaining (?.) and a fallback string (|| "")
+      const teamName = team?.name || "";
+
+      const matchesSearch = teamName
         .toLowerCase()
         .includes(teamSearchTerm.toLowerCase());
+
       return matchesSearch;
     });
   }, [teams, teamSearchTerm]);
@@ -465,7 +500,7 @@ export default function CreateWorkTaskModal({
   // FIXED: Added guard clause to prevent error when memberIds is undefined
   const getTeamMemberDetails = (memberIds) => {
     if (!memberIds || !Array.isArray(memberIds)) return [];
-    
+
     return memberIds
       .map((id) => workers?.find((w) => w._id === id))
       .filter(Boolean);
@@ -475,9 +510,9 @@ export default function CreateWorkTaskModal({
   // FIXED: Added guard clause to prevent error when availableWork is undefined
   const getTeamProjects = (team) => {
     if (!availableWork || !Array.isArray(availableWork)) return [];
-    
+
     return availableWork.filter((task) =>
-      team.assignedProjects?.includes(task._id)
+      team.assignedProjects?.includes(task._id),
     );
   };
 
@@ -499,7 +534,7 @@ export default function CreateWorkTaskModal({
           // Convert tags string to array
           formData.append(
             key,
-            JSON.stringify(data[key].split(",").map((tag) => tag.trim()))
+            JSON.stringify(data[key].split(",").map((tag) => tag.trim())),
           );
         } else {
           formData.append(key, data[key]);
@@ -542,7 +577,7 @@ export default function CreateWorkTaskModal({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ projectIds: [newWork._id] }),
-          })
+          }),
         );
 
         // Wait for all promises to settle (either fulfilled or rejected)
@@ -567,8 +602,8 @@ export default function CreateWorkTaskModal({
               if (assignmentResult.success && assignmentResult.data.team) {
                 setTeams((prevTeams) =>
                   prevTeams.map((t) =>
-                    t._id === teamId ? assignmentResult.data.team : t
-                  )
+                    t._id === teamId ? assignmentResult.data.team : t,
+                  ),
                 );
               }
             } catch (parseError) {
@@ -597,12 +632,12 @@ export default function CreateWorkTaskModal({
         if (failedAssignments.length > 0) {
           const failureMessages = failedAssignments
             .map(
-              ({ teamName, errorMessage }) => `• ${teamName}: ${errorMessage}`
+              ({ teamName, errorMessage }) => `• ${teamName}: ${errorMessage}`,
             )
             .join("<br>"); // Use <br> for HTML rendering in notification
 
           throw new Error(
-            `Task created, but failed to assign to some teams:<br>${failureMessages}`
+            `Task created, but failed to assign to some teams:<br>${failureMessages}`,
           );
         }
 
@@ -610,14 +645,16 @@ export default function CreateWorkTaskModal({
         if (successfulTeamIds.length > 0) {
           try {
             // Fetch the updated task to get the latest assignedTo information
-            const updatedTaskResponse = await fetch(`/api/projects/${newWork._id}`);
+            const updatedTaskResponse = await fetch(
+              `/api/projects/${newWork._id}`,
+            );
             if (updatedTaskResponse.ok) {
               const updatedTaskData = await updatedTaskResponse.json();
               if (updatedTaskData.data) {
                 setAvailableWork((prev) =>
                   prev.map((task) =>
-                    task._id === newWork._id ? updatedTaskData.data : task
-                  )
+                    task._id === newWork._id ? updatedTaskData.data : task,
+                  ),
                 );
               }
             }
@@ -638,7 +675,7 @@ export default function CreateWorkTaskModal({
       setFiles([]);
       showNotification(
         "New work task created and assigned successfully!",
-        "success"
+        "success",
       );
     } catch (error) {
       console.error("Error in handleWorkSubmit:", error);
@@ -852,7 +889,9 @@ export default function CreateWorkTaskModal({
                         type="range"
                         min="0"
                         max="100"
-                        {...workForm.register("progress", { valueAsNumber: true })}
+                        {...workForm.register("progress", {
+                          valueAsNumber: true,
+                        })}
                         className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                       />
                       <div className="flex justify-between text-xs text-muted-foreground">
@@ -1046,7 +1085,7 @@ export default function CreateWorkTaskModal({
                             <Checkbox
                               id={`team-${team._id}`}
                               checked={selectedTeamsForNewTask.includes(
-                                team._id
+                                team._id,
                               )}
                               onCheckedChange={() => {
                                 if (
@@ -1054,8 +1093,8 @@ export default function CreateWorkTaskModal({
                                 ) {
                                   setSelectedTeamsForNewTask(
                                     selectedTeamsForNewTask.filter(
-                                      (id) => id !== team._id
-                                    )
+                                      (id) => id !== team._id,
+                                    ),
                                   );
                                 } else {
                                   setSelectedTeamsForNewTask([
@@ -1077,7 +1116,7 @@ export default function CreateWorkTaskModal({
                                   <span>{team.name}</span>
                                   <Badge variant="outline" className="text-xs">
                                     {getTeamMemberDetails(
-                                      team.teamMembers || []
+                                      team.teamMembers || [],
                                     ).length + 1}{" "}
                                     members
                                   </Badge>
@@ -1086,7 +1125,7 @@ export default function CreateWorkTaskModal({
                                   Leader:{" "}
                                   {(() => {
                                     const leader = workers?.find(
-                                      (w) => w._id === team.teamLeader
+                                      (w) => w._id === team.teamLeader,
                                     );
                                     return leader ? leader.name : "Unknown";
                                   })()}

@@ -496,7 +496,8 @@ export default function ManageClients() {
     } catch (error) {
       console.error("Error fetching data:", error);
       const message =
-        error.message || "Failed to load data. Check your connection and try again.";
+        error.message ||
+        "Failed to load data. Check your connection and try again.";
       setFetchError(message);
       showNotification(message, "error");
     } finally {
@@ -540,7 +541,7 @@ export default function ManageClients() {
         const errorData = await response.json();
         throw new Error(
           errorData.error ||
-            `Failed to ${editingClient ? "update" : "create"} client`
+            `Failed to ${editingClient ? "update" : "create"} client`,
         );
       }
 
@@ -549,7 +550,7 @@ export default function ManageClients() {
       if (editingClient) {
         // Update client in the list
         setClients(
-          clients.map((c) => (c._id === editingClient._id ? result.data : c))
+          clients.map((c) => (c._id === editingClient._id ? result.data : c)),
         );
         showNotification("Client updated successfully!", "success");
         setEditingClient(null);
@@ -567,7 +568,7 @@ export default function ManageClients() {
       showNotification(
         error.message ||
           `Failed to ${editingClient ? "update" : "create"} client.`,
-        "error"
+        "error",
       );
     } finally {
       setIsLoading(false);
@@ -604,14 +605,14 @@ export default function ManageClients() {
       if (!response.ok) {
         throw new Error(
           result.error ||
-            `Failed to ${editingProject ? "update" : "create"} project`
+            `Failed to ${editingProject ? "update" : "create"} project`,
         );
       }
 
       if (editingProject) {
         // বিদ্যমান প্রজেক্ট আপডেট করুন
         setProjects(
-          projects.map((p) => (p._id === editingProject._id ? result.data : p))
+          projects.map((p) => (p._id === editingProject._id ? result.data : p)),
         );
         setEditingProject(null);
         showNotification("Project updated successfully!", "success");
@@ -627,7 +628,7 @@ export default function ManageClients() {
       showNotification(
         error.message ||
           `Failed to ${editingProject ? "update" : "create"} project.`,
-        "error"
+        "error",
       );
     } finally {
       setIsLoading(false);
@@ -638,7 +639,7 @@ export default function ManageClients() {
   const handleDeleteClient = async (clientId) => {
     if (
       confirm(
-        "Are you sure you want to delete this client? This action cannot be undone."
+        "Are you sure you want to delete this client? This action cannot be undone.",
       )
     ) {
       setIsLoading(true);
@@ -660,125 +661,131 @@ export default function ManageClients() {
     }
   };
 
-const getAuthToken = () => {
- 
-  return localStorage.getItem('token') || document.cookie.split('=')[1];
-};
-
+  const getAuthToken = () => {
+    return localStorage.getItem("token") || document.cookie.split("=")[1];
+  };
 
   // Handle assigning work to a client
 
-const handleAssignWork = async () => {
-  if (selectedTasksToAssign.length === 0) {
-    showNotification("Please select at least one project to assign.", "error");
-    return;
-  }
-console.log(selectedTasksToAssign);
-  setIsLoading(true);
-  try {
-    const updatePromises = selectedTasksToAssign.map((taskId) =>
-     
-      fetch(`/api/projects/${taskId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: 'include', 
-        body: JSON.stringify({
-          clientId: assigningWorkTo._id,
+  const handleAssignWork = async () => {
+    if (selectedTasksToAssign.length === 0) {
+      showNotification(
+        "Please select at least one project to assign.",
+        "error",
+      );
+      return;
+    }
+    console.log(selectedTasksToAssign);
+    setIsLoading(true);
+    try {
+      const updatePromises = selectedTasksToAssign.map((taskId) =>
+        fetch(`/api/projects/${taskId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            clientId: assigningWorkTo._id,
+          }),
         }),
-      })
-    );
+      );
 
-    const updateResults = await Promise.all(updatePromises);
+      const updateResults = await Promise.all(updatePromises);
 
-    // Check each response for errors
-    const failedUpdates = [];
-    const successfulUpdates = [];
+      // Check each response for errors
+      const failedUpdates = [];
+      const successfulUpdates = [];
 
-    for (let i = 0; i < updateResults.length; i++) {
-      const result = updateResults[i];
-      const taskId = selectedTasksToAssign[i];
-      
-      if (!result.ok) {
-        failedUpdates.push(taskId);
-        try {
-          const errorData = await result.json();
-          console.error(`Failed to update project ${taskId}:`, errorData);
-        } catch (e) {
-          console.error(`Failed to update project ${taskId}:`, result.statusText);
+      for (let i = 0; i < updateResults.length; i++) {
+        const result = updateResults[i];
+        const taskId = selectedTasksToAssign[i];
+
+        if (!result.ok) {
+          failedUpdates.push(taskId);
+          try {
+            const errorData = await result.json();
+            console.error(`Failed to update project ${taskId}:`, errorData);
+          } catch (e) {
+            console.error(
+              `Failed to update project ${taskId}:`,
+              result.statusText,
+            );
+          }
+        } else {
+          successfulUpdates.push(taskId);
+        }
+      }
+
+      if (failedUpdates.length > 0) {
+        console.error("Some projects were not updated:", failedUpdates);
+        showNotification(
+          `${failedUpdates.length} project(s) could not be assigned. Please try again.`,
+          "error",
+        );
+
+        // Still update the successful ones in the UI
+        if (successfulUpdates.length > 0) {
+          // Update available work list with the updated projects
+          const updatedProjects = await Promise.all(
+            successfulUpdates.map(async (projectId) => {
+              try {
+                const response = await fetch(`/api/projects/${projectId}`);
+                if (response.ok) {
+                  const project = await response.json();
+                  return project;
+                }
+              } catch (error) {
+                console.error(
+                  `Error fetching updated project ${projectId}:`,
+                  error,
+                );
+              }
+              return null;
+            }),
+          );
+
+          setAvailableWork((prev) =>
+            prev.map((project) => {
+              const updatedProject = updatedProjects.find(
+                (p) => p && p._id === project._id,
+              );
+              return updatedProject || project;
+            }),
+          );
         }
       } else {
-        successfulUpdates.push(taskId);
-      }
-    }
-
-    if (failedUpdates.length > 0) {
-      console.error("Some projects were not updated:", failedUpdates);
-      showNotification(
-        `${failedUpdates.length} project(s) could not be assigned. Please try again.`,
-        "error"
-      );
-      
-      // Still update the successful ones in the UI
-      if (successfulUpdates.length > 0) {
-        // Update available work list with the updated projects
+        // All updates were successful
         const updatedProjects = await Promise.all(
           successfulUpdates.map(async (projectId) => {
-            try {
-              const response = await fetch(`/api/projects/${projectId}`);
-              if (response.ok) {
-                const project = await response.json();
-                return project;
-              }
-            } catch (error) {
-              console.error(`Error fetching updated project ${projectId}:`, error);
+            const response = await fetch(`/api/projects/${projectId}`);
+            if (response.ok) {
+              const project = await response.json();
+              return project;
             }
             return null;
-          })
+          }),
         );
 
         setAvailableWork((prev) =>
           prev.map((project) => {
             const updatedProject = updatedProjects.find(
-              (p) => p && p._id === project._id
+              (p) => p && p._id === project._id,
             );
             return updatedProject || project;
-          })
+          }),
         );
+
+        showNotification("Projects assigned successfully!", "success");
       }
-    } else {
-      // All updates were successful
-      const updatedProjects = await Promise.all(
-        successfulUpdates.map(async (projectId) => {
-          const response = await fetch(`/api/projects/${projectId}`);
-          if (response.ok) {
-            const project = await response.json();
-            return project;
-          }
-          return null;
-        })
-      );
 
-      setAvailableWork((prev) =>
-        prev.map((project) => {
-          const updatedProject = updatedProjects.find(
-            (p) => p && p._id === project._id
-          );
-          return updatedProject || project;
-        })
-      );
-
-      showNotification("Projects assigned successfully!", "success");
+      setAssigningWorkTo(null);
+      setSelectedTasksToAssign([]);
+    } catch (error) {
+      console.error("Error assigning work:", error);
+      showNotification(error.message || "Failed to assign projects.", "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    setAssigningWorkTo(null);
-    setSelectedTasksToAssign([]);
-  } catch (error) {
-    console.error("Error assigning work:", error);
-    showNotification(error.message || "Failed to assign projects.", "error");
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   // Filter clients based on search and status
   const filteredClients = useMemo(() => {
@@ -819,12 +826,13 @@ console.log(selectedTasksToAssign);
         <Card className="w-full max-w-md">
           <CardContent className="flex flex-col items-center justify-center p-8 text-center">
             <FaExclamationCircle className="h-16 w-16 text-destructive mb-4" />
-            <CardTitle className="text-xl mb-2">Could not load clients</CardTitle>
-            <CardDescription className="mb-6">
-              {fetchError}
-            </CardDescription>
+            <CardTitle className="text-xl mb-2">
+              Could not load clients
+            </CardTitle>
+            <CardDescription className="mb-6">{fetchError}</CardDescription>
             <p className="text-sm text-muted-foreground mb-6">
-              This often happens when the database is unreachable. Check your connection and try again.
+              This often happens when the database is unreachable. Check your
+              connection and try again.
             </p>
             <Button onClick={() => fetchData()} variant="default" size="lg">
               Try again
@@ -974,14 +982,14 @@ console.log(selectedTasksToAssign);
                               <span>
                                 {
                                   INDUSTRY_OPTIONS.find(
-                                    (i) => i.value === client.industry
+                                    (i) => i.value === client.industry,
                                   )?.icon
                                 }
                               </span>
                               <span>
                                 {
                                   INDUSTRY_OPTIONS.find(
-                                    (i) => i.value === client.industry
+                                    (i) => i.value === client.industry,
                                   )?.label
                                 }
                               </span>
@@ -990,7 +998,7 @@ console.log(selectedTasksToAssign);
                           <TooltipContent>
                             <p>
                               {INDUSTRY_OPTIONS.find(
-                                (i) => i.value === client.industry
+                                (i) => i.value === client.industry,
                               )?.description || "No description available"}
                             </p>
                           </TooltipContent>
@@ -1006,7 +1014,7 @@ console.log(selectedTasksToAssign);
                           <TooltipContent>
                             <p>
                               {STATUS_OPTIONS.find(
-                                (s) => s.value === client.status
+                                (s) => s.value === client.status,
                               )?.description || "No description available"}
                             </p>
                           </TooltipContent>
@@ -1035,7 +1043,7 @@ console.log(selectedTasksToAssign);
                           <span>
                             {
                               availableWork.filter(
-                                (work) => work.clientId === client._id
+                                (work) => work.clientId === client._id,
                               ).length
                             }
                           </span>
@@ -1222,7 +1230,7 @@ console.log(selectedTasksToAssign);
                         tooltip="Company's primary phone number"
                       >
                         <Input
-                          placeholder="+1 (555) 123-4567"
+                          placeholder="01817886592"
                           {...clientForm.register("phone")}
                           className="transition-all duration-200 focus:ring-2 focus:ring-primary/20"
                         />
@@ -1374,10 +1382,10 @@ console.log(selectedTasksToAssign);
                     <span className="text-sm font-medium">
                       {editingClient
                         ? `Created: ${new Date(
-                            editingClient.createdAt
+                            editingClient.createdAt,
                           ).toLocaleDateString()}`
                         : `Creation Date: ${new Date(
-                            currentDate
+                            currentDate,
                           ).toLocaleDateString()}`}
                     </span>
                   </div>
@@ -1639,7 +1647,7 @@ console.log(selectedTasksToAssign);
                                 <span>
                                   {
                                     INDUSTRY_OPTIONS.find(
-                                      (i) => i.value === client.industry
+                                      (i) => i.value === client.industry,
                                     )?.icon
                                   }
                                 </span>
@@ -1663,7 +1671,7 @@ console.log(selectedTasksToAssign);
                             >
                               <FaBuilding className="h-3 w-3" />
                               {clients.find(
-                                (c) => c._id === projectForm.watch("clientId")
+                                (c) => c._id === projectForm.watch("clientId"),
                               )?.name || "Unknown Client"}
                             </Badge>
                           </div>
@@ -1690,12 +1698,12 @@ console.log(selectedTasksToAssign);
                                 {
                                   CATEGORY_OPTIONS.find(
                                     (c) =>
-                                      c.value === projectForm.watch("category")
+                                      c.value === projectForm.watch("category"),
                                   )?.icon
                                 }
                                 {CATEGORY_OPTIONS.find(
                                   (c) =>
-                                    c.value === projectForm.watch("category")
+                                    c.value === projectForm.watch("category"),
                                 )?.label || "No Category"}
                               </Badge>
                             </TooltipTrigger>
@@ -1703,7 +1711,7 @@ console.log(selectedTasksToAssign);
                               <p>
                                 {CATEGORY_OPTIONS.find(
                                   (c) =>
-                                    c.value === projectForm.watch("category")
+                                    c.value === projectForm.watch("category"),
                                 )?.description || "No description available"}
                               </p>
                             </TooltipContent>
@@ -1715,14 +1723,14 @@ console.log(selectedTasksToAssign);
                                 className={`flex items-center gap-1 transition-all duration-200 hover:scale-105 ${
                                   PRIORITY_OPTIONS.find(
                                     (p) =>
-                                      p.value === projectForm.watch("priority")
+                                      p.value === projectForm.watch("priority"),
                                   )?.color
                                 } text-white`}
                               >
                                 <FaFlag className="h-3 w-3" />
                                 {PRIORITY_OPTIONS.find(
                                   (p) =>
-                                    p.value === projectForm.watch("priority")
+                                    p.value === projectForm.watch("priority"),
                                 )?.label || "No Priority"}
                               </Badge>
                             </TooltipTrigger>
@@ -1730,7 +1738,7 @@ console.log(selectedTasksToAssign);
                               <p>
                                 {PRIORITY_OPTIONS.find(
                                   (p) =>
-                                    p.value === projectForm.watch("priority")
+                                    p.value === projectForm.watch("priority"),
                                 )?.description || "No description available"}
                               </p>
                             </TooltipContent>
@@ -1747,7 +1755,7 @@ console.log(selectedTasksToAssign);
                             <FaClock />
                             Due:{" "}
                             {new Date(
-                              projectForm.watch("dueDate")
+                              projectForm.watch("dueDate"),
                             ).toLocaleDateString()}
                           </span>
                         )}
@@ -1793,7 +1801,7 @@ console.log(selectedTasksToAssign);
                           >
                             <FaBuilding className="h-3 w-3" />
                             {clients.find(
-                              (c) => c._id === projectForm.watch("clientId")
+                              (c) => c._id === projectForm.watch("clientId"),
                             )?.name || "Unknown Client"}
                           </Badge>
                         </div>
@@ -1862,8 +1870,8 @@ console.log(selectedTasksToAssign);
                             if (selectedTasksToAssign.includes(task._id)) {
                               setSelectedTasksToAssign(
                                 selectedTasksToAssign.filter(
-                                  (id) => id !== task._id
-                                )
+                                  (id) => id !== task._id,
+                                ),
                               );
                             } else {
                               setSelectedTasksToAssign([

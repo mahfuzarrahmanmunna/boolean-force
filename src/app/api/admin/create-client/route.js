@@ -6,41 +6,43 @@ import nodemailer from "nodemailer";
 
 // Create a transporter object using SMTP transport
 const createTransporter = () => {
-    // Check if Gmail credentials are available
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-        console.error("Gmail credentials are not set in environment variables. Email sending will be skipped.");
-        return null; // Return null instead of throwing an error
-    }
+  // Check if Gmail credentials are available
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    console.error(
+      "Gmail credentials are not set in environment variables. Email sending will be skipped.",
+    );
+    return null; // Return null instead of throwing an error
+  }
 
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASS,
-        },
-    });
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    },
+  });
 };
 
 // Send password reset email
 const sendPasswordResetEmail = async (user, transporter) => {
-    const resetToken = generateResetToken();
-    const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;
+  const resetToken = generateResetToken();
+  const resetLink = `${process.env.NEXTAUTH_URL}/reset-password?token=${resetToken}`;
 
-    // Store the reset token in the database
-    const client = await clientPromise;
-    const db = client.db(process.env.DB_NAME);
-    await db.collection("passwordResets").insertOne({
-        email: user.email,
-        token: resetToken,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-        createdAt: new Date(),
-    });
+  // Store the reset token in the database
+  const client = await clientPromise;
+  const db = client.db(process.env.DB_NAME);
+  await db.collection("passwordResets").insertOne({
+    email: user.email,
+    token: resetToken,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+    createdAt: new Date(),
+  });
 
-    const mailOptions = {
-        from: process.env.GMAIL_USER,
-        to: user.email,
-        subject: 'Your Account Has Been Created - Set Your Password',
-        html: `
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: user.email,
+    subject: "Your Account Has Been Created - Set Your Password",
+    html: `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -164,109 +166,114 @@ const sendPasswordResetEmail = async (user, transporter) => {
                     <div class="footer">
                         <p>Best regards,<br>The BooleanForce Team</p>
                         <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
-                        <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | info@BooleanForce.com</p>
+                        <p>House - SA- 23,(2nd floor) Adarsha Nagar Road,Madda Badda,Dhaka 1212 | 01817886592 | consult@booleanforce.com</p>
                     </div>
                 </div>
             </body>
             </html>
         `,
-    };
+  };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
 
 // Generate a random reset token
 const generateResetToken = () => {
-    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let token = '';
-    for (let i = 0; i < 32; i++) {
-        token += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return token;
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let token = "";
+  for (let i = 0; i < 32; i++) {
+    token += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return token;
 };
 
 export async function POST(request) {
-    try {
-        const { name, email, password, role, sendResetEmail } = await request.json();
+  try {
+    const { name, email, password, role, sendResetEmail } =
+      await request.json();
 
-        // Validate input
-        if (!name || !email || !password) {
-            return NextResponse.json(
-                { error: "Missing required fields" },
-                { status: 400 }
-            );
-        }
-
-        // Connect to database
-        const client = await clientPromise;
-        const db = client.db(process.env.DB_NAME);
-        const users = db.collection("users");
-
-        // Check if user already exists
-        const existingUser = await users.findOne({ email });
-        if (existingUser) {
-            return NextResponse.json(
-                { error: "User with this email already exists" },
-                { status: 409 }
-            );
-        }
-
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        // Create new user
-        const newUser = {
-            name,
-            email,
-            password: hashedPassword,
-            role: role || "client",
-            status: "active", // Client accounts are active by default
-            provider: "credentials",
-            createdAt: new Date(),
-        };
-
-        // Insert user into database
-        const result = await users.insertOne(newUser);
-        const userId = result.insertedId.toString();
-
-        // Send password reset email if requested
-        if (sendResetEmail) {
-            const transporter = createTransporter();
-            if (transporter) {
-                try {
-                    await sendPasswordResetEmail(newUser, transporter);
-                    console.log("Password reset email sent successfully");
-                } catch (emailError) {
-                    console.error("Error sending password reset email:", emailError);
-                    // The request will still succeed, but we log the error
-                }
-            }
-        }
-
-        // Create notification for admin
-        await db.collection("notifications").insertOne({
-            type: "new_client_created",
-            title: "New Client Account Created",
-            message: `${name} has been added as a client.`,
-            userId: userId,
-            read: false,
-            createdAt: new Date(),
-        });
-
-        // Return success response
-        return NextResponse.json(
-            {
-                message: "Client account created successfully!",
-                userId,
-                passwordResetEmailSent: sendResetEmail && !!process.env.GMAIL_USER && !!process.env.GMAIL_PASS
-            },
-            { status: 201 }
-        );
-    } catch (error) {
-        console.error("Error creating client account:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+    // Validate input
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 },
+      );
     }
+
+    // Connect to database
+    const client = await clientPromise;
+    const db = client.db(process.env.DB_NAME);
+    const users = db.collection("users");
+
+    // Check if user already exists
+    const existingUser = await users.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User with this email already exists" },
+        { status: 409 },
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create new user
+    const newUser = {
+      name,
+      email,
+      password: hashedPassword,
+      role: role || "client",
+      status: "active", // Client accounts are active by default
+      provider: "credentials",
+      createdAt: new Date(),
+    };
+
+    // Insert user into database
+    const result = await users.insertOne(newUser);
+    const userId = result.insertedId.toString();
+
+    // Send password reset email if requested
+    if (sendResetEmail) {
+      const transporter = createTransporter();
+      if (transporter) {
+        try {
+          await sendPasswordResetEmail(newUser, transporter);
+          console.log("Password reset email sent successfully");
+        } catch (emailError) {
+          console.error("Error sending password reset email:", emailError);
+          // The request will still succeed, but we log the error
+        }
+      }
+    }
+
+    // Create notification for admin
+    await db.collection("notifications").insertOne({
+      type: "new_client_created",
+      title: "New Client Account Created",
+      message: `${name} has been added as a client.`,
+      userId: userId,
+      read: false,
+      createdAt: new Date(),
+    });
+
+    // Return success response
+    return NextResponse.json(
+      {
+        message: "Client account created successfully!",
+        userId,
+        passwordResetEmailSent:
+          sendResetEmail &&
+          !!process.env.GMAIL_USER &&
+          !!process.env.GMAIL_PASS,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error creating client account:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
 }
