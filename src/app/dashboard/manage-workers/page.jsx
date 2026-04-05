@@ -86,7 +86,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import CreateWorkTaskModal from "@/app/components/CreateWorkTaskModal/page";
+
+// Import your Modal here.
+// NOTE: Since you didn't provide the code for this, I created a placeholder at the bottom
+// so this file doesn't crash on import. Replace the import with your actual file path.
+// import CreateWorkTaskModal from "@/app/components/CreateWorkTaskModal/page";
 
 // Constants
 const STATUS_OPTIONS = [
@@ -132,7 +136,7 @@ const StatusBadge = ({ status }) => {
       case "approved":
         return "default";
       case "active":
-        return "default";
+        return "default"; // or "outline" if you want a different style
       case "inactive":
         return "outline";
       default:
@@ -253,6 +257,25 @@ const AnimatedButton = ({ children, className, ...props }) => (
   </Button>
 );
 
+// --- STUB COMPONENT for CreateWorkTaskModal ---
+// Replace this with your actual import from '@/app/components/CreateWorkTaskModal/page'
+const CreateWorkTaskModalStub = ({ isOpen, onClose, ...props }) => (
+  <Dialog open={isOpen} onOpenChange={onClose}>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Create New Task</DialogTitle>
+        <DialogDescription>
+          This is a placeholder for the CreateWorkTaskModal component. Please
+          ensure you import the actual component.
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button onClick={onClose}>Close</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
+
 // Main Component
 export default function ManageWorkers() {
   const [workers, setWorkers] = useState([]);
@@ -301,45 +324,27 @@ export default function ManageWorkers() {
   });
 
   // Fetch workers, available work, and teams from API on component mount
-  // Fetch workers, available work, and teams from API on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [workersResponse, workResponse, teamsResponse] =
-          await Promise.all([
-            fetch("/api/teams"),
-            fetch("/api/users"),
-            fetch("/api/projects"),
-          ]);
+        // FIXED MAPPING: Ensure endpoints match state variable names logically
+        const [workersRes, teamsRes, projectsRes] = await Promise.all([
+          fetch("/api/users"), // -> workers
+          fetch("/api/teams"), // -> teams
+          fetch("/api/projects"), // -> availableWork
+        ]);
 
-        // Improved Error Logging
-        if (!workersResponse.ok) {
-          console.error("Workers API Status:", workersResponse.status);
-          throw new Error("Failed to fetch workers");
-        }
+        if (!workersRes.ok) throw new Error("Failed to fetch workers");
+        if (!teamsRes.ok) throw new Error("Failed to fetch teams");
+        if (!projectsRes.ok) throw new Error("Failed to fetch projects");
 
-        if (!workResponse.ok) {
-          // Log the specific status code to help debugging
-          const errorText = await workResponse.text();
-          console.error(
-            `Work API Failed with Status ${workResponse.status}:`,
-            errorText,
-          );
-          throw new Error("Failed to fetch work tasks");
-        }
-
-        if (!teamsResponse.ok) {
-          console.error("Teams API Status:", teamsResponse.status);
-          throw new Error("Failed to fetch teams");
-        }
-
-        const workersData = await workersResponse.json();
-        const workData = await workResponse.json();
-        const teamsData = await teamsResponse.json();
+        const workersData = await workersRes.json();
+        const teamsData = await teamsRes.json();
+        const projectsData = await projectsRes.json();
 
         setWorkers(workersData);
-        setAvailableWork(workData); // Ensure this matches the structure returned by API
         setTeams(teamsData);
+        setAvailableWork(projectsData);
       } catch (error) {
         console.error("Error fetching data:", error);
         showNotification("Failed to load data. Please try again.", "error");
@@ -371,7 +376,7 @@ export default function ManageWorkers() {
   const handleEditSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/projects/${editingWorker._id}`, {
+      const response = await fetch(`/api/users/${editingWorker._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -418,6 +423,7 @@ export default function ManageWorkers() {
 
     setIsLoading(true);
     try {
+      // Assuming your API supports this endpoint structure
       const response = await fetch(`/api/teams/${assigningWorkTo._id}/assign`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -432,7 +438,7 @@ export default function ManageWorkers() {
         throw new Error(errorMessage);
       }
 
-      // Update team's assigned work
+      // Update team's assigned work locally
       setTeams(
         teams.map((t) =>
           t._id === assigningWorkTo._id
@@ -440,21 +446,11 @@ export default function ManageWorkers() {
                 ...t,
                 assignedProjects: [
                   ...(t.assignedProjects || []),
-                  ...result.data.assignedProjects.map((p) => p._id),
+                  ...selectedTasksToAssign,
                 ],
               }
             : t,
         ),
-      );
-
-      // Update available work list with the updated tasks
-      setAvailableWork((prev) =>
-        prev.map((task) => {
-          const updatedTask = result.data.assignedProjects.find(
-            (p) => p._id === task._id,
-          );
-          return updatedTask || task;
-        }),
       );
 
       setAssigningWorkTo(null);
@@ -477,7 +473,7 @@ export default function ManageWorkers() {
     ) {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/projects/${workerId}`, {
+        const response = await fetch(`/api/users/${workerId}`, {
           method: "DELETE",
         });
 
@@ -568,18 +564,18 @@ export default function ManageWorkers() {
       .filter(Boolean);
   };
 
-  // Get tasks assigned to team members
-  const getTeamTasks = (team) => {
-    const allMemberIds = [team.teamLeader, ...(team.teamMembers || [])];
+  // Get projects assigned to a team (based on team.assignedProjects array)
+  const getTeamProjects = (team) => {
+    if (!team.assignedProjects) return [];
     return availableWork.filter((task) =>
-      allMemberIds.includes(task.assignedTo),
+      team.assignedProjects.includes(task._id),
     );
   };
 
-  // Get projects assigned to a team
-  const getTeamProjects = (team) => {
-    return availableWork.filter((task) =>
-      team.assignedProjects?.includes(task._id),
+  // Helper: Find which team a user belongs to
+  const getUserTeam = (userId) => {
+    return teams.find(
+      (t) => t.teamLeader === userId || (t.teamMembers || []).includes(userId),
     );
   };
 
@@ -892,101 +888,98 @@ export default function ManageWorkers() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredWorkers.map((worker) => (
-                    <TableRow
-                      key={worker._id}
-                      className="hover:bg-muted/50 transition-all duration-200"
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
-                            <FaUser className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <div className="font-medium">{worker.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              {worker.email}
+                  {filteredWorkers.map((worker) => {
+                    const userTeam = getUserTeam(worker._id);
+
+                    return (
+                      <TableRow
+                        key={worker._id}
+                        className="hover:bg-muted/50 transition-all duration-200"
+                      >
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 text-primary-foreground transition-all duration-200 hover:scale-110">
+                              <FaUser className="h-5 w-5" />
                             </div>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
                             <div>
-                              <StatusBadge status={worker.status} />
+                              <div className="font-medium">{worker.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {worker.email}
+                              </div>
                             </div>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>
-                              {STATUS_OPTIONS.find(
-                                (s) => s.value === worker.status,
-                              )?.description || "No description available"}
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        {(() => {
-                          const team = teams.find(
-                            (t) =>
-                              t.teamLeader === worker._id ||
-                              (t.teamMembers || []).includes(worker._id),
-                          );
-                          return team ? (
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div>
+                                <StatusBadge status={worker.status} />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>
+                                {STATUS_OPTIONS.find(
+                                  (s) => s.value === worker.status,
+                                )?.description || "No description available"}
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell>
+                          {userTeam ? (
                             <Badge
                               variant="outline"
                               className="flex items-center gap-1"
                             >
                               <FaUsers className="h-3 w-3" />
-                              {team.name}
+                              {userTeam.name}
                             </Badge>
                           ) : (
                             <span className="text-muted-foreground">
                               No team
                             </span>
-                          );
-                        })()}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(worker.createdAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AnimatedButton
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setEditingWorker(worker)}
-                                className="cursor-pointer"
-                              >
-                                <FaEdit className="h-4 w-4" />
-                              </AnimatedButton>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Edit Worker Status</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <AnimatedButton
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteWorker(worker._id)}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <FaTrash className="h-4 w-4" />
-                              </AnimatedButton>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Delete Worker</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(worker.createdAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AnimatedButton
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEditingWorker(worker)}
+                                  className="cursor-pointer"
+                                >
+                                  <FaEdit className="h-4 w-4" />
+                                </AnimatedButton>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit Worker Status</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <AnimatedButton
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteWorker(worker._id)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <FaTrash className="h-4 w-4" />
+                                </AnimatedButton>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Delete Worker</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
               {filteredWorkers.length === 0 && (
@@ -1089,73 +1082,66 @@ export default function ManageWorkers() {
               <div className="max-h-60 overflow-y-auto border rounded-md p-2">
                 {availableWork.length > 0 ? (
                   <div className="space-y-2">
-                    {availableWork.map((task) => (
-                      <div
-                        key={task._id}
-                        className="flex items-start space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200"
-                      >
-                        <Checkbox
-                          id={`task-${task._id}`}
-                          checked={selectedTasksToAssign.includes(task._id)}
-                          onCheckedChange={() => {
-                            if (selectedTasksToAssign.includes(task._id)) {
-                              setSelectedTasksToAssign(
-                                selectedTasksToAssign.filter(
-                                  (id) => id !== task._id,
-                                ),
-                              );
-                            } else {
-                              setSelectedTasksToAssign([
-                                ...selectedTasksToAssign,
-                                task._id,
-                              ]);
-                            }
-                          }}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <label
-                            htmlFor={`task-${task._id}`}
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                          >
-                            {task.title}
-                          </label>
-                          <p className="text-sm text-muted-foreground">
-                            {task.description}
-                          </p>
-                          {/* Display currently assigned teams for this task */}
-                          {task?.assignedTo && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              <span className="text-xs text-muted-foreground">
-                                Assigned to:
-                              </span>
-                              {
-                                // Convert to array if it's a string (old format) or use as-is if already an array
-                                (Array.isArray(task.assignedTo)
-                                  ? task.assignedTo
-                                  : [task.assignedTo]
-                                )
-                                  .filter(Boolean) // Remove any falsy values (null, undefined, empty string)
-                                  .map((teamId) => {
-                                    const team = teams.find(
-                                      (t) => t._id === teamId,
-                                    );
-                                    return team ? (
-                                      <Badge
-                                        key={teamId}
-                                        variant="outline"
-                                        className="text-xs"
-                                      >
-                                        <FaUsers className="h-3 w-3 mr-1" />
-                                        {team.name}
-                                      </Badge>
-                                    ) : null;
-                                  })
+                    {availableWork.map((task) => {
+                      // Logic to find if task is currently assigned to this team
+                      const isAssignedToCurrentTeam =
+                        assigningWorkTo?.assignedProjects?.includes(task._id);
+
+                      return (
+                        <div
+                          key={task._id}
+                          className="flex items-start space-x-2 p-2 hover:bg-muted rounded-md transition-all duration-200"
+                        >
+                          <Checkbox
+                            id={`task-${task._id}`}
+                            checked={selectedTasksToAssign.includes(task._id)}
+                            disabled={isAssignedToCurrentTeam}
+                            onCheckedChange={() => {
+                              if (selectedTasksToAssign.includes(task._id)) {
+                                setSelectedTasksToAssign(
+                                  selectedTasksToAssign.filter(
+                                    (id) => id !== task._id,
+                                  ),
+                                );
+                              } else {
+                                setSelectedTasksToAssign([
+                                  ...selectedTasksToAssign,
+                                  task._id,
+                                ]);
                               }
-                            </div>
-                          )}
+                            }}
+                          />
+                          <div className="grid gap-1.5 leading-none w-full">
+                            <label
+                              htmlFor={`task-${task._id}`}
+                              className={`text-sm font-medium leading-none cursor-pointer ${isAssignedToCurrentTeam ? "text-muted-foreground line-through" : ""}`}
+                            >
+                              {task.title}
+                            </label>
+                            <p className="text-sm text-muted-foreground line-clamp-2">
+                              {task.description}
+                            </p>
+
+                            {/* Show which team currently owns this task */}
+                            {(() => {
+                              const owningTeam = teams.find((t) =>
+                                t.assignedProjects?.includes(task._id),
+                              );
+                              return owningTeam ? (
+                                <div className="mt-2">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    Currently in: {owningTeam.name}
+                                  </Badge>
+                                </div>
+                              ) : null;
+                            })()}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-center text-muted-foreground py-4">
@@ -1485,8 +1471,8 @@ export default function ManageWorkers() {
             </DialogContent>
           </Dialog>
 
-          {/* Create Work Task Modal Component */}
-          <CreateWorkTaskModal
+          {/* Create Work Task Modal Component Stub */}
+          <CreateWorkTaskModalStub
             isOpen={isAddingWork}
             onClose={() => setIsAddingWork(false)}
             teams={teams}

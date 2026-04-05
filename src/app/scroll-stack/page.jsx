@@ -1,4 +1,4 @@
-import ScrollStack from "@/app/components/ScrollStack";
+import ScrollStack from "../portfolio/ScrollStack";
 
 export default function Page() {
   return (

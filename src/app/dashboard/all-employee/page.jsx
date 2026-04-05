@@ -403,7 +403,7 @@ export default function ManageWorkers() {
     const fetchData = async () => {
       try {
         const [workersResponse, workResponse] = await Promise.all([
-          fetch("/api/projects"),
+          fetch("/api/users"),
           fetch("/api/projects"),
         ]);
 
@@ -435,7 +435,6 @@ export default function ManageWorkers() {
   const handleWorkerSubmit = async (data) => {
     setIsLoading(true);
     try {
-      // Add creation date to data
       const workerData = {
         ...data,
         createdAt: currentDate,
@@ -444,19 +443,15 @@ export default function ManageWorkers() {
 
       let response;
       if (editingWorker) {
-        // Update existing worker - make sure we have a valid ID
-        if (!editingWorker._id) {
-          throw new Error("Invalid worker ID for update");
-        }
-
-        response = await fetch(`/api/projects/${editingWorker._id}`, {
+        // FIX: Changed /api/projects to /api/users
+        response = await fetch(`/api/users/${editingWorker._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(workerData),
         });
       } else {
-        // Create new worker
-        response = await fetch("/api/projects", {
+        // FIX: Changed /api/projects to /api/users
+        response = await fetch("/api/users", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(workerData),
@@ -476,18 +471,19 @@ export default function ManageWorkers() {
       if (editingWorker) {
         // Update worker in the list
         setWorkers(
-          workers.map((w) => (w._id === editingWorker._id ? result.data : w)),
+          workers.map((w) =>
+            w._id === editingWorker._id ? result.data || result : w,
+          ), // Handle if API returns just result or result.data
         );
         showNotification("Worker updated successfully!", "success");
         setEditingWorker(null);
       } else {
         // Add the new worker to the list
-        setWorkers([...workers, result.data]);
+        setWorkers([...workers, result.data || result]);
         showNotification("Worker created successfully!", "success");
         setIsAddingWorker(false);
       }
 
-      // Reset form
       workerForm.reset();
     } catch (error) {
       console.error("Error in handleWorkerSubmit:", error);
@@ -510,7 +506,8 @@ export default function ManageWorkers() {
     ) {
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/projects/${workerId}`, {
+        // FIX: Changed /api/projects to /api/users
+        const response = await fetch(`/api/users/${workerId}`, {
           method: "DELETE",
         });
 
@@ -531,7 +528,8 @@ export default function ManageWorkers() {
   const handleStatusChange = async (worker, newStatus) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/projects/${worker._id}`, {
+      // FIX: Changed /api/projects to /api/users
+      const response = await fetch(`/api/users/${worker._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
@@ -542,7 +540,6 @@ export default function ManageWorkers() {
         throw new Error(errorData.error || "Failed to update worker status");
       }
 
-      // Update worker in the list
       setWorkers(
         workers.map((w) =>
           w._id === worker._id
@@ -559,7 +556,6 @@ export default function ManageWorkers() {
       setIsLoading(false);
     }
   };
-
   // Handle job title change (admin only)
   const handleJobTitleChange = async (worker, newJobTitle) => {
     if (!isAdmin) {
@@ -569,10 +565,11 @@ export default function ManageWorkers() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/projects/${worker._id}`, {
+      // FIX: Changed /api/projects to /api/users
+      const response = await fetch(`/api/users/${worker._id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobTitle: newJobTitle }), // Only send jobTitle, not status
+        body: JSON.stringify({ jobTitle: newJobTitle }),
       });
 
       if (!response.ok) {
@@ -580,7 +577,6 @@ export default function ManageWorkers() {
         throw new Error(errorData.error || "Failed to update worker job title");
       }
 
-      // Update worker in the list
       setWorkers(
         workers.map((w) =>
           w._id === worker._id
@@ -604,7 +600,6 @@ export default function ManageWorkers() {
       setIsLoading(false);
     }
   };
-
   // Handle assigning work to a worker
   const handleAssignWork = async () => {
     if (selectedTasksToAssign.length === 0) {
@@ -614,14 +609,21 @@ export default function ManageWorkers() {
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `/api/projects/${assigningWorkTo._id}/assign`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ taskIds: selectedTasksToAssign }),
-        },
-      );
+      // FIX: Update the User, not a Project. We are appending tasks to the user's list.
+      // Note: This assumes your /api/users/[id] PUT endpoint supports partial updates or merging arrays.
+      // If it doesn't, you might need a specific '/assign' endpoint on the Users API.
+
+      // We construct the update payload
+      const updatedAssignedWork = [
+        ...(assigningWorkTo.assignedWork || []),
+        ...selectedTasksToAssign,
+      ];
+
+      const response = await fetch(`/api/users/${assigningWorkTo._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedWork: updatedAssignedWork }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -630,22 +632,16 @@ export default function ManageWorkers() {
 
       const result = await response.json();
 
-      // Update worker's assigned work
+      // Update local state
       setWorkers(
         workers.map((w) =>
           w._id === assigningWorkTo._id
-            ? {
-                ...w,
-                assignedWork: [
-                  ...(w.assignedWork || []),
-                  ...selectedTasksToAssign,
-                ],
-              }
+            ? { ...w, assignedWork: updatedAssignedWork }
             : w,
         ),
       );
 
-      // Update available work list
+      // Update available work list (Optimistic UI update for tasks)
       setAvailableWork((prev) =>
         prev.map((work) => {
           if (selectedTasksToAssign.includes(work._id)) {
@@ -671,17 +667,23 @@ export default function ManageWorkers() {
   };
 
   // Filter workers based on search and status
+  // Filter workers based on search and status
   const filteredWorkers = useMemo(() => {
     return workers.filter((worker) => {
+      // FIX: Add (|| "") to handle cases where name or email might be missing/null
+      const workerName = (worker.name || "").toLowerCase();
+      const workerEmail = (worker.email || "").toLowerCase();
+      const searchLower = (searchTerm || "").toLowerCase();
+
       const matchesSearch =
-        worker.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        worker.email.toLowerCase().includes(searchTerm.toLowerCase());
+        workerName.includes(searchLower) || workerEmail.includes(searchLower);
+
       const matchesStatus =
         statusFilter === "all" || worker.status === statusFilter;
+
       return matchesSearch && matchesStatus;
     });
   }, [workers, searchTerm, statusFilter]);
-
   // Update form when editingWorker changes
   useEffect(() => {
     if (editingWorker) {
@@ -850,12 +852,16 @@ export default function ManageWorkers() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="h-12 w-12 flex-shrink-0">
+                              {/* AFTER (Safe) */}
                               <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
                                 {worker.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()}
+                                  ? worker.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")
+                                      .toUpperCase()
+                                  : "?"}{" "}
+                                {/* Fallback "?" if name is missing */}
                               </div>
                             </div>
                             <div className="ml-4">
@@ -898,22 +904,26 @@ export default function ManageWorkers() {
                           <StatusBadge status={worker.status} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <span className="text-sm text-slate-900 dark:text-white mr-2">
-                              {worker.assignedWork
-                                ? worker.assignedWork.length
-                                : 0}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setAssigningWorkTo(worker);
-                                setSelectedTasksToAssign([]);
-                              }}
-                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                            >
-                              <FaPlus className="h-4 w-4" />
-                            </button>
-                          </div>
+                          <Select
+                            value={worker.status}
+                            onValueChange={(newStatus) =>
+                              handleStatusChange(worker, newStatus)
+                            }
+                          >
+                            <SelectTrigger className="w-[140px] h-8">
+                              <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {STATUS_OPTIONS.map((option) => (
+                                <SelectItem
+                                  key={option.value}
+                                  value={option.value}
+                                >
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                           {new Date(worker.createdAt).toLocaleDateString()}

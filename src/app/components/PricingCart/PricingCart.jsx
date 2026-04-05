@@ -1,4 +1,5 @@
 // components/PricingCard.jsx
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { FaCheck, FaCode, FaRocket, FaShieldAlt, FaUsers, FaBolt, FaClock, FaStar, FaInfinity, FaHeadset, FaDatabase, FaCloud, FaGitAlt, FaReact, FaNodeJs, FaArrowRight, FaSpinner } from 'react-icons/fa';
 
@@ -25,6 +26,7 @@ const PricingCard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    console.log(pricingData)
     useEffect(() => {
         const fetchPricingData = async () => {
             try {
@@ -137,11 +139,11 @@ const PricingCard = () => {
                                             <p className="text-gray-400 text-sm">{plan.subtitle}</p>
                                         </div>
 
-                                        <div className="mb-6 flex items-baseline gap-2">
+                                        {/* <div className="mb-6 flex items-baseline gap-2">
                                             {plan.originalPrice && <span className="text-gray-500 line-through text-lg">{plan.originalPrice}</span>}
                                             <span className={`text-4xl md:text-5xl font-bold text-white ${isMiddle ? 'md:text-6xl' : ''}`}>{plan.price}</span>
                                             {plan.priceUnit && <span className="text-gray-300">{plan.priceUnit}</span>}
-                                        </div>
+                                        </div> */}
 
                                         <p className="text-gray-300 mb-8">{plan.description}</p>
 
@@ -158,7 +160,7 @@ const PricingCard = () => {
                                             </ul>
                                         </div>
 
-                                        <button
+                                        <Link href={'/contact'}
                                             className={`w-full bg-gradient-to-r ${plan.buttonColor} hover:from-opacity-90 hover:to-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-1 shadow-lg group
                       ${isMiddle ? 'md:py-4 md:px-6 md:text-lg' : ''}`}
                                         >
@@ -166,7 +168,7 @@ const PricingCard = () => {
                                                 {plan.buttonText}
                                                 <FaArrowRight className={`ml-2 transition-transform duration-300 group-hover:translate-x-1 ${isHovered ? 'translate-x-1' : ''}`} />
                                             </span>
-                                        </button>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>

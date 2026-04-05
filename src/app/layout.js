@@ -1,22 +1,15 @@
 // app/layout.jsx
-"use client"
+"use client";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import BinaryBackground from "./components/BinaryBackground/BinaryBackground";
-import Navbar1 from "./components/Navbar1/Navbar1";
-import Footer from "./components/Footer/Footer";
-import VerticalNavbar4 from "./components/VerticalNavbar4/VerticalNavbar4";
 import ClientLayout from "@/components/ui/ClientLayout/ClientLayout";
 import BinaryBack from "./components/BinarayBack/BinaryBack";
 import { AuthProviders } from "@/providers/AuthProviders";
-import AuthDebug from "./components/AuthDebug";
 import Chatbot from "./components/Chatbot/Chatbot";
-// import AnimatedCursor from "react-animated-cursor";
-// import AuthDebug from "./components/AuthDebug";
 
-const inter = Inter({ 
-  subsets: ['latin'],
-  preload: false // Add this temporarily
+const inter = Inter({
+  subsets: ["latin"],
+  preload: false, // Add this temporarily
 });
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -46,7 +39,6 @@ export default function RootLayout({ children }) {
           <VerticalNavbar4 /> */}
 
           <main className="flex-grow">
-
             {/* <AnimatedCursor
               showSystemCursor={true}
               color="#fff"

@@ -432,58 +432,58 @@ export default function ManageAllProjects() {
   }, []);
 
   // Handle project creation/update
-//  const handleProjectSubmit = async (data) => {
-//     setIsLoading(true);
-//     try {
-//         const projectData = {
-//             ...data,
-//             budget: data.budget ? parseFloat(data.budget) : 0,
-//             tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
-//             status: editingProject ? data.status : 'planning',
-//             progress: editingProject ? data.progress : 0,
-//             createdAt: editingProject ? data.createdAt : new Date().toISOString(),
-//             updatedAt: new Date().toISOString()
-//         };
+  //  const handleProjectSubmit = async (data) => {
+  //     setIsLoading(true);
+  //     try {
+  //         const projectData = {
+  //             ...data,
+  //             budget: data.budget ? parseFloat(data.budget) : 0,
+  //             tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
+  //             status: editingProject ? data.status : 'planning',
+  //             progress: editingProject ? data.progress : 0,
+  //             createdAt: editingProject ? data.createdAt : new Date().toISOString(),
+  //             updatedAt: new Date().toISOString()
+  //         };
 
-//         const url = editingProject ? `/api/projects/${editingProject._id}` : '/api/projects';
-//         const method = editingProject ? 'PUT' : 'POST';
+  //         const url = editingProject ? `/api/projects/${editingProject._id}` : '/api/projects';
+  //         const method = editingProject ? 'PUT' : 'POST';
 
-//         const response = await fetch(url, {
-//             method,
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify(projectData),
-//         });
+  //         const response = await fetch(url, {
+  //             method,
+  //             headers: { 'Content-Type': 'application/json' },
+  //             body: JSON.stringify(projectData),
+  //         });
 
-//         const result = await response.json();
+  //         const result = await response.json();
 
-//         if (!response.ok) {
-//             throw new Error(result.error || `Failed to ${editingProject ? 'update' : 'create'} project`);
-//         }
+  //         if (!response.ok) {
+  //             throw new Error(result.error || `Failed to ${editingProject ? 'update' : 'create'} project`);
+  //         }
 
-//         if (editingProject) {
+  //         if (editingProject) {
 
-//             setProjects(projects.map(p => p._id === editingProject._id ? result.data : p));
-//             setEditingProject(null);
-//             showNotification('Project updated successfully!', 'success');
-//         } else {
-//             setProjects(prev => [result.data, ...prev]);
-//             showNotification('Project created successfully!', 'success');
-//         }
+  //             setProjects(projects.map(p => p._id === editingProject._id ? result.data : p));
+  //             setEditingProject(null);
+  //             showNotification('Project updated successfully!', 'success');
+  //         } else {
+  //             setProjects(prev => [result.data, ...prev]);
+  //             showNotification('Project created successfully!', 'success');
+  //         }
 
-//         projectForm.reset();
-//     } catch (error) {
-//         console.error("Error in handleProjectSubmit:", error);
-//         showNotification(error.message || `Failed to ${editingProject ? 'update' : 'create'} project.`, 'error');
-//     } finally {
-//         setIsLoading(false);
-//     }
-// };
+  //         projectForm.reset();
+  //     } catch (error) {
+  //         console.error("Error in handleProjectSubmit:", error);
+  //         showNotification(error.message || `Failed to ${editingProject ? 'update' : 'create'} project.`, 'error');
+  //     } finally {
+  //         setIsLoading(false);
+  //     }
+  // };
 
   // Handle project deletion
   const handleDeleteProject = async (projectId) => {
     if (
       confirm(
-        "Are you sure you want to delete this project? This action cannot be undone."
+        "Are you sure you want to delete this project? This action cannot be undone.",
       )
     ) {
       setIsLoading(true);
@@ -525,12 +525,12 @@ export default function ManageAllProjects() {
                 return {
                   ...team,
                   assignedProjects: team.assignedProjects.filter(
-                    (id) => id !== projectId
+                    (id) => id !== projectId,
                   ),
                 };
               }
               return team;
-            })
+            }),
           );
         }
 
@@ -562,7 +562,7 @@ export default function ManageAllProjects() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ projectIds: [assigningProjectTo._id] }),
-        })
+        }),
       );
 
       // Wait for all assignments to complete
@@ -586,7 +586,7 @@ export default function ManageAllProjects() {
 
       if (failedAssignments.length > 0) {
         throw new Error(
-          `Failed to assign project to teams: ${failedAssignments.join(", ")}`
+          `Failed to assign project to teams: ${failedAssignments.join(", ")}`,
         );
       }
 
@@ -603,8 +603,8 @@ export default function ManageAllProjects() {
       // Update the projects state
       setProjects(
         projects.map((p) =>
-          p._id === assigningProjectTo._id ? updatedProject : p
-        )
+          p._id === assigningProjectTo._id ? updatedProject : p,
+        ),
       );
 
       // Update the teams state to reflect the new assignments
@@ -1542,8 +1542,8 @@ export default function ManageAllProjects() {
                               if (selectedTeamsToAssign.includes(team._id)) {
                                 setSelectedTeamsToAssign(
                                   selectedTeamsToAssign.filter(
-                                    (id) => id !== team._id
-                                  )
+                                    (id) => id !== team._id,
+                                  ),
                                 );
                               } else {
                                 setSelectedTeamsToAssign([
@@ -1680,7 +1680,7 @@ export default function ManageAllProjects() {
                       <p className="mt-1">
                         {viewingProject.startDate
                           ? new Date(
-                              viewingProject.startDate
+                              viewingProject.startDate,
                             ).toLocaleDateString()
                           : "Not set"}
                       </p>
@@ -1692,7 +1692,7 @@ export default function ManageAllProjects() {
                       <p className="mt-1">
                         {viewingProject.endDate
                           ? new Date(
-                              viewingProject.endDate
+                              viewingProject.endDate,
                             ).toLocaleDateString()
                           : "Not set"}
                       </p>
@@ -1758,7 +1758,7 @@ export default function ManageAllProjects() {
                       </h4>
                       <p className="mt-1">
                         {new Date(
-                          viewingProject.createdAt
+                          viewingProject.createdAt,
                         ).toLocaleDateString()}
                       </p>
                     </div>
@@ -1768,7 +1768,7 @@ export default function ManageAllProjects() {
                       </h4>
                       <p className="mt-1">
                         {new Date(
-                          viewingProject.updatedAt
+                          viewingProject.updatedAt,
                         ).toLocaleDateString()}
                       </p>
                     </div>

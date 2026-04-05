@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useFormState } from "react-dom";
 
 export default function ManageSubmitTaskPage() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useFormState(null);
+  // FIX: Changed useFormState to useState
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +30,11 @@ export default function ManageSubmitTaskPage() {
   }, [router]);
 
   useEffect(() => {
-    if (!loading && user && (user.role === "admin" || user.isTeamLeader === "true")) {
+    if (
+      !loading &&
+      user &&
+      (user.role === "admin" || user.isTeamLeader === "true")
+    ) {
       fetch("/api/tasks/submissions")
         .then((res) => res.json())
         .then((data) => setSubmissions(data || []));
@@ -41,7 +45,9 @@ export default function ManageSubmitTaskPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4 text-white">Manage Submitted Tasks</h1>
+      <h1 className="text-2xl font-bold mb-4 text-white">
+        Manage Submitted Tasks
+      </h1>
 
       {submissions.length === 0 ? (
         <p className="text-gray-500">No submissions yet</p>
