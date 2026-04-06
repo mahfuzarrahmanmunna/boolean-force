@@ -375,7 +375,7 @@ src/
 
 ### Code Quality Issues
 1. **Debug Logging**
-   - Console.logs in production code (socket.js, authOptions.js)
+   - //console.logs in production code (socket.js, authOptions.js)
    - Should use proper logging library with levels
 
 2. **Error Handling**
@@ -471,7 +471,7 @@ OPENROUTER_API_KEY (if using AI features)
 2. **Consolidate Socket.IO** implementations
 3. **Implement error boundaries** in critical components
 4. **Create API service layer** with centralized axios instance
-5. **Add proper logging** instead of console.logs
+5. **Add proper logging** instead of //console.logs
 
 ### Medium-term (Priority 2)
 1. **Migrate to TypeScript** for type safety

@@ -219,7 +219,7 @@ export default function ManageTasks() {
         //     description: message,
         //     variant: type === 'success' ? "default" : "destructive",
         // });
-        console.log(`${type}: ${message}`);
+        //console.log(`${type}: ${message}`);
     };
 
     // Fetch tasks from API on component mount
@@ -250,7 +250,7 @@ export default function ManageTasks() {
             const url = editingTask ? `/api/projects/${editingTask._id}` : '/api/projects';
             const method = editingTask ? 'PUT' : 'POST';
             
-            console.log(`Submitting ${method} request to ${url}`, data);
+            //console.log(`Submitting ${method} request to ${url}`, data);
             
             const response = await fetch(url, {
                 method,
@@ -274,7 +274,7 @@ export default function ManageTasks() {
             }
     
             const result = await response.json();
-            console.log('Server response:', result);
+            //console.log('Server response:', result);
             
             if (editingTask) {
                 // Update the task in the local state
@@ -302,7 +302,7 @@ export default function ManageTasks() {
         if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
             setIsLoading(true);
             try {
-                console.log(`Deleting task with ID: ${taskId}`);
+                //console.log(`Deleting task with ID: ${taskId}`);
                 // Fixed the typo: changed from '/api/tasks' to '/api/projects'
                 const response = await fetch(`/api/projects/${taskId}`, {
                     method: 'DELETE',
@@ -343,7 +343,7 @@ export default function ManageTasks() {
 
         setIsLoading(true);
         try {
-            console.log(`Performing ${action} on tasks:`, selectedTasks);
+            //console.log(`Performing ${action} on tasks:`, selectedTasks);
             // Fixed the typo: changed from '/api/tasks/bulk' to '/api/projects/bulk'
             const response = await fetch('/api/projects/bulk', {
                 method: 'POST',
@@ -367,7 +367,7 @@ export default function ManageTasks() {
             }
 
             const result = await response.json();
-            console.log('Server response:', result);
+            //console.log('Server response:', result);
             
             if (result.success && result.data) {
                 setTasks(result.data);

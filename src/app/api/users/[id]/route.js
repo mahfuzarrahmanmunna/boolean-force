@@ -2,13 +2,13 @@
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 
 // GET - Fetch a specific user
 export async function GET(request, { params }) {
     try {
         // Log the entire params object to see its structure
-        console.log("GET params:", params);
+        //console.log("GET params:", params);
         
         // Try different ways to extract the ID
         let id;
@@ -23,11 +23,11 @@ export async function GET(request, { params }) {
             id = pathSegments[pathSegments.length - 1];
         }
         
-        console.log("Extracted ID:", id);
+        //console.log("Extracted ID:", id);
         
         // Validate the user ID
         if (!ObjectId.isValid(id)) {
-            console.log("Invalid ID format:", id);
+            //console.log("Invalid ID format:", id);
             return NextResponse.json(
                 { error: "Invalid user ID format." },
                 { status: 400 }
@@ -72,7 +72,7 @@ export async function GET(request, { params }) {
 export async function PUT(request, { params }) {
     try {
         // Log the entire params object to see its structure
-        console.log("PUT params:", params);
+        //console.log("PUT params:", params);
         
         // Try different ways to extract the ID
         let id;
@@ -87,12 +87,12 @@ export async function PUT(request, { params }) {
             id = pathSegments[pathSegments.length - 1];
         }
         
-        console.log("Extracted ID:", id);
+        //console.log("Extracted ID:", id);
         
-        const session = await getServerSession();
+        const session = await auth();
 
         if (!session) {
-            console.log("PUT /api/users/[id]: No session found");
+            //console.log("PUT /api/users/[id]: No session found");
             return NextResponse.json(
                 { error: "Unauthorized" },
                 { status: 401 }
@@ -106,10 +106,10 @@ export async function PUT(request, { params }) {
             { projection: { password: 0 } }
         );
 
-        console.log("PUT /api/users/[id]: Current user:", currentUser);
+        //console.log("PUT /api/users/[id]: Current user:", currentUser);
 
         if (!currentUser || currentUser.role !== 'admin') {
-            console.log("PUT /api/users/[id]: User is not admin or not found");
+            //console.log("PUT /api/users/[id]: User is not admin or not found");
             return NextResponse.json(
                 { error: "Only admins can update user roles" },
                 { status: 403 }
@@ -118,7 +118,7 @@ export async function PUT(request, { params }) {
 
         // Validate the user ID to be updated
         if (!ObjectId.isValid(id)) {
-            console.log("PUT /api/users/[id]: Invalid ID format:", id);
+            //console.log("PUT /api/users/[id]: Invalid ID format:", id);
             return NextResponse.json(
                 { error: "Invalid user ID format." },
                 { status: 400 }
@@ -126,7 +126,7 @@ export async function PUT(request, { params }) {
         }
 
         const data = await request.json();
-        console.log("PUT /api/users/[id]: Update data:", data);
+        //console.log("PUT /api/users/[id]: Update data:", data);
         
         // Allow updating isTeamLeader field and other user fields
         const { isTeamLeader, ...otherFields } = data;
@@ -150,7 +150,7 @@ export async function PUT(request, { params }) {
             updateObject[key] = otherFields[key];
         });
 
-        console.log("PUT /api/users/[id]: Update object:", updateObject);
+        //console.log("PUT /api/users/[id]: Update object:", updateObject);
 
         // Update user profile
         const result = await usersCollection.updateOne(
@@ -158,7 +158,7 @@ export async function PUT(request, { params }) {
             { $set: updateObject }
         );
 
-        console.log("PUT /api/users/[id]: Update result:", result);
+        //console.log("PUT /api/users/[id]: Update result:", result);
 
         if (result.matchedCount === 0) {
             return NextResponse.json(
@@ -173,7 +173,7 @@ export async function PUT(request, { params }) {
             { projection: { password: 0 } }
         );
 
-        console.log("PUT /api/users/[id]: Updated user:", updatedUser);
+        //console.log("PUT /api/users/[id]: Updated user:", updatedUser);
 
         return NextResponse.json({
             success: true,

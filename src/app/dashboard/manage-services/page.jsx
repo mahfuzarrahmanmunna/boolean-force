@@ -252,7 +252,7 @@ export default function ServicesAdmin() {
                 }
                 const data = await response.json();
                 setServicesData(data);
-                console.log("Fetched services:", data);
+                //console.log("Fetched services:", data);
             } catch (error) {
                 console.error("Error fetching services:", error);
                 showNotification('Failed to load services. Please try again.', 'error');
@@ -266,15 +266,15 @@ export default function ServicesAdmin() {
 
     // Log data to console whenever it changes
     useEffect(() => {
-        console.log("Current Services Data:", servicesData);
+        //console.log("Current Services Data:", servicesData);
     }, [servicesData]);
 
     // Handle form submission for editing with improved error handling
     const onEditSubmit = async (data) => {
         setIsLoading(true);
         setSavingServiceId(editingService);
-        console.log("Submitting edit form data:", data);
-        console.log("Editing service ID:", editingService);
+        //console.log("Submitting edit form data:", data);
+        //console.log("Editing service ID:", editingService);
 
         try {
             // Validate required fields
@@ -326,8 +326,8 @@ export default function ServicesAdmin() {
 
             const requestBody = JSON.stringify(cleanData);
 
-            console.log("Request body:", requestBody);
-            console.log("Request URL:", `/api/services/${editingService}`);
+            //console.log("Request body:", requestBody);
+            //console.log("Request URL:", `/api/services/${editingService}`);
 
             const response = await fetch(`/api/services/${editingService}`, {
                 method: 'PUT',
@@ -337,12 +337,12 @@ export default function ServicesAdmin() {
                 body: requestBody,
             });
 
-            console.log("Response status:", response.status);
-            console.log("Response ok:", response.ok);
+            //console.log("Response status:", response.status);
+            //console.log("Response ok:", response.ok);
 
             // Get the response text first to see what we're getting
             const responseText = await response.text();
-            console.log("Response text:", responseText);
+            //console.log("Response text:", responseText);
 
             let responseData;
             try {
@@ -352,7 +352,7 @@ export default function ServicesAdmin() {
                 throw new Error('Invalid response from server');
             }
 
-            console.log("API Response:", responseData);
+            //console.log("API Response:", responseData);
 
             if (!response.ok) {
                 // Provide more specific error messages
@@ -392,7 +392,7 @@ export default function ServicesAdmin() {
     // Handle form submission for adding new service with improved error handling
     const onNewSubmit = async (data) => {
         setIsLoading(true);
-        console.log("Submitting new service data:", data);
+        //console.log("Submitting new service data:", data);
 
         try {
             // Validate required fields
@@ -414,7 +414,7 @@ export default function ServicesAdmin() {
             }
 
             const result = await response.json();
-            console.log("Create response:", result);
+            //console.log("Create response:", result);
 
             // Update the local state with the new service from the API response
             if (result.data) {
@@ -442,7 +442,7 @@ export default function ServicesAdmin() {
     // Handle service delete with improved error handling
     const handleDeleteService = async (serviceId) => {
         if (confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
-            console.log("Deleting service with ID:", serviceId);
+            //console.log("Deleting service with ID:", serviceId);
             setDeletingServiceId(serviceId);
 
             try {
@@ -456,7 +456,7 @@ export default function ServicesAdmin() {
                 }
 
                 const result = await response.json();
-                console.log("Delete response:", result);
+                //console.log("Delete response:", result);
 
                 // Update the local state by removing the deleted service
                 const updatedData = servicesData.filter(service => service._id !== serviceId);
@@ -526,7 +526,7 @@ export default function ServicesAdmin() {
                 });
 
                 setServicesData(newServicesData);
-                console.log("Reordered services:", newServicesData);
+                //console.log("Reordered services:", newServicesData);
                 showNotification('Services reordered successfully!', 'success');
             } catch (error) {
                 console.error("Error reordering services:", error);
@@ -571,7 +571,7 @@ export default function ServicesAdmin() {
 
             setServicesData(newServicesData);
             setDraggedIndex(null);
-            console.log("Reordered services via drag and drop:", newServicesData);
+            //console.log("Reordered services via drag and drop:", newServicesData);
             showNotification('Services reordered successfully!', 'success');
         } catch (error) {
             console.error("Error reordering services:", error);
@@ -584,12 +584,12 @@ export default function ServicesAdmin() {
 
     // Handle edit service with improved functionality
     const handleEditService = (service) => {
-        console.log("Editing service:", service);
-        console.log("Service ID:", service._id);
+        //console.log("Editing service:", service);
+        //console.log("Service ID:", service._id);
 
         // Ensure ID is a string
         const serviceId = typeof service._id === 'object' ? service._id.toString() : service._id;
-        console.log("Normalized service ID:", serviceId);
+        //console.log("Normalized service ID:", serviceId);
 
         setEditingService(serviceId);
         // Set the form values with the current service data

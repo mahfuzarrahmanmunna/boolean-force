@@ -253,16 +253,16 @@ export default function WorkerTasks() {
         // --- DEBUGGING & VALIDATION ---
 
         // 1. Log the raw selected task object
-        console.log('Attempting to update task. Selected Task Object:', selectedTask);
+        //console.log('Attempting to update task. Selected Task Object:', selectedTask);
 
         // 2. Log the ID and its type directly from the object
-        console.log('Task ID from selectedTask:', selectedTask._id);
-        console.log('Task ID Type:', typeof selectedTask._id);
+        //console.log('Task ID from selectedTask:', selectedTask._id);
+        //console.log('Task ID Type:', typeof selectedTask._id);
 
         // 3. Force the ID to be a string, just in case it's an object
         const taskId = String(selectedTask._id);
-        console.log('Forced String Task ID:', taskId);
-        console.log('Forced String Task ID Type:', typeof taskId);
+        //console.log('Forced String Task ID:', taskId);
+        //console.log('Forced String Task ID Type:', typeof taskId);
 
         // 4. Client-side validation: Check if it matches the 24-char hex format for a MongoDB ObjectId.
         const isValidObjectId = /^[0-9a-fA-F]{24}$/.test(taskId);
@@ -272,7 +272,7 @@ export default function WorkerTasks() {
             return; // Stop the function here
         }
 
-        console.log('ID is valid. Proceeding with API call to:', `/api/projects/${taskId}`);
+        //console.log('ID is valid. Proceeding with API call to:', `/api/projects/${taskId}`);
         // --- END DEBUGGING ---
 
         setIsLoading(true);

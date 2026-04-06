@@ -349,10 +349,10 @@ export default function ProjectManagement() {
     }
 
     // Log for debugging
-    console.log(`Making ${options.method || "GET"} request to ${url}`, {
-      headers,
-      credentials: "include",
-    });
+    // //console.log(`Making ${options.method || "GET"} request to ${url}`, {
+    //   headers,
+    //   credentials: "include",
+    // });
 
     return fetch(url, {
       ...options,
@@ -424,8 +424,8 @@ export default function ProjectManagement() {
 
     // Ensure we're using the correct project ID format
     const projectId = selectedProject._id;
-    console.log("Updating project with ID:", projectId);
-    console.log("Update data:", data);
+    //console.log("Updating project with ID:", projectId);
+    //console.log("Update data:", data);
 
     setIsLoading(true);
     try {
@@ -434,8 +434,8 @@ export default function ProjectManagement() {
         body: JSON.stringify(data),
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response headers:", response.headers);
+      //console.log("Response status:", response.status);
+      //console.log("Response headers:", response.headers);
 
       if (!response.ok) {
         let errorData = {};
@@ -444,7 +444,7 @@ export default function ProjectManagement() {
         try {
           // Try to parse the error response as JSON
           const responseText = await response.text();
-          console.log("Error response text:", responseText);
+          //console.log("Error response text:", responseText);
           
           if (responseText) {
             try {
@@ -521,7 +521,7 @@ export default function ProjectManagement() {
         try {
           // Try to parse the error response as JSON
           const responseText = await response.text();
-          console.log("Error response text:", responseText);
+          //console.log("Error response text:", responseText);
           
           if (responseText) {
             try {

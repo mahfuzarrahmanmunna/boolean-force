@@ -675,7 +675,7 @@ export default function ManageClients() {
       );
       return;
     }
-    console.log(selectedTasksToAssign);
+    //console.log(selectedTasksToAssign);
     setIsLoading(true);
     try {
       const updatePromises = selectedTasksToAssign.map((taskId) =>

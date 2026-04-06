@@ -1,131 +1,140 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
-import { dbConnect } from "./dbConnect";
 import bcrypt from "bcryptjs";
-
-// Direct implementation of loginUser
-async function loginUser({ email, password, role }) {
-  try {
-    const db = await dbConnect();
-    const usersCollection = db.collection("test_user");
-    
-    const user = await usersCollection.findOne({ email });
-    
-    if (!user) {
-      return null;
-    }
-    
-    if (user.password) {
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return null;
-      }
-    }
-    
-    if (role && user.role !== role) {
-      return null;
-    }
-    
-    return {
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      image: user.image,
-    };
-  } catch (error) {
-    console.error("Login error:", error);
-    return null;
-  }
-}
+import clientPromise from "@/lib/mongodbAdapter";
 
 export const authOptions = {
-    providers: [
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "text", placeholder: "Enter Email" },
-                password: { label: "Password", type: "password" },
-                role: { label: "Role", type: "text" }
-            },
-            async authorize(credentials) {
-                const { email, password, role } = credentials;
-                const user = await loginUser({ email, password, role });
-                
-                if (!user) {
-                    throw new Error("Invalid email or password");
-                }
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    }),
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Please enter your email and password");
+        }
 
-                if (role && user.role !== role) {
-                    throw new Error("Role mismatch");
-                }
+        try {
+          const client = await clientPromise;
+          const db = client.db(process.env.DB_NAME);
+          const users = db.collection("users");
 
-                return user;
-            },
-        }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        }),
-        GitHubProvider({
-            clientId: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-        }),
-    ],
+          const user = await users.findOne({ email: credentials.email });
 
-    pages: {
-        signIn: "/login",
-        signUp: "/register",
-    },
+          if (!user || !user.password) {
+            throw new Error("No user found with this email");
+          }
 
-    callbacks: {
-        async signIn({ user, account }) {
-            if (account) {
-                const db = await dbConnect();
-                const userCollection = db.collection("test_user");
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            user.password,
+          );
 
-                const isExisted = await userCollection.findOne({
-                    providerAccountId: account.providerAccountId,
-                });
+          if (!isPasswordValid) {
+            throw new Error("Invalid password");
+          }
 
-                if (!isExisted) {
-                    await userCollection.insertOne({
-                        providerAccountId: account.providerAccountId,
-                        provider: account.provider,
-                        email: user.email,
-                        name: user.name,
-                        image: user.image,
-                        role: "user",
-                        createdAt: new Date(),
-                    });
-                }
+          return {
+            id: user._id.toString(),
+            name: user.name,
+            email: user.email,
+            image: user.image || null,
+            role: user.role || "worker",
+          };
+        } catch (error) {
+          const msg = error?.message ?? "";
+          const isDbUnavailable =
+            msg.includes("ECONNREFUSED") ||
+            msg.includes("querySrv") ||
+            msg.includes("ENOTFOUND");
+          if (isDbUnavailable) {
+            if (process.env.NODE_ENV === "development") {
+              console.error("Auth error (DB unreachable):", msg);
             }
-            return true;
-        },
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-                token.role = user.role;
-                token.name = user.name;
-                token.email = user.email;
-            }
-            return token;
-        },
-        async session({ session, token }) {
-            if (token) {
-                session.user.id = token.id;
-                session.user.role = token.role;
-                session.user.name = token.name;
-                session.user.email = token.email;
-            }
-            return session;
-        },
-    },
+            throw new Error(
+              "Database is unavailable. Check your internet connection and try again.",
+            );
+          }
+          console.error("Auth error:", error);
+          throw new Error("Invalid credentials");
+        }
+      },
+    }),
+  ],
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60,
+  },
+  pages: {
+    signIn: "/login",
+    signUp: "/register",
+    error: "/auth/error",
+  },
+  callbacks: {
+    async signIn({ user, account }) {
+      if (account.provider === "google" || account.provider === "github") {
+        try {
+          const client = await clientPromise;
+          const db = client.db(process.env.DB_NAME);
+          const users = db.collection("users");
 
-    session: {
-        strategy: "jwt",
-    },
+          const existingUser = await users.findOne({ email: user.email });
 
-    secret: process.env.NEXTAUTH_SECRET,
+          if (!existingUser) {
+            await users.insertOne({
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              role: "worker",
+              createdAt: new Date(),
+            });
+
+            user.role = "worker";
+          } else {
+            user.role = existingUser.role || "worker";
+          }
+        } catch (error) {
+          const msg = error?.message ?? "";
+          if (!msg.includes("ECONNREFUSED") && !msg.includes("querySrv")) {
+            console.error("Error during social sign in:", error);
+          }
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.name = user.name;
+        token.email = user.email;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.name = token.name;
+        session.user.email = token.email;
+      }
+      return session;
+    },
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
 };

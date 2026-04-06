@@ -7,7 +7,7 @@ import { dbConnect } from "@/lib/dbConnect";
 
 // GET - Fetch a single pricing plan by ID
 export async function GET(request, { params }) {
-    console.log("GET /api/pricing-plans/[id] called with params:", params);
+    //console.log("GET /api/pricing-plans/[id] called with params:", params);
     try {
         const { id } = params;
 
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             // If it's not a valid ObjectId, try to find by the 'id' field instead
@@ -60,7 +60,7 @@ export async function GET(request, { params }) {
 
         // Find by ObjectId
         const plan = await collection.findOne({ _id: objectId });
-        console.log("Found plan:", plan);
+        //console.log("Found plan:", plan);
 
         if (!plan) {
             return new Response(
@@ -101,11 +101,11 @@ export async function GET(request, { params }) {
 
 // PUT - Update an existing pricing plan by ID
 export async function PUT(request, { params }) {
-    console.log("PUT /api/pricing-plans/[id] called with params:", params);
+    //console.log("PUT /api/pricing-plans/[id] called with params:", params);
     try {
         const { id } = params;
         const updateData = await request.json();
-        console.log("Updating pricing plan:", id, updateData);
+        //console.log("Updating pricing plan:", id, updateData);
 
         if (!id) {
             return new Response(
@@ -123,17 +123,17 @@ export async function PUT(request, { params }) {
         const collection = await dbConnect('pricingPlans');
 
         // Add debugging logs
-        console.log("Connected to database, collection:", collection.collectionName);
+        //console.log("Connected to database, collection:", collection.collectionName);
 
         // Check all document IDs in the database
         const allDocs = await collection.find({}).toArray();
-        console.log("All document IDs in database:", allDocs.map(doc => ({ _id: doc._id.toString(), name: doc.name })));
+        //console.log("All document IDs in database:", allDocs.map(doc => ({ _id: doc._id.toString(), name: doc.name })));
 
         // Try to convert to ObjectId, but handle the case where it might fail
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             // If it's not a valid ObjectId, try to update by the 'id' field instead
@@ -177,13 +177,13 @@ export async function PUT(request, { params }) {
 
         // Find by ObjectId
         const existingDoc = await collection.findOne({ _id: objectId });
-        console.log("Existing document:", existingDoc);
+        //console.log("Existing document:", existingDoc);
 
         if (!existingDoc) {
             // Try to find by string ID as a fallback
-            console.log("ObjectId search failed, trying string-based search");
+            //console.log("ObjectId search failed, trying string-based search");
             const stringDoc = await collection.findOne({ _id: id });
-            console.log("String-based search result:", stringDoc);
+            //console.log("String-based search result:", stringDoc);
 
             if (!stringDoc) {
                 return new Response(
@@ -229,7 +229,7 @@ export async function PUT(request, { params }) {
             { $set: updateData }
         );
 
-        console.log("Update result:", result);
+        //console.log("Update result:", result);
 
         // Get the updated document
         const updatedDocument = await collection.findOne({ _id: objectId });
@@ -268,11 +268,11 @@ export async function PUT(request, { params }) {
 
 // PATCH - Partially update an existing pricing plan by ID
 export async function PATCH(request, { params }) {
-    console.log("PATCH /api/pricing-plans/[id] called with params:", params);
+    //console.log("PATCH /api/pricing-plans/[id] called with params:", params);
     try {
         const { id } = params;
         const updateData = await request.json();
-        console.log("Partially updating pricing plan:", id, updateData);
+        //console.log("Partially updating pricing plan:", id, updateData);
 
         if (!id) {
             return new Response(
@@ -293,7 +293,7 @@ export async function PATCH(request, { params }) {
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             // If it's not a valid ObjectId, try to update by the 'id' field instead
@@ -337,7 +337,7 @@ export async function PATCH(request, { params }) {
 
         // Find by ObjectId
         const existingDoc = await collection.findOne({ _id: objectId });
-        console.log("Existing document:", existingDoc);
+        //console.log("Existing document:", existingDoc);
 
         if (!existingDoc) {
             return new Response(
@@ -357,7 +357,7 @@ export async function PATCH(request, { params }) {
             { $set: updateData }
         );
 
-        console.log("Update result:", result);
+        //console.log("Update result:", result);
 
         // Get the updated document
         const updatedDocument = await collection.findOne({ _id: objectId });
@@ -396,7 +396,7 @@ export async function PATCH(request, { params }) {
 
 // DELETE - Delete a pricing plan by ID
 export async function DELETE(request, { params }) {
-    console.log("DELETE /api/pricing-plans/[id] called with params:", params);
+    //console.log("DELETE /api/pricing-plans/[id] called with params:", params);
     try {
         const { id } = params;
 
@@ -413,14 +413,14 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        console.log("Deleting pricing plan:", id);
+        //console.log("Deleting pricing plan:", id);
         const collection = await dbConnect('pricingPlans');
 
         // Try to convert to ObjectId, but handle the case where it might fail
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             // If it's not a valid ObjectId, try to delete by the 'id' field instead
@@ -452,7 +452,7 @@ export async function DELETE(request, { params }) {
 
         // Find by ObjectId
         const existingDoc = await collection.findOne({ _id: objectId });
-        console.log("Existing document:", existingDoc);
+        //console.log("Existing document:", existingDoc);
 
         if (!existingDoc) {
             return new Response(
@@ -469,7 +469,7 @@ export async function DELETE(request, { params }) {
 
         const result = await collection.deleteOne({ _id: objectId });
 
-        console.log("Delete result:", result);
+        //console.log("Delete result:", result);
 
         return NextResponse.json(
             {

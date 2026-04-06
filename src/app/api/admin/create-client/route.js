@@ -239,7 +239,7 @@ export async function POST(request) {
       if (transporter) {
         try {
           await sendPasswordResetEmail(newUser, transporter);
-          console.log("Password reset email sent successfully");
+          //console.log("Password reset email sent successfully");
         } catch (emailError) {
           console.error("Error sending password reset email:", emailError);
           // The request will still succeed, but we log the error

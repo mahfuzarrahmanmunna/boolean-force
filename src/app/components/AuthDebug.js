@@ -8,11 +8,11 @@ export default function AuthDebug() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    console.log("=== AUTH DEBUG ===");
-    console.log("Status:", status);
-    console.log("Session:", session);
-    console.log("User:", session?.user);
-    console.log("==================");
+    //console.log("=== AUTH DEBUG ===");
+    //console.log("Status:", status);
+    //console.log("Session:", session);
+    //console.log("User:", session?.user);
+    //console.log("==================");
   }, [session, status]);
 
   return (

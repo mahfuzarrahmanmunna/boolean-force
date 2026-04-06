@@ -26,7 +26,7 @@ const PricingCard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    console.log(pricingData)
+    // //console.log(pricingData)
     useEffect(() => {
         const fetchPricingData = async () => {
             try {

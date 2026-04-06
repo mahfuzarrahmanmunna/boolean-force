@@ -141,7 +141,7 @@ export default function PricingAdmin() {
                 }
                 const data = await response.json();
                 setPricingData(data);
-                console.log("Fetched pricing plans:", data);
+                //console.log("Fetched pricing plans:", data);
             } catch (error) {
                 console.error("Error fetching pricing plans:", error);
                 showNotification('Failed to load pricing plans. Please try again.', 'error');
@@ -155,16 +155,16 @@ export default function PricingAdmin() {
 
     // Log data to console whenever it changes
     useEffect(() => {
-        console.log("Current Pricing Data:", pricingData);
+        //console.log("Current Pricing Data:", pricingData);
     }, [pricingData]);
 
     // Handle form submission for editing with improved error handling
     const onEditSubmit = async (data) => {
         setIsLoading(true);
         setSavingPlanId(editingPlan);
-        console.log("Submitting edit form data:", data);
-        console.log("Editing plan ID:", editingPlan);
-        console.log("Editing plan ID type:", typeof editingPlan);
+        //console.log("Submitting edit form data:", data);
+        //console.log("Editing plan ID:", editingPlan);
+        //console.log("Editing plan ID type:", typeof editingPlan);
 
         try {
             // Validate required fields
@@ -174,8 +174,8 @@ export default function PricingAdmin() {
 
             const requestBody = JSON.stringify(data);
 
-            console.log("Request body:", requestBody);
-            console.log("Request URL:", `/api/pricing-plans/${editingPlan}`);
+            //console.log("Request body:", requestBody);
+            //console.log("Request URL:", `/api/pricing-plans/${editingPlan}`);
 
             const response = await fetch(`/api/pricing-plans/${editingPlan}`, {
                 method: 'PUT',
@@ -185,11 +185,11 @@ export default function PricingAdmin() {
                 body: requestBody,
             });
 
-            console.log("Response status:", response.status);
-            console.log("Response ok:", response.ok);
+            //console.log("Response status:", response.status);
+            //console.log("Response ok:", response.ok);
 
             const responseData = await response.json();
-            console.log("API Response:", responseData);
+            //console.log("API Response:", responseData);
 
             if (!response.ok) {
                 // Provide more specific error messages
@@ -230,7 +230,7 @@ export default function PricingAdmin() {
     // Handle form submission for adding new plan with improved error handling
     const onNewSubmit = async (data) => {
         setIsLoading(true);
-        console.log("Submitting new plan data:", data);
+        //console.log("Submitting new plan data:", data);
 
         try {
             // Validate required fields
@@ -252,7 +252,7 @@ export default function PricingAdmin() {
             }
 
             const result = await response.json();
-            console.log("Create response:", result);
+            //console.log("Create response:", result);
 
             // Update the local state with the new plan from the API response
             if (result.data) {
@@ -280,7 +280,7 @@ export default function PricingAdmin() {
     // Handle plan delete with improved error handling
     const handleDeletePlan = async (planId) => {
         if (confirm('Are you sure you want to delete this plan? This action cannot be undone.')) {
-            console.log("Deleting plan with ID:", planId);
+            //console.log("Deleting plan with ID:", planId);
             setDeletingPlanId(planId);
 
             try {
@@ -294,7 +294,7 @@ export default function PricingAdmin() {
                 }
 
                 const result = await response.json();
-                console.log("Delete response:", result);
+                //console.log("Delete response:", result);
 
                 // Update the local state by removing the deleted plan
                 const updatedData = pricingData.filter(plan => plan._id !== planId);
@@ -364,7 +364,7 @@ export default function PricingAdmin() {
                 });
 
                 setPricingData(newPricingData);
-                console.log("Reordered plans:", newPricingData);
+                //console.log("Reordered plans:", newPricingData);
                 showNotification('Plans reordered successfully!', 'success');
             } catch (error) {
                 console.error("Error reordering plans:", error);
@@ -409,7 +409,7 @@ export default function PricingAdmin() {
 
             setPricingData(newPricingData);
             setDraggedIndex(null);
-            console.log("Reordered plans via drag and drop:", newPricingData);
+            //console.log("Reordered plans via drag and drop:", newPricingData);
             showNotification('Plans reordered successfully!', 'success');
         } catch (error) {
             console.error("Error reordering plans:", error);
@@ -422,13 +422,13 @@ export default function PricingAdmin() {
 
     // Handle edit plan with improved functionality
     const handleEditPlan = (plan) => {
-        console.log("Editing plan:", plan);
-        console.log("Plan ID:", plan._id);
-        console.log("Plan ID type:", typeof plan._id);
+        //console.log("Editing plan:", plan);
+        //console.log("Plan ID:", plan._id);
+        //console.log("Plan ID type:", typeof plan._id);
 
         // Ensure ID is a string
         const planId = typeof plan._id === 'object' ? plan._id.toString() : plan._id;
-        console.log("Normalized plan ID:", planId);
+        //console.log("Normalized plan ID:", planId);
 
         setEditingPlan(planId);
         // Set the form values with the current plan data

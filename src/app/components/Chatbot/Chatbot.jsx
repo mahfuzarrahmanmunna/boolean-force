@@ -236,7 +236,7 @@ const Chatbot = () => {
         setConnectionStatus('connecting');
 
         try {
-            console.log('Sending message:', messageToSend);
+            //console.log('Sending message:', messageToSend);
 
             // Prepare messages for API
             const apiMessages = messages
@@ -416,7 +416,7 @@ const Chatbot = () => {
     };
 
     const handleReaction = (messageId, reaction) => {
-        console.log(`Reacted with ${reaction} to message ${messageId}`);
+        //console.log(`Reacted with ${reaction} to message ${messageId}`);
 
         if (reaction === 'like') {
             setLikedMessageIds(prev => {
@@ -448,7 +448,7 @@ const Chatbot = () => {
 
     const submitRating = () => {
         // In a real implementation, you would send the rating to your server
-        console.log(`User rated the conversation: ${rating} stars`);
+        //console.log(`User rated the conversation: ${rating} stars`);
         setShowRatingDialog(false);
         setRating(0);
         setShowOptionsMenu(false);

@@ -89,7 +89,7 @@ export async function POST(request) {
             ...messages
         ];
 
-        console.log('Sending request to OpenRouter with messages:', apiMessages);
+        //console.log('Sending request to OpenRouter with messages:', apiMessages);
 
         // Try each model until one works
         let lastError = null;
@@ -98,7 +98,7 @@ export async function POST(request) {
 
         for (const model of AVAILABLE_MODELS) {
             try {
-                console.log(`Trying model: ${model}`);
+                //console.log(`Trying model: ${model}`);
 
                 const response = await axios.post(
                     'https://openrouter.ai/api/v1/chat/completions',
@@ -124,7 +124,7 @@ export async function POST(request) {
                 successfulModel = model;
 
                 if (botReply) {
-                    console.log(`Successfully used model: ${model}`);
+                    //console.log(`Successfully used model: ${model}`);
                     break;
                 }
             } catch (error) {
@@ -192,7 +192,7 @@ export async function POST(request) {
             );
         }
 
-        console.log('Received response from OpenRouter using model:', successfulModel);
+        //console.log('Received response from OpenRouter using model:', successfulModel);
 
         // Return the successful response
         return NextResponse.json({

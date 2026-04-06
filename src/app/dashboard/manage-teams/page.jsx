@@ -397,16 +397,16 @@ export default function ManageTeamsPage() {
       const newLeaderId = data.teamLeader;
       const oldLeaderId = editingTeam ? editingTeam.teamLeader : null;
 
-      console.log("Team submit - New leader ID:", newLeaderId);
-      console.log("Team submit - Old leader ID:", oldLeaderId);
+      //console.log("Team submit - New leader ID:", newLeaderId);
+      //console.log("Team submit - Old leader ID:", oldLeaderId);
 
       // 1. Set the new/selected leader's status to true
       try {
-        console.log("Setting new team leader status to true for:", newLeaderId);
+        //console.log("Setting new team leader status to true for:", newLeaderId);
 
         // Log the full URL to make sure it's correct
         const updateUrl = `/api/users/${newLeaderId}`;
-        console.log("Update URL:", updateUrl);
+        //console.log("Update URL:", updateUrl);
 
         const userResponse = await fetch(updateUrl, {
           method: "PUT",
@@ -414,14 +414,14 @@ export default function ManageTeamsPage() {
           body: JSON.stringify({ isTeamLeader: true }),
         });
 
-        console.log("New leader response status:", userResponse.status);
+        //console.log("New leader response status:", userResponse.status);
         console.log("New leader response headers:", [
           ...userResponse.headers.entries(),
         ]);
 
         if (userResponse.ok) {
           const userResult = await userResponse.json();
-          console.log("New leader update result:", userResult);
+          //console.log("New leader update result:", userResult);
 
           setWorkers((prevWorkers) =>
             prevWorkers.map((worker) =>
@@ -477,11 +477,11 @@ export default function ManageTeamsPage() {
             body: JSON.stringify({ isTeamLeader: false }),
           });
 
-          console.log("Old leader response status:", oldLeaderResponse.status);
+          // console.log("Old leader response status:", oldLeaderResponse.status);
 
           if (oldLeaderResponse.ok) {
             const oldLeaderResult = await oldLeaderResponse.json();
-            console.log("Old leader update result:", oldLeaderResult);
+            //console.log("Old leader update result:", oldLeaderResult);
 
             setWorkers((prevWorkers) =>
               prevWorkers.map((worker) =>
@@ -628,7 +628,7 @@ export default function ManageTeamsPage() {
 
           if (userResponse.ok) {
             const userResult = await userResponse.json();
-            console.log("Deleted team leader update result:", userResult);
+            //console.log("Deleted team leader update result:", userResult);
 
             setWorkers((prevWorkers) =>
               prevWorkers.map((worker) =>

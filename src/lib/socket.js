@@ -15,7 +15,7 @@ export const getSocketServer = (server) => {
     });
 
     io.on('connection', (socket) => {
-      console.log('User connected:', socket.id);
+      //console.log('User connected:', socket.id);
       
       // User joins their personal room for private messages
       socket.on('join-user-room', (userId) => {
@@ -132,7 +132,7 @@ export const getSocketServer = (server) => {
         if (socket.userId) {
           socket.broadcast.emit('user-status-update', { userId: socket.userId, status: 'offline' });
         }
-        console.log('User disconnected:', socket.id);
+        //console.log('User disconnected:', socket.id);
       });
     });
   }

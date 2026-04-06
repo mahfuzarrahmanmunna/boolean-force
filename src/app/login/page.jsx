@@ -28,8 +28,8 @@ const Login = () => {
   // Redirect based on role when session changes
   useEffect(() => {
     if (status === "authenticated" && session?.user) {
-      // console.log("User logged in:", session.user);
-      // console.log("User role:", session.user.role);
+      // //console.log("User logged in:", session.user);
+      // //console.log("User role:", session.user.role);
 
       // Redirect based on role
       if (session.user.role === "admin") {
@@ -61,7 +61,7 @@ const Login = () => {
         throw new Error("Please fill in all fields");
       }
 
-      // console.log("Attempting login for:", formData.email);
+      // //console.log("Attempting login for:", formData.email);
 
       const result = await signIn("credentials", {
         redirect: false,
@@ -69,17 +69,17 @@ const Login = () => {
         password: formData.password,
       });
 
-      // console.log("Sign in result:", result);
+      // //console.log("Sign in result:", result);
 
       if (result.error) {
-        console.log("Login error:", result.error);
+        //console.log("Login error:", result.error);
         throw new Error(result.error);
       }
 
       // Successful login - useEffect will handle redirect
-      console.log("Login successful, checking session...");
+      //console.log("Login successful, checking session...");
     } catch (err) {
-      console.log("Login error:", err.message);
+      //console.log("Login error:", err.message);
       setError(err.message || "Invalid email or password");
     } finally {
       setIsLoading(false);
@@ -89,13 +89,13 @@ const Login = () => {
   const handleSocialLogin = async (provider) => {
     setSocialLoading(provider);
     try {
-      console.log(`Social login attempt: ${provider}`);
+      //console.log(`Social login attempt: ${provider}`);
 
       await signIn(provider.toLowerCase(), {
         callbackUrl: window.location.origin, // Stay on same page, useEffect will handle redirect
       });
     } catch (err) {
-      console.log(`Social login error: ${provider}`, err);
+      //console.log(`Social login error: ${provider}`, err);
       setError(`Failed to sign in with ${provider}`);
       setSocialLoading("");
     }

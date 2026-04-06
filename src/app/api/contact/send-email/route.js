@@ -138,7 +138,7 @@ export async function POST(request) {
 
     // Send email
     await transporter.sendMail(mailOptions);
-    console.log("Reply email sent successfully to:", to);
+    //console.log("Reply email sent successfully to:", to);
 
     return NextResponse.json({
       success: true,

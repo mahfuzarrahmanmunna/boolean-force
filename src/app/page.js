@@ -23,10 +23,10 @@ import WhyUs from "./components/WhyUs";
 export default function Home() {
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    console.log("Home Component - Session status:", status);
-    console.log("Home Component - Session data:", session);
-  }, [session, status]);
+  // useEffect(() => {
+  //   //console.log("Home Component - Session status:", status);
+  //   //console.log("Home Component - Session data:", session);
+  // }, [session, status]);
 
   return (
     <div className="min-h-screen my-12">

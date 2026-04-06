@@ -273,7 +273,7 @@ export default function ManageContact() {
         const data = await response.json();
         setContacts(data);
         setFilteredContacts(data);
-        console.log("Fetched contacts:", data);
+        //console.log("Fetched contacts:", data);
       } catch (error) {
         console.error("Error fetching contacts:", error);
         showNotification("Failed to load contacts. Please try again.", "error");

@@ -214,7 +214,7 @@ const ContactPage = () => {
     setIsSubmitting(true);
 
     try {
-      console.log("Form Data Object:", formData);
+      //console.log("Form Data Object:", formData);
 
       const response = await fetch("/api/contact", {
         method: "POST",
@@ -229,7 +229,7 @@ const ContactPage = () => {
       }
 
       const data = await response.json();
-      console.log("Response data:", data);
+      //console.log("Response data:", data);
 
       if (data.success) {
         setFormStatus({

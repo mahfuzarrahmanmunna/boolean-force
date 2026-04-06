@@ -508,7 +508,7 @@ export async function GET() {
 export async function POST(request) {
   try {
     const postData = await request.json();
-    console.log("Received form data:", postData);
+    //console.log("Received form data:", postData);
 
     // Validate required fields
     if (!postData.name || !postData.email || !postData.message) {
@@ -521,7 +521,7 @@ export async function POST(request) {
     // Save to database
     const collection = await dbConnect("contacts");
     const result = await collection.insertOne(postData);
-    console.log("Data saved to database:", result);
+    //console.log("Data saved to database:", result);
 
     // Send emails
     const transporter = createTransporter();
@@ -529,11 +529,11 @@ export async function POST(request) {
       try {
         // Send notification to admin
         await sendAdminEmail(postData, transporter);
-        console.log("Admin email sent successfully");
+        //console.log("Admin email sent successfully");
 
         // Send confirmation to user
         await sendUserEmail(postData, transporter);
-        console.log("User confirmation email sent successfully");
+        //console.log("User confirmation email sent successfully");
       } catch (emailError) {
         console.error("Error sending email:", emailError);
         // The request will still succeed, but we log the error

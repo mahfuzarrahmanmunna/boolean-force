@@ -939,7 +939,7 @@ const OurServicesSlider = ({ onNavigateToSection }) => {
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                                 onClick={() => {
-                                                    console.log(`Secondary button clicked for ${services[currentServiceIndex].title}`);
+                                                    //console.log(`Secondary button clicked for ${services[currentServiceIndex].title}`);
                                                 }}
                                             >
                                                 {services[currentServiceIndex].secondaryButtonText}

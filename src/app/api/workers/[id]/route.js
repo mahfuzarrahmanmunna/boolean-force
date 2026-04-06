@@ -9,7 +9,7 @@ export async function PUT(request, { params }) {
     // Await params since it's a Promise in Next.js 13+
     const { id } = await params;
     
-    console.log(`PUT /api/projects/${id} called`);
+    //console.log(`PUT /api/projects/${id} called`);
     try {
         const { status, jobTitle, skills, experience, skillLevel, name, email, phone } = await request.json();
         
@@ -63,7 +63,7 @@ export async function DELETE(request, { params }) {
     // Await params since it's a Promise in Next.js 13+
     const { id } = await params;
     
-    console.log(`DELETE /api/projects/${id} called`);
+    //console.log(`DELETE /api/projects/${id} called`);
     try {
         const collection = await dbConnect('users');
         const result = await collection.deleteOne({ _id: new ObjectId(id) });

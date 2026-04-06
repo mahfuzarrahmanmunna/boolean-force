@@ -299,16 +299,16 @@ export default function AdminLayout({ children }) {
 
   // Check authentication and role - FIXED VERSION
   useEffect(() => {
-    console.log("Auth check - Status:", status);
-    console.log("Auth check - Session:", session);
+    //console.log("Auth check - Status:", status);
+    //console.log("Auth check - Session:", session);
     
     if (status === "loading") {
-      console.log("Auth check - Still loading");
+      //console.log("Auth check - Still loading");
       return;
     }
 
     if (!session) {
-      console.log("Auth check - No session, redirecting to login");
+      //console.log("Auth check - No session, redirecting to login");
       router.push("/login");
       return;
     }
@@ -320,30 +320,30 @@ export default function AdminLayout({ children }) {
                         session.user?.isTeamLeader === "1" ||
                         session.user?.isTeamLeader === true;
 
-    console.log("Auth check - isAdmin:", isAdmin);
-    console.log("Auth check - isTeamLeader:", isTeamLeader);
-    console.log("Auth check - User data:", session.user);
+    //console.log("Auth check - isAdmin:", isAdmin);
+    //console.log("Auth check - isTeamLeader:", isTeamLeader);
+    //console.log("Auth check - User data:", session.user);
 
     // Allow access for both admin and team leader
     if (!isAdmin && !isTeamLeader) {
-      console.log("Auth check - Not admin or team leader, redirecting to unauthorized");
+      //console.log("Auth check - Not admin or team leader, redirecting to unauthorized");
       router.push("/unauthorized");
       return;
     }
 
-    console.log("Auth check - Access granted");
+    //console.log("Auth check - Access granted");
   }, [session, status, router]);
 
   // Load user permissions from localStorage or API - SIMPLIFIED VERSION
   useEffect(() => {
-    console.log("Permission load - Status:", status);
+    //console.log("Permission load - Status:", status);
     
     if (status !== "authenticated" || !session?.user) {
-      console.log("Permission load - Not authenticated or no user");
+      //console.log("Permission load - Not authenticated or no user");
       return;
     }
 
-    console.log("Permission load - User:", session.user);
+    //console.log("Permission load - User:", session.user);
     
     const loadUserPermissions = () => {
       try {
@@ -353,11 +353,11 @@ export default function AdminLayout({ children }) {
                            session.user?.isTeamLeader === "1" ||
                            session.user?.isTeamLeader === true;
 
-        console.log("Permission load - isAdmin:", isAdmin);
-        console.log("Permission load - isTeamLeader:", isTeamLeader);
+        //console.log("Permission load - isAdmin:", isAdmin);
+        //console.log("Permission load - isTeamLeader:", isTeamLeader);
 
         if (isAdmin || isTeamLeader) {
-          console.log("Permission load - Setting admin/team leader permissions");
+          //console.log("Permission load - Setting admin/team leader permissions");
           const permissions = {
             project: {
               create_project: true,
@@ -391,7 +391,7 @@ export default function AdminLayout({ children }) {
             },
           };
           
-          console.log("Permission load - Permissions set:", permissions);
+          //console.log("Permission load - Permissions set:", permissions);
           setUserPermissions(permissions);
           return;
         }
@@ -401,7 +401,7 @@ export default function AdminLayout({ children }) {
         if (userId) {
           const cached = localStorage.getItem(`userPermissions_${userId}`);
           if (cached) {
-            console.log("Permission load - Loaded from cache");
+            //console.log("Permission load - Loaded from cache");
             setUserPermissions(JSON.parse(cached));
           }
         }
@@ -502,7 +502,7 @@ export default function AdminLayout({ children }) {
 
   // Redirect if not authenticated or not admin
   if (!session) {
-    console.log("No session, returning null");
+    //console.log("No session, returning null");
     return null;
   }
 
@@ -512,30 +512,30 @@ export default function AdminLayout({ children }) {
                       session.user?.isTeamLeader === "1" ||
                       session.user?.isTeamLeader === true;
 
-  console.log("User check - isAdmin:", isAdmin);
-  console.log("User check - isTeamLeader:", isTeamLeader);
-  console.log("User check - Full user data:", session.user);
+  //console.log("User check - isAdmin:", isAdmin);
+  //console.log("User check - isTeamLeader:", isTeamLeader);
+  //console.log("User check - Full user data:", session.user);
 
   if (!isAdmin && !isTeamLeader) {
-    console.log("Not admin or team leader, redirecting");
+    //console.log("Not admin or team leader, redirecting");
     router.push("/unauthorized");
     return null;
   }
 
-  console.log("User authenticated and authorized");
+  //console.log("User authenticated and authorized");
 
   // Check if user has permission to access current route - SIMPLIFIED
   const hasPermission = (permission) => {
-    console.log("hasPermission called with:", permission);
+    //console.log("hasPermission called with:", permission);
     
     // Admin and Team Leader both have all permissions
     if (isAdmin || isTeamLeader) {
-      console.log("User is admin or team leader, returning true");
+      //console.log("User is admin or team leader, returning true");
       return true;
     }
 
     // For regular users, check specific permissions
-    console.log("Checking permission for regular user");
+    //console.log("Checking permission for regular user");
     
     // Extract category and permission name
     const parts = permission.split('.');
@@ -1181,7 +1181,7 @@ export default function AdminLayout({ children }) {
     return <>{children}</>;
   }
 
-  console.log("Rendering layout, userPermissions:", userPermissions);
+  //console.log("Rendering layout, userPermissions:", userPermissions);
 
   return (
     <div
@@ -1267,12 +1267,12 @@ export default function AdminLayout({ children }) {
 
               // Debug for Performance menu
               if (item.title === "Performance") {
-                console.log("Performance Menu Debug:");
-                console.log("- item.permission:", item.permission);
-                console.log("- hasRequiredPermission:", hasRequiredPermission);
-                console.log("- isAdmin:", isAdmin);
-                console.log("- isTeamLeader:", isTeamLeader);
-                console.log("- userPermissions.system.view_analytics:", userPermissions.system.view_analytics);
+                //console.log("Performance Menu Debug:");
+                //console.log("- item.permission:", item.permission);
+                //console.log("- hasRequiredPermission:", hasRequiredPermission);
+                //console.log("- isAdmin:", isAdmin);
+                //console.log("- isTeamLeader:", isTeamLeader);
+                //console.log("- userPermissions.system.view_analytics:", userPermissions.system.view_analytics);
               }
 
               return (

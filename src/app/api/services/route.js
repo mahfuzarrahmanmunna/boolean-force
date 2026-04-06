@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch all services
 export async function GET(request) {
-    console.log("GET /api/services called");
+    //console.log("GET /api/services called");
     try {
         const collection = await dbConnect('services');
         const data = await collection.find({}).toArray();
@@ -16,7 +16,7 @@ export async function GET(request) {
             _id: item._id.toString()
         }));
 
-        console.log("Fetched services:", serializedData);
+        //console.log("Fetched services:", serializedData);
         return NextResponse.json(serializedData);
     }
     catch (err) {
@@ -37,10 +37,10 @@ export async function GET(request) {
 
 // POST - Add a new service
 export async function POST(request) {
-    console.log("POST /api/services called");
+    //console.log("POST /api/services called");
     try {
         const postData = await request.json();
-        console.log("Adding new service:", postData);
+        //console.log("Adding new service:", postData);
         const collection = await dbConnect('services');
         const result = await collection.insertOne(postData);
 

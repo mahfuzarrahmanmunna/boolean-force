@@ -75,7 +75,7 @@ export default function ChatSystem() {
         const data = await res.json();
         if (data.success) {
           // Assuming the API returns an array of users
-          console.log("Fetched users:", data.data);
+          //console.log("Fetched users:", data.data);
           setUsers(data.data);
         } else {
           console.error("Failed to fetch users:", data.message);

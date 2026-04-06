@@ -214,12 +214,12 @@ export const ChatProvider = ({ children }) => {
     // Screen sharing
     socketService.onScreenShareStarted((data) => {
       // Handle screen share started
-      console.log('Screen share started by:', data.name);
+      //console.log('Screen share started by:', data.name);
     });
     
     socketService.onScreenShareStopped((data) => {
       // Handle screen share stopped
-      console.log('Screen share stopped by:', data.userId);
+      //console.log('Screen share stopped by:', data.userId);
     });
     
     // Errors
@@ -324,7 +324,7 @@ export const ChatProvider = ({ children }) => {
     
     // Extract the actual users array from the response
     const users = data.data || data;
-    console.log(users)
+    //console.log(users)
     
     dispatch({ type: 'SET_USERS', payload: users });
 

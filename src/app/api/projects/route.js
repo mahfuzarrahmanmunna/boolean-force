@@ -51,7 +51,7 @@ export async function GET(request) {
         // Serialize data with null checks
         const serializedData = data.map(item => {
             if (!item || !item._id) {
-                console.log("Invalid item:", item);
+                //console.log("Invalid item:", item);
                 return null;
             }
 

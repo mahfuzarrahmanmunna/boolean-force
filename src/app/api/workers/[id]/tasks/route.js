@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
     // Await params object before accessing its properties
     const { id } = await params;
 
-    console.log(`GET /api/projects/${id}/tasks called`);
+    //console.log(`GET /api/projects/${id}/tasks called`);
     try {
         // Validate worker ID
         if (!ObjectId.isValid(id)) {
@@ -40,7 +40,7 @@ export async function GET(request, { params }) {
             };
         }).filter(Boolean);
 
-        console.log(`Found ${serializedTasks.length} tasks for worker ${id}`);
+        //console.log(`Found ${serializedTasks.length} tasks for worker ${id}`);
         return NextResponse.json(serializedTasks);
     }
     catch (err) {

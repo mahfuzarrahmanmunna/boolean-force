@@ -14,7 +14,7 @@ export const getChatSocketServer = (server) => {
     });
 
     io.on('connection', (socket) => {
-      console.log('User connected to chat:', socket.id);
+      //console.log('User connected to chat:', socket.id);
       
       // User authentication and joining their personal room
       socket.on('authenticate', async (data) => {
@@ -198,7 +198,7 @@ export const getChatSocketServer = (server) => {
             userName: socket.userName 
           });
         }
-        console.log('User disconnected from chat:', socket.id);
+        //console.log('User disconnected from chat:', socket.id);
       });
     });
   }

@@ -27,7 +27,7 @@ app.prepare().then(() => {
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, (err) => {
     if (err) throw err;
-    console.log(`> Custom server ready on http://localhost:${PORT}`);
-    console.log('> Chat socket server is running on /api/chat-socket');
+    //console.log(`> Custom server ready on http://localhost:${PORT}`);
+    //console.log('> Chat socket server is running on /api/chat-socket');
   });
 });

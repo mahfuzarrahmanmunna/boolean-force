@@ -19,11 +19,11 @@ class SocketService {
     });
     
     this.socket.on('connect', () => {
-      console.log('Connected to chat server');
+      //console.log('Connected to chat server');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('Disconnected from chat server');
+      //console.log('Disconnected from chat server');
     });
 
     this.socket.on('error', (error) => {

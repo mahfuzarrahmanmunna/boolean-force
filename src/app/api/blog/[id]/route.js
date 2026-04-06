@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch a single blog post by ID
 export async function GET(request, { params }) {
-    console.log("GET /api/blog/[id] called with params:", params);
+    //console.log("GET /api/blog/[id] called with params:", params);
     try {
         const { id } = await params;
 
@@ -28,7 +28,7 @@ export async function GET(request, { params }) {
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             return new Response(
@@ -45,7 +45,7 @@ export async function GET(request, { params }) {
 
         // Find by ObjectId
         const post = await collection.findOne({ _id: objectId });
-        console.log("Found blog post:", post);
+        //console.log("Found blog post:", post);
 
         if (!post) {
             return new Response(
@@ -86,7 +86,7 @@ export async function GET(request, { params }) {
 
 // PUT - Update an existing blog post by ID
 export async function PUT(request, { params }) {
-    console.log("PUT /api/blog/[id] called with params:", params);
+    //console.log("PUT /api/blog/[id] called with params:", params);
     try {
         // Await params to fix Next.js warning
         const { id } = await params;
@@ -95,9 +95,9 @@ export async function PUT(request, { params }) {
         let updateData;
         try {
             const requestBody = await request.text();
-            console.log("Raw request body:", requestBody);
+            //console.log("Raw request body:", requestBody);
             updateData = JSON.parse(requestBody);
-            console.log("Parsed update data:", updateData);
+            //console.log("Parsed update data:", updateData);
         } catch (parseError) {
             console.error("Error parsing request body:", parseError);
             return new Response(
@@ -127,7 +127,7 @@ export async function PUT(request, { params }) {
 
         // Remove _id from updateData if it exists to avoid MongoDB error
         if (updateData._id) {
-            console.log("Removing _id from update data");
+            //console.log("Removing _id from update data");
             delete updateData._id;
         }
 
@@ -140,7 +140,7 @@ export async function PUT(request, { params }) {
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             return new Response(
@@ -157,7 +157,7 @@ export async function PUT(request, { params }) {
 
         // Find existing document
         const existingDoc = await collection.findOne({ _id: objectId });
-        console.log("Existing document:", existingDoc);
+        //console.log("Existing document:", existingDoc);
 
         if (!existingDoc) {
             return new Response(
@@ -178,7 +178,7 @@ export async function PUT(request, { params }) {
             { $set: updateData }
         );
 
-        console.log("Update result:", result);
+        //console.log("Update result:", result);
 
         // Get updated document
         const updatedDocument = await collection.findOne({ _id: objectId });
@@ -217,7 +217,7 @@ export async function PUT(request, { params }) {
 
 // DELETE - Delete a blog post by ID
 export async function DELETE(request, { params }) {
-    console.log("DELETE /api/blog/[id] called with params:", params);
+    //console.log("DELETE /api/blog/[id] called with params:", params);
     try {
         const { id } = await params;
 
@@ -234,14 +234,14 @@ export async function DELETE(request, { params }) {
             );
         }
 
-        console.log("Deleting blog post:", id);
+        //console.log("Deleting blog post:", id);
         const collection = await dbConnect('blog');
 
         // Try to convert to ObjectId, but handle case where it might fail
         let objectId;
         try {
             objectId = new ObjectId(id);
-            console.log("Converted to ObjectId:", objectId);
+            //console.log("Converted to ObjectId:", objectId);
         } catch (err) {
             console.error("Invalid ObjectId format:", id, err);
             return new Response(
@@ -258,7 +258,7 @@ export async function DELETE(request, { params }) {
 
         // Find existing document
         const existingDoc = await collection.findOne({ _id: objectId });
-        console.log("Existing document:", existingDoc);
+        //console.log("Existing document:", existingDoc);
 
         if (!existingDoc) {
             return new Response(
@@ -275,7 +275,7 @@ export async function DELETE(request, { params }) {
 
         const result = await collection.deleteOne({ _id: objectId });
 
-        console.log("Delete result:", result);
+        //console.log("Delete result:", result);
 
         return NextResponse.json(
             {

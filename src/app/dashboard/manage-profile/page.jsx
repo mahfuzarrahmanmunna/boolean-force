@@ -79,7 +79,7 @@ export default function ManageProfilePage() {
                 }
 
                 const users = await response.json();
-                console.log("All users:", users);
+                //console.log("All users:", users);
 
                 // Find the current user from the list
                 const currentUser = users.find(user => user.email === session.user.email);
@@ -88,7 +88,7 @@ export default function ManageProfilePage() {
                     throw new Error('User not found in the system');
                 }
 
-                console.log("Current user:", currentUser);
+                //console.log("Current user:", currentUser);
 
                 // Update form with fetched data
                 setFormData({

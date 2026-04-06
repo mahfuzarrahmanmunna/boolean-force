@@ -488,21 +488,21 @@ export default function ManageAllProjects() {
     ) {
       setIsLoading(true);
       try {
-        console.log("Deleting project with ID:", projectId);
+        //console.log("Deleting project with ID:", projectId);
 
         const response = await fetch(`/api/projects/${projectId}`, {
           method: "DELETE",
         });
 
-        console.log("Delete response status:", response.status);
-        console.log("Delete response ok:", response.ok);
+        //console.log("Delete response status:", response.status);
+        //console.log("Delete response ok:", response.ok);
 
         // Check if response has content before trying to parse JSON
         let responseData;
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.includes("application/json")) {
           responseData = await response.json();
-          console.log("Delete response data:", responseData);
+          //console.log("Delete response data:", responseData);
         }
 
         if (!response.ok) {
@@ -553,8 +553,8 @@ export default function ManageAllProjects() {
 
     setIsLoading(true);
     try {
-      console.log("Assigning teams:", selectedTeamsToAssign);
-      console.log("Project ID:", assigningProjectTo._id);
+      //console.log("Assigning teams:", selectedTeamsToAssign);
+      //console.log("Project ID:", assigningProjectTo._id);
 
       // For each selected team, assign project to that team
       const assignmentPromises = selectedTeamsToAssign.map((teamId) =>

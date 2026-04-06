@@ -10,7 +10,7 @@ export async function GET() {
 
         const users = await collection.find({}).toArray();
 
-        console.log('fetched users:', users);
+        //console.log('fetched users:', users);
 
         return new Response(JSON.stringify(users), {
             status: 200,

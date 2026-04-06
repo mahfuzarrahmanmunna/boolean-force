@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // PATCH - Update status of a blog post
 export async function PATCH(request, { params }) {
-    console.log("PATCH /api/blog/[id]/status called with params:", params);
+    //console.log("PATCH /api/blog/[id]/status called with params:", params);
     try {
         const { id } = await params;
         const { status } = await request.json();

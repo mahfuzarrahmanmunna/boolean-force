@@ -6,7 +6,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch all pricing plans
 export async function GET(request) {
-    console.log("GET /api/pricing-plans called");
+    //console.log("GET /api/pricing-plans called");
     try {
         const collection = await dbConnect('pricingPlans');
         const data = await collection.find({}).toArray();
@@ -17,7 +17,7 @@ export async function GET(request) {
             _id: item._id.toString()
         }));
 
-        console.log("Fetched pricing plans:", serializedData);
+        //console.log("Fetched pricing plans:", serializedData);
         return NextResponse.json(serializedData);
     }
     catch (err) {
@@ -38,10 +38,10 @@ export async function GET(request) {
 
 // POST - Add a new pricing plan
 export async function POST(request) {
-    console.log("POST /api/pricing-plans called");
+    //console.log("POST /api/pricing-plans called");
     try {
         const postData = await request.json();
-        console.log("Adding new pricing plan:", postData);
+        //console.log("Adding new pricing plan:", postData);
         const collection = await dbConnect('pricingPlans');
         const result = await collection.insertOne(postData);
 

@@ -66,16 +66,16 @@ export default function BrandVisualIdentity() {
                 }
 
                 const data = await res.json();
-                console.log('API Response:', data); // Debug log
+                //console.log('API Response:', data); // Debug log
 
                 // Filter the data to get only the Brand Visual Identity
                 const brandService = data.find(service => service.name === 'Brand Visual Identity');
-                console.log('Brand Service from API:', brandService); // Debug log
+                //console.log('Brand Service from API:', brandService); // Debug log
 
                 if (brandService) {
                     // Process the data to convert icon strings to JSX elements
                     const processedData = processApiData(brandService);
-                    console.log('Processed Data:', processedData); // Debug log
+                    //console.log('Processed Data:', processedData); // Debug log
                     setBrandData(processedData);
                 } else {
                     setError('Brand Visual Identity service not found');
@@ -117,6 +117,6 @@ export default function BrandVisualIdentity() {
         );
     }
 
-    console.log('Final brandData:', brandData); // Debug log
+    //console.log('Final brandData:', brandData); // Debug log
     return <ServiceTemplates serviceData={brandData} />;
 }
