@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronRight, Palette, Globe, Cpu, ShoppingBag, Search, Menu, X, ArrowRight, Sparkles, Users, Award, Target, Zap, Briefcase, Lightbulb } from 'lucide-react';
+import { ChevronRight, Palette, Globe, Cpu, ShoppingBag, Search, Menu, X, ArrowRight, Sparkles, Users, Award, Target, Zap, Briefcase, Lightbulb, MessageCircle } from 'lucide-react';
 
 const Navbar1 = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -114,6 +114,13 @@ const Navbar1 = () => {
             description: "Modern point-of-sale solutions",
             icon: <ShoppingBag className="w-5 h-5" />,
             color: "from-green-500 to-teal-500"
+        },
+         {
+            name: "AI Chat Bots",
+            href: "/ai-chat-bots",
+            description: "Intelligent conversational agents for your business",
+            icon: <MessageCircle className="w-5 h-5" />,
+            color: "from-yellow-500 to-orange-500"
         }
     ];
 
@@ -293,7 +300,7 @@ const Navbar1 = () => {
             >
                 <div className="bg-slate-800/95 backdrop-blur-md shadow-2xl border border-slate-700/50 rounded-b-lg">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {services.map((service, index) => (
                                 <Link
                                     key={index}

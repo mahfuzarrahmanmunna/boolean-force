@@ -155,19 +155,14 @@ const Partnership = () => {
                                Send_Request
 
                             </button>
-                            <div>
-    <p  className='text-white font-lg mt-4 font-bold'
-    >
-                                    📧 info@booleanforce.com
-<span className='flex items-center gap-2 justify-center mt-2'>
-    <FaPhone /> 
+  <div className="text-white mt-4">
+  <p>📧 info@booleanforce.com</p>
 
-<p>+1 (555) 123-4567</p>
-</span>
-                    
-        </p>       
-        
-         </div>
+  <div className="text-lg font-bold flex items-center gap-2 mt-2">
+    <FaPhone />
+    <span>+1 (555) 123-4567</span>
+  </div>
+</div>
                         </div>
 
                         {/* Stats or testimonials could go here */}

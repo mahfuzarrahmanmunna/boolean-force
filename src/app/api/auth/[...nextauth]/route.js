@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import clientPromise from "@/lib/mongodbAdapter";
+import clientPromise from "../../../../lib/mongodbAdapter";
 
 export const authOptions = {
     providers: [

@@ -127,6 +127,7 @@ const Footer = () => {
                 "Website Development",
                 "ERP Software Solutions",
                 "POS Systems",
+                "AI Chat Bots"
               ].map((service, i) => (
                 <li key={i}>
                   <Link

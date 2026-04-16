@@ -1,6 +1,6 @@
 // app/api/pricing-plans/route.js
 
-import { dbConnect } from "@/lib/dbConnect";
+import { dbConnect } from "../../../lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 

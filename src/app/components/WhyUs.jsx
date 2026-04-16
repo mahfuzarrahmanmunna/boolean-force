@@ -34,12 +34,14 @@ const WhyUs = () => {
         }
     ];
 
-    return (
-   
 
-        <section className="py-20 px-4 sm:px-6 lg:px-8 ">
+
+    return (
+
+   <section className="py-20 px-4 sm:px-6 lg:px-8 ">
+
             <div className='text-center mb-8'>
-                 <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-white">Why Us?</h2>
+             <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-white">Why Us?</h2>
                     <div className="mx-auto my w-28 h-0.5 rounded-full bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 opacity-90" aria-hidden="true"></div>
             </div>
             <div className="max-w-7xl mx-auto bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-12">
