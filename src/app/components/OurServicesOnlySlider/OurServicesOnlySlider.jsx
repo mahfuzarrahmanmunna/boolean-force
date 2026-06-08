@@ -1,24 +1,27 @@
+
 "use client";
-
+ 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Play, Pause, ArrowRight } from 'lucide-react';
-
-// Define your brand colors as constants
-const PRIMARY_COLOR = '#3B85FE';
-const SECONDARY_COLOR = '#A9DBDC';
-const ACCENT_COLOR = '#6366F1';
-const DARK_BG = '#0F172A';
+import { motion } from 'framer-motion';
+import { Play, Pause, ArrowRight } from 'lucide-react';
+ 
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+ 
+// Brand colors
+const PRIMARY_COLOR = '#F97316';   // orange
+const SECONDARY_COLOR = '#1E3A8A'; // deep blue
+const ACCENT_COLOR = '#FB923C';    // lighter orange accent
+const DARK_BG = '#0A0A0A';
 const LIGHT_TEXT = '#F1F5F9';
-
+ 
 const OurServicesOnlySlider = () => {
     const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
-    const [isHovered, setIsHovered] = useState(false);
-    const controls = useAnimation();
-    const intervalRef = useRef(null);
-    const sliderRef = useRef(null);
-
+    const swiperRef = useRef(null);
+ 
     const services = [
         {
             id: 1,
@@ -85,240 +88,431 @@ const OurServicesOnlySlider = () => {
             color: PRIMARY_COLOR
         }
     ];
-
-    // Auto-play functionality
-    useEffect(() => {
-        if (isPlaying && !isHovered) {
-            intervalRef.current = setInterval(() => {
-                setCurrentServiceIndex((prevIndex) =>
-                    prevIndex === services.length - 1 ? 0 : prevIndex + 1
-                );
-            }, 5000);
-        } else {
-            clearInterval(intervalRef.current);
-        }
-
-        return () => clearInterval(intervalRef.current);
-    }, [isPlaying, isHovered, services.length]);
-
+ 
     // Keyboard navigation
     useEffect(() => {
         const handleKeyDown = (e) => {
+            if (!swiperRef.current) return;
             if (e.key === 'ArrowRight') {
-                setCurrentServiceIndex((prevIndex) =>
-                    prevIndex === services.length - 1 ? 0 : prevIndex + 1
-                );
+                swiperRef.current.slideNext();
             } else if (e.key === 'ArrowLeft') {
-                setCurrentServiceIndex((prevIndex) =>
-                    prevIndex === 0 ? services.length - 1 : prevIndex - 1
-                );
+                swiperRef.current.slidePrev();
             } else if (e.key === ' ') {
                 e.preventDefault();
-                setIsPlaying(!isPlaying);
+                togglePlayPause();
             }
         };
-
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isPlaying, services.length]);
-
-    const handleDotClick = (index) => {
-        setCurrentServiceIndex(index);
-    };
-
-    const handlePrev = () => {
-        setCurrentServiceIndex((prevIndex) =>
-            prevIndex === 0 ? services.length - 1 : prevIndex - 1
-        );
-    };
-
-    const handleNext = () => {
-        setCurrentServiceIndex((prevIndex) =>
-            prevIndex === services.length - 1 ? 0 : prevIndex + 1
-        );
-    };
-
+    }, [isPlaying]);
+ 
     const togglePlayPause = () => {
-        setIsPlaying(!isPlaying);
+        if (!swiperRef.current) return;
+        if (isPlaying) {
+            swiperRef.current.autoplay.stop();
+        } else {
+            swiperRef.current.autoplay.start();
+        }
+        setIsPlaying(prev => !prev);
     };
-
+ 
+    const handlePrev = () => swiperRef.current?.slidePrev();
+    const handleNext = () => swiperRef.current?.slideNext();
+ 
+    const currentService = services[currentServiceIndex];
+ 
     return (
         <section
-            ref={sliderRef}
-            className="relative min-h-screen overflow-hidden flex items-center justify-center"
+            className="relative min-h-screen overflow-hidden flex flex-col justify-center"
+            style={{ backgroundColor: DARK_BG }}
         >
-
-            {/* Main content */}
-            <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12">
-                {/* Section header */}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+ 
+                .services-section * {
+                    font-family: 'DM Sans', sans-serif;
+                }
+                .services-section h2,
+                .services-section h3 {
+                    font-family: 'Syne', sans-serif;
+                }
+ 
+                /* Swiper overrides — peek layout */
+                .services-swiper {
+                    overflow: visible !important;
+                    width: 100%;
+                }
+ 
+                /* Each slide: image (left, ~42%) + content (right) side by side */
+                .services-swiper .swiper-slide {
+                    /* Show roughly 85% of current + peek ~15% of next */
+                    width: 85vw;
+                    max-width: 1080px;
+                    min-width: 320px;
+                    height: auto;
+                    transition: opacity 0.45s ease, transform 0.45s ease;
+                    opacity: 0.3;
+                    transform: scale(0.97);
+                    pointer-events: none;
+                }
+                .services-swiper .swiper-slide-active {
+                    opacity: 1;
+                    transform: scale(1);
+                    pointer-events: auto;
+                }
+                .services-swiper .swiper-slide-next {
+                    opacity: 0.5;
+                }
+ 
+                @media (max-width: 768px) {
+                    .services-swiper .swiper-slide {
+                        width: 92vw;
+                    }
+                }
+ 
+                /* Divider line accent */
+                .slide-divider {
+                    width: 3px;
+                    background: linear-gradient(to bottom, transparent, #F97316, transparent);
+                    align-self: stretch;
+                    flex-shrink: 0;
+                }
+ 
+                /* "Read more" button */
+                .read-more-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0px;
+                    font-family: 'Syne', sans-serif;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.02em;
+                    color: ${LIGHT_TEXT};
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+                    transition: gap 0.3s ease;
+                }
+                .read-more-btn:hover {
+                    gap: 6px;
+                }
+                .read-more-btn .arrow-box {
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    margin-left: 12px;
+                    background-color: ${PRIMARY_COLOR};
+                    transition: background-color 0.3s ease, transform 0.3s ease;
+                    flex-shrink: 0;
+                }
+                .read-more-btn:hover .arrow-box {
+                    background-color: ${SECONDARY_COLOR};
+                    transform: translateX(3px);
+                }
+ 
+                /* nav buttons */
+                .nav-btn {
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.06);
+                    color: ${LIGHT_TEXT};
+                    cursor: pointer;
+                    transition: background 0.25s, border-color 0.25s, transform 0.2s;
+                }
+                .nav-btn:hover {
+                    background: ${PRIMARY_COLOR};
+                    border-color: ${PRIMARY_COLOR};
+                    transform: scale(1.08);
+                }
+ 
+                .pause-btn {
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.06);
+                    color: ${LIGHT_TEXT};
+                    cursor: pointer;
+                    transition: background 0.25s, border-color 0.25s, transform 0.2s;
+                }
+                .pause-btn:hover {
+                    background: rgba(255,255,255,0.14);
+                    transform: scale(1.08);
+                }
+ 
+                /* orange underline on section title */
+                .section-title-wrap {
+                    position: relative;
+                    display: inline-block;
+                }
+                .section-title-wrap::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -6px;
+                    left: 0;
+                    width: 56px;
+                    height: 3px;
+                    background: ${PRIMARY_COLOR};
+                    border-radius: 2px;
+                }
+            `}</style>
+ 
+            <div className="services-section relative z-10 w-full mx-auto py-16">
+ 
+                {/* Section header — left-aligned like the screenshot */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="text-center mb-12"
+                    className="mb-12 px-6 text-center"
+                    style={{ paddingLeft: '35vw', paddingRight: '35vw' }}
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: LIGHT_TEXT }}>
-                        Our Services
-                    </h2>
-                    <div className="w-24 h-1 mx-auto rounded-full" style={{ backgroundColor: PRIMARY_COLOR }}></div>
-                </motion.div>
-
-                {/* Slider container */}
-                <div
-                    className="relative"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                >
-                    {/* Slider content */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentServiceIndex}
-                            initial={{ opacity: 0, x: 100 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -100 }}
-                            transition={{ duration: 0.5, ease: "easeInOut" }}
-                            className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
+                    {/* <p
+                        className="text-xs font-semibold tracking-widest uppercase mb-3"
+                        style={{ color: PRIMARY_COLOR, fontFamily: 'Syne, sans-serif' }}
+                    >
+                        What We Offer
+                    </p> */}
+                    <div className="section-title-wrap">
+                        <h2
+                            className="text-4xl md:text-5xl font-bold"
+                            style={{ color: LIGHT_TEXT, fontFamily: 'Syne, sans-serif', lineHeight: 1.1 }}
                         >
-                            {/* Service image */}
-                            <div className="relative order-2 lg:order-1">
-                                <div className="relative overflow-hidden rounded-2xl shadow-2xl group">
-                                    <img
-                                        src={services[currentServiceIndex].image}
-                                        alt={services[currentServiceIndex].title}
-                                        className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                    <div
-                                        className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"
-                                        style={{ background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, transparent)` }}
-                                    ></div>
-                                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
-                                        <div className="flex items-center">
-                                            <span className="text-4xl mr-3">{services[currentServiceIndex].icon}</span>
-                                            <h3 className="text-2xl font-bold text-white">{services[currentServiceIndex].title}</h3>
-                                        </div>
+                            Our Services
+                        </h2>
+                    </div>
+                </motion.div>
+ 
+                {/* Swiper — left-anchored, peek on right */}
+                <div className="relative w-full" style={{ paddingLeft: '0vw' }}>
+                    <Swiper
+    modules={[Autoplay, Navigation]}
+    slidesPerView="auto"
+    centeredSlides={false}
+    spaceBetween={28}
+    loop={true}
+    speed={1000} // 1 second transition
+    autoplay={
+        isPlaying
+            ? { delay: 7000, disableOnInteraction: false }
+            : false
+    }
+    onSwiper={(swiper) => {
+        swiperRef.current = swiper;
+    }}
+    onSlideChange={(swiper) =>
+        setCurrentServiceIndex(swiper.realIndex)
+    }
+    className="services-swiper"
+>
+     {services.map((service, index) => (
+                            <SwiperSlide key={service.id}>
+                                {/* Card: horizontal split — image left, content right */}
+                                <div
+                                    style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        height: '400px',
+                                        borderRadius: '0px',
+                                        overflow: 'hidden',
+                                        // background: '#111111',
+                                        // border: '1px solid rgba(255,255,255,0.07)',
+                                    }}
+                                >
+                                    {/* IMAGE — left side, fixed ~42% */}
+                                    <div style={{ width: '52%', flexShrink: 0, position: 'relative', overflow: 'hidden' }}>
+                                        <img
+                                            src={service.image}
+                                            alt={service.title}
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                        />
+                                        {/* subtle color tint overlay */}
+                                        <div style={{
+                                            position: 'absolute', inset: 0,
+                                            background: `linear-gradient(160deg, ${service.color}22 0%, transparent 60%)`
+                                        }} />
                                     </div>
-                                </div>
-                            </div>
-
-                            {/* Service content */}
-                            <div className="order-1 lg:order-2">
-                                <div className="mb-6">
-                                    <span
-                                        className="inline-block px-4 py-2 rounded-full text-sm font-medium mb-4"
+ 
+                                    {/* Thin vertical divider */}
+                                    <div className="slide-divider" />
+ 
+                                    {/* CONTENT — right side */}
+                                    <div
                                         style={{
-                                            backgroundColor: `${services[currentServiceIndex].color}20`,
-                                            color: services[currentServiceIndex].color
+                                            flex: 1,
+                                            padding: '44px 40px',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'center',
+                                            gap: '0',
+                                            overflowY: 'hidden',
                                         }}
                                     >
-                                        Service {currentServiceIndex + 1} of {services.length}
-                                    </span>
-                                    <h3 className="text-3xl md:text-4xl font-bold mb-6" style={{ color: LIGHT_TEXT }}>
-                                        {services[currentServiceIndex].title}
-                                    </h3>
-                                </div>
-
-                                <p className="text-lg mb-8 leading-relaxed" style={{ color: LIGHT_TEXT, opacity: 0.8 }}>
-                                    {services[currentServiceIndex].description}
-                                </p>
-
-                                <div className="rounded-lg p-4 mb-8 font-mono text-sm border backdrop-blur-sm"
-                                    style={{
-                                        background: 'rgba(0,0,0,0.3)',
-                                        borderColor: `${services[currentServiceIndex].color}40`,
-                                        color: '#4ade80'
-                                    }}
-                                >
-                                    {services[currentServiceIndex].code}
-                                </div>
-
-                                <ul className="space-y-3 mb-8">
-                                    {services[currentServiceIndex].features.map((feature, idx) => (
-                                        <motion.li
-                                            key={idx}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ duration: 0.3, delay: idx * 0.1 }}
-                                            className="flex items-start"
+                                        {/* Label */}
+                                        <span
+                                            style={{
+                                                fontSize: '0.72rem',
+                                                fontWeight: 700,
+                                                letterSpacing: '0.14em',
+                                                textTransform: 'uppercase',
+                                                color: service.color,
+                                              
+                                                marginBottom: '14px',
+                                                display: 'block',
+                                            }}
                                         >
-                                            <div
-                                                className="w-5 h-5 rounded-full mr-3 mt-0.5 flex-shrink-0 flex items-center justify-center"
-                                                style={{ backgroundColor: services[currentServiceIndex].color }}
-                                            >
-                                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                                </svg>
-                                            </div>
-                                            <span style={{ color: LIGHT_TEXT, opacity: 0.8 }}>{feature}</span>
-                                        </motion.li>
-                                    ))}
-                                </ul>
-
-                                <button
-                                    className="px-8 py-3 text-white font-medium rounded-lg transition-all duration-300 hover:shadow-xl transform hover:scale-105 flex items-center"
-                                    style={{
-                                        background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`,
-                                        boxShadow: `0 10px 25px -5px ${services[currentServiceIndex].color}40`
-                                    }}
-                                >
-                                    Learn More
-                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                </button>
-                            </div>
-                        </motion.div>
-                    </AnimatePresence>
-
-                    {/* Navigation controls */}
-                    <div className="flex justify-between items-center mt-8">
-                        {/* Previous button */}
-                        <button
-                            onClick={handlePrev}
-                            className="p-3 rounded-full transition-all duration-300 hover:scale-110"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                        >
-                            <ChevronLeft className="w-6 h-6" style={{ color: LIGHT_TEXT }} />
+                                            Service {index + 1} / {services.length}
+                                        </span>
+ 
+                                        {/* Title */}
+                                        <h3
+                                            style={{
+                                                // fontFamily: 'Poppins, sans-serif',
+                                                fontWeight: 700,
+                                                // fontSize: 'clamp(1.4rem, 2vw, 2rem)',
+                                                fontSize: '2rem',
+                                                color: LIGHT_TEXT,
+                                                lineHeight: 1.15,
+                                                marginBottom: '14px',
+                                            }}
+                                        >
+                                            {service.title}
+                                        </h3>
+ 
+                                        {/* Description */}
+                                        <p
+                                            style={{
+                                                fontSize: '0.93rem',
+                                                lineHeight: 1.7,
+                                                color: 'rgba(241,245,249,0.72)',
+                                                marginBottom: '20px',
+                                                maxWidth: '420px',
+                                            }}
+                                        >
+                                            {service.description}
+                                        </p>
+ 
+                                        {/* Code snippet */}
+                                        <div
+                                            style={{
+                                                background: 'rgba(0,0,0,0.45)',
+                                                border: `1px solid ${service.color}35`,
+                                                borderLeft: `3px solid ${service.color}`,
+                                                borderRadius: '4px',
+                                                padding: '10px 14px',
+                                                fontSize: '0.72rem',
+                                                color: '#1E3A8A',
+                                                marginBottom: '20px',
+                                                letterSpacing: '0.01em',
+                                            }}
+                                        >
+                                            {service.code}
+                                        </div>
+ 
+                                        {/* Features list */}
+                                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 26px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {service.features.map((feature, idx) => (
+                                                <li key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                    <span
+                                                        style={{
+                                                            width: '18px', height: '18px', borderRadius: '50%',
+                                                            background: service.color,
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            flexShrink: 0,
+                                                        }}
+                                                    >
+                                                        <svg width="10" height="10" viewBox="0 0 20 20" fill="white">
+                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                    </span>
+                                                    <span style={{ fontSize: '0.875rem', color: 'rgba(241,245,249,0.78)' }}>{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+ 
+                                        {/* Read more — matches screenshot style */}
+                                        <button className="read-more-btn">
+                                            Learn More
+                                            <span className="arrow-box">
+                                                <ArrowRight size={16} color="white" />
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </SwiperSlide>
+                        ))}
+                    </Swiper>
+                </div>
+ 
+                {/* Controls bar */}
+                <div
+                    className="flex justify-between items-center mt-8"
+                    style={{ paddingLeft: '8vw', paddingRight: '8vw' }}
+                >
+                    {/* Play / Pause */}
+                    <button
+                        className="pause-btn"
+                        onClick={togglePlayPause}
+                        aria-label={isPlaying ? 'Pause' : 'Play'}
+                    >
+                        {isPlaying
+                            ? <Pause size={18} />
+                            : <Play size={18} />
+                        }
+                    </button>
+ 
+                    {/* Fraction + arrow nav */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button className="nav-btn" onClick={handlePrev} aria-label="Previous slide">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
                         </button>
-
-                        {/* Dots indicator */}
-                        <div className="flex items-center gap-2">
-                            {services.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleDotClick(index)}
-                                    className={`transition-all duration-300 ${index === currentServiceIndex
-                                        ? 'w-10 h-2 rounded-full'
-                                        : 'w-2 h-2 rounded-full opacity-50 hover:opacity-100'
-                                        }`}
-                                    style={{
-                                        backgroundColor: index === currentServiceIndex
-                                            ? services[currentServiceIndex].color
-                                            : LIGHT_TEXT
-                                    }}
-                                />
-                            ))}
+ 
+                        <div
+                            style={{
+                                minWidth: '64px', height: '44px',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: '4px',
+                                background: 'rgba(255,255,255,0.06)',
+                               
+                                fontWeight: 700,
+                                fontSize: '0.95rem',
+                                color: LIGHT_TEXT,
+                                letterSpacing: '0.06em',
+                                userSelect: 'none',
+                            }}
+                        >
+                            <motion.span
+                                key={`cur-${currentServiceIndex}`}
+                                initial={{ opacity: 0, y: -6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }}
+                                style={{ color: currentService.color }}
+                            >
+                                {currentServiceIndex + 1}
+                            </motion.span>
+                            <span style={{ opacity: 0.4, margin: '0 4px' }}>/</span>
+                            <span style={{ opacity: 0.65 }}>{services.length}</span>
                         </div>
-
-                        {/* Next button */}
-                        <button
-                            onClick={handleNext}
-                            className="p-3 rounded-full transition-all duration-300 hover:scale-110"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                        >
-                            <ChevronRight className="w-6 h-6" style={{ color: LIGHT_TEXT }} />
-                        </button>
-                    </div>
-
-                    {/* Play/Pause button */}
-                    <div className="flex justify-center mt-6">
-                        <button
-                            onClick={togglePlayPause}
-                            className="p-3 rounded-full transition-all duration-300 hover:scale-110"
-                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                        >
-                            {isPlaying ? (
-                                <Pause className="w-6 h-6" style={{ color: LIGHT_TEXT }} />
-                            ) : (
-                                <Play className="w-6 h-6" style={{ color: LIGHT_TEXT }} />
-                            )}
+ 
+                        <button className="nav-btn" onClick={handleNext} aria-label="Next slide">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -326,5 +520,5 @@ const OurServicesOnlySlider = () => {
         </section>
     );
 };
-
+ 
 export default OurServicesOnlySlider;

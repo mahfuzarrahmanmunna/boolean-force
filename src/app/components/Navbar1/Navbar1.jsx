@@ -1,477 +1,726 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ChevronRight, Palette, Globe, Cpu, ShoppingBag, Search, Menu, X, ArrowRight, Sparkles, Users, Award, Target, Zap, Briefcase, Lightbulb } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ChevronRight,
+  Palette,
+  Globe,
+  Cpu,
+  ShoppingBag,
+  Search,
+  Menu,
+  X,
+  ArrowRight,
+  Sparkles,
+  Users,
+  Award,
+  Target,
+  Zap,
+} from "lucide-react";
 
 const Navbar1 = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [mounted, setMounted] = useState(false);
-    const [servicesModalOpen, setServicesModalOpen] = useState(false);
-    const [aboutModalOpen, setAboutModalOpen] = useState(false);
-    const [searchOpen, setSearchOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
-    const servicesTimeoutRef = useRef(null);
-    const aboutTimeoutRef = useRef(null);
-    const searchInputRef = useRef(null);
-    const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [servicesModalOpen, setServicesModalOpen] = useState(false);
+  const [aboutModalOpen, setAboutModalOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  const servicesTimeoutRef = useRef(null);
+  const aboutTimeoutRef = useRef(null);
+  const searchInputRef = useRef(null);
+  const pathname = usePathname();
 
-    useEffect(() => {
-        const handleScroll = () => {
-            if (window.scrollY > 20) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    useEffect(() => {
-        if (searchOpen && searchInputRef.current) {
-            searchInputRef.current.focus();
-        }
-    }, [searchOpen]);
+  const [navHidden, setNavHidden] = useState(false);
 
-    const handleServicesMouseEnter = () => {
-        if (servicesTimeoutRef.current) {
-            clearTimeout(servicesTimeoutRef.current);
-        }
-        setServicesModalOpen(true);
-        setAboutModalOpen(false);
+  useEffect(() => {
+    let lastScroll = 0;
+
+    const handleScroll = () => {
+      const currentScroll = window.scrollY;
+
+      if (currentScroll > lastScroll && currentScroll > 100) {
+        setNavHidden(true);
+      } else if (currentScroll < lastScroll) {
+        setNavHidden(false);
+      }
+
+      lastScroll = currentScroll;
     };
 
-    const handleServicesMouseLeave = () => {
-        servicesTimeoutRef.current = setTimeout(() => {
-            setServicesModalOpen(false);
-        }, 200);
-    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    const handleAboutMouseEnter = () => {
-        if (aboutTimeoutRef.current) {
-            clearTimeout(aboutTimeoutRef.current);
-        }
-        setAboutModalOpen(true);
-        setServicesModalOpen(false);
-    };
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
-    const handleAboutMouseLeave = () => {
-        aboutTimeoutRef.current = setTimeout(() => {
-            setAboutModalOpen(false);
-        }, 200);
-    };
+  const handleServicesMouseEnter = () => {
+    if (servicesTimeoutRef.current) {
+      clearTimeout(servicesTimeoutRef.current);
+    }
+    setServicesModalOpen(true);
+    setAboutModalOpen(false);
+  };
 
-    const handleSearchSubmit = (e) => {
-        e.preventDefault();
-        // Handle search functionality
-        console.log("Searching for:", searchQuery);
-        setSearchOpen(false);
-        setSearchQuery('');
-    };
+  const handleServicesMouseLeave = () => {
+    servicesTimeoutRef.current = setTimeout(() => {
+      setServicesModalOpen(false);
+    }, 200);
+  };
 
-    const navLinks = [
-        { name: "Services", href: "/services" },
-        { name: "Portfolio", href: "/portfolio" },
-        { name: "Blog", href: "/blog" },
-        { name: "About", href: "/about-us" },
-        { name: "Contact", href: "/contact" },
-    ];
+  const handleAboutMouseEnter = () => {
+    if (aboutTimeoutRef.current) {
+      clearTimeout(aboutTimeoutRef.current);
+    }
+    setAboutModalOpen(true);
+    setServicesModalOpen(false);
+  };
 
-    const services = [
-        {
-            name: "Brand Visual Identity",
-            href: "/brand-visual-identity",
-            description: "Creating memorable brand experiences",
-            icon: <Palette className="w-5 h-5" />,
-            color: "from-purple-500 to-pink-500"
-        },
-        {
-            name: "Website Development",
-            href: "/website-development",
-            description: "Building responsive, high-performance websites",
-            icon: <Globe className="w-5 h-5" />,
-            color: "from-blue-500 to-cyan-500"
-        },
-        {
-            name: "ERP Software Solutions",
-            href: "/erp-software-solutions",
-            description: "Streamlining business operations",
-            icon: <Cpu className="w-5 h-5" />,
-            color: "from-indigo-500 to-purple-500"
-        },
-        {
-            name: "POS Systems",
-            href: "/pos-systems",
-            description: "Modern point-of-sale solutions",
-            icon: <ShoppingBag className="w-5 h-5" />,
-            color: "from-green-500 to-teal-500"
-        }
-    ];
+  const handleAboutMouseLeave = () => {
+    aboutTimeoutRef.current = setTimeout(() => {
+      setAboutModalOpen(false);
+    }, 200);
+  };
 
-    const aboutLinks = [
-        {
-            name: "About Us",
-            href: "/about-us",
-            description: "Learn more about our company and team",
-            icon: <Users className="w-5 h-5" />,
-            color: "from-blue-500 to-indigo-500"
-        },
-        {
-            name: "Partnership",
-            href: "/partnership",
-            description: "Explore partnership opportunities with us",
-            icon: <Award className="w-5 h-5" />,
-            color: "from-purple-500 to-pink-500"
-        },
-        {
-            name: "Careers",
-            href: "/careers",
-            description: "Join our team of talented professionals",
-            icon: <Target className="w-5 h-5" />,
-            color: "from-green-500 to-teal-500"
-        },
-        {
-            name: "Our Process",
-            href: "/our-process",
-            description: "How we deliver exceptional results",
-            icon: <Zap className="w-5 h-5" />,
-            color: "from-yellow-500 to-orange-500"
-        }
-    ];
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    console.log("Searching for:", searchQuery);
+    setSearchOpen(false);
+    setSearchQuery("");
+  };
 
-    return (
-        <nav
-            className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled
-                ? "bg-slate-900/95 bg-gray-900 backdrop-blur-xl shadow-2xl border-b border-slate-700/30"
-                : "bg-transparent"
-                }`}
+  const navLinks = [
+    { name: "Services", href: "/services" },
+    { name: "Portfolio", href: "/portfolio" },
+    { name: "Blog", href: "/blog" },
+    { name: "About", href: "/about-us" },
+    { name: "Contact", href: "/contact" },
+  ];
+
+  const services = [
+    {
+      name: "Brand Visual Identity",
+      href: "/brand-visual-identity",
+      description: "Creating memorable brand experiences",
+      icon: <Palette className="w-5 h-5" />,
+      accent: "orange",
+    },
+    {
+      name: "Website Development ",
+      href: "/website-development",
+      description: "Building responsive, high-performance websites",
+      icon: <Globe className="w-5 h-5" />,
+      accent: "blue",
+    },
+    {
+      name: "ERP Software Solutions",
+      href: "/erp-software-solutions",
+      description: "Streamlining business operations",
+      icon: <Cpu className="w-5 h-5" />,
+      accent: "blue",
+    },
+    {
+      name: "POS Systems",
+      href: "/pos-systems",
+      description: "Modern point-of-sale solutions",
+      icon: <ShoppingBag className="w-5 h-5" />,
+      accent: "orange",
+    },
+  ];
+
+  const aboutLinks = [
+    {
+      name: "About Us",
+      href: "/about-us",
+      description: "Learn more about our company and team",
+      icon: <Users className="w-5 h-5" />,
+      color: "from-blue-500 to-indigo-500",
+      accent: "blue",
+    },
+    {
+      name: "Partnership",
+      href: "/partnership",
+      description: "Explore partnership opportunities with us",
+      icon: <Award className="w-5 h-5" />,
+      color: "from-purple-500 to-pink-500",
+      accent: "orange",
+    },
+    {
+      name: "Careers",
+      href: "/careers",
+      description: "Join our team of talented professionals",
+      icon: <Target className="w-5 h-5" />,
+      color: "from-green-500 to-teal-500",
+      accent: "blue",
+    },
+    {
+      name: "Our Process",
+      href: "/our-process",
+      description: "How we deliver exceptional results",
+      icon: <Zap className="w-5 h-5" />,
+      color: "from-yellow-500 to-orange-500",
+      accent: "orange",
+    },
+  ];
+
+  return (
+    <nav
+      className={`relative w-full z-50 text-white transition-all duration-300
+        bg-black/35 backdrop-blur-2xl 
+        shadow-[0_8px_40px_rgba(0,0,0,0.25)]
+       ${navHidden ? "-translate-y-full" : "translate-y-0"}`}
+    >
+      <div className="relative w-full">
+        <div className="mx-auto flex h-[76px] max-w-[1720px] items-center justify-between px-6 md:px-12 lg:px-20">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0 flex items-center">
+            <img
+              src="/logo.png"
+              alt="BooleanForce Logo"
+              className="h-3 md:h-5 w-auto object-contain"
+            />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex flex-1 items-center justify-center">
+            <div className="flex items-center gap-6 lg:gap-8">
+              {navLinks.map((link) => {
+                const hasDropdown =
+                  link.name === "Services" || link.name === "About";
+                const isActive = mounted && pathname === link.href;
+                const isDropdownOpen =
+                  link.name === "Services"
+                    ? servicesModalOpen
+                    : link.name === "About"
+                    ? aboutModalOpen
+                    : false;
+
+                return (
+                  <div
+                    key={link.name}
+                    className="relative"
+                    onMouseEnter={
+                      link.name === "Services"
+                        ? handleServicesMouseEnter
+                        : link.name === "About"
+                        ? handleAboutMouseEnter
+                        : undefined
+                    }
+                    onMouseLeave={
+                      link.name === "Services"
+                        ? handleServicesMouseLeave
+                        : link.name === "About"
+                        ? handleAboutMouseLeave
+                        : undefined
+                    }
+                  >
+                    <Link
+                      href={link.href}
+                      className={`flex items-center gap-2 text-[12px] lg:text-[14px] font-medium tracking-wide transition-colors duration-200 ${
+                        isActive || isDropdownOpen
+                          ? "text-white"
+                          : "text-white/85 hover:text-white"
+                      }`}
+                    >
+                      <span>{link.name}</span>
+
+                      {hasDropdown && (
+                        <ChevronRight
+                          className={`h-4 w-4 transition-transform duration-200 ${
+                            isDropdownOpen ? "-rotate-90" : "rotate-90"
+                          }`}
+                        />
+                      )}
+                    </Link>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Right Side */}
+          <div className="hidden md:flex items-center gap-7">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="text-white/90 hover:text-white transition-colors"
+              aria-label="Open search"
+            >
+              <Search className="h-6 w-6" />
+            </button>
+
+            <Link
+              href="/contact"
+              className="hidden lg:inline-flex items-center gap-2 border border-white/25 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white hover:text-black transition-all duration-300"
+            >
+              Let&apos;s Talk
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* Mobile Button */}
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden inline-flex items-center justify-center text-white"
+            aria-label="Toggle menu"
+          >
+            {isOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
+          </button>
+        </div>
+
+        {/* Search Modal */}
+        <div
+          className={`absolute inset-x-0 top-0 z-[60] transition-all duration-300 ${
+            searchOpen ? "visible opacity-100" : "invisible opacity-0"
+          }`}
         >
-            {/* subtle gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none"></div>
+          <div className="bg-black/55 backdrop-blur-2xl border-b border-white/10 shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+            <div className="mx-auto max-w-5xl px-6 py-4">
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <Search className="absolute left-0 top-1/2 h-6 w-6 -translate-y-1/2 text-white/60" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-                <div className="flex items-center justify-between h-20">
-                    {/* Logo */}
-                    <div className="flex items-center">
-                        <Link href="/" className="flex-shrink-0 flex items-center group">
-                            <div className="relative mr-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-blue-500/30 transition-all duration-300 group-hover:scale-110">
-                                    <svg
-                                        className="w-6 h-6 text-white"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth="2"
-                                            d="M13 10V3L4 14h7v7l9-11h-7z"
-                                        ></path>
-                                    </svg>
-                                </div>
-                                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-0 group-hover:opacity-30 transition duration-300"></div>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-white font-bold text-xl md:text-2xl tracking-tight relative transition-all duration-300 group-hover:scale-105">
-                                    BooleanForce
-                                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 group-hover:w-full transition-all duration-500"></span>
-                                </span>
-                                <span className="text-xs text-blue-400 hidden md:block transition-all duration-300 group-hover:text-blue-300">
-                                    Enterprise Solutions
-                                </span>
-                            </div>
-                        </Link>
-                    </div>
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for services, articles, and more..."
+                  className="w-full bg-transparent py-4 pl-10 pr-14 text-xl text-white placeholder:text-white/45 outline-none"
+                />
 
-                    {/* Desktop Navigation */}
-                    <div className="hidden md:block">
-                        <div className="ml-10 flex items-baseline space-x-1">
-                            {navLinks.map((link) => (
-                                <div
-                                    key={link.name}
-                                    className="relative group"
-                                    onMouseEnter={link.name === "Services" ? handleServicesMouseEnter : link.name === "About" ? handleAboutMouseEnter : undefined}
-                                    onMouseLeave={link.name === "Services" ? handleServicesMouseLeave : link.name === "About" ? handleAboutMouseLeave : undefined}
-                                >
-                                    <Link
-                                        href={link.href}
-                                        className={`relative text-gray-300 hover:text-white px-4 py-3 rounded-md text-sm font-medium transition-all duration-300 overflow-hidden ${mounted && pathname === link.href ? "text-white" : ""
-                                            }`}
-                                    >
-                                        <span className="relative z-10">{link.name}</span>
-                                        <span className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-md"></span>
-                                        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600 group-hover:w-full transition-all duration-500"></span>
-                                    </Link>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Desktop Right Side Actions */}
-                    <div className="hidden md:flex items-center space-x-3">
-                        {/* Search Button */}
-                        <button
-                            onClick={() => setSearchOpen(true)}
-                            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-slate-700/30 transition-all duration-300"
-                        >
-                            <Search className="w-5 h-5" />
-                        </button>
-
-                        {/* CTA Button */}
-                        <Link href="/contact" className="relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-300"></div>
-                            <button className=" cursor-pointerrelative bg-slate-800 border border-slate-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
-                                <span className="relative z-10 flex items-center">
-                                    Let's Talk
-                                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                </span>
-                            </button>
-                        </Link>
-                    </div>
-
-                    {/* Mobile Button */}
-                    <div className="md:hidden">
-                        <button
-                            onClick={() => setIsOpen(!isOpen)}
-                            className={`inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-slate-700/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-all duration-300 ${scrolled ? "backdrop-blur-md" : ""
-                                }`}
-                        >
-                            {!isOpen ? (
-                                <Menu className="block h-6 w-6" />
-                            ) : (
-                                <X className="block h-6 w-6" />
-                            )}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Search Modal */}
-            <div className={`absolute inset-x-0 top-0 transition-all duration-300 ${searchOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
-                <div className="bg-slate-900/95 backdrop-blur-xl shadow-2xl border-b border-slate-700/50">
-                    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                        <form onSubmit={handleSearchSubmit} className="relative">
-                            <div className="flex items-center">
-                                <Search className="absolute left-3 w-5 h-5 text-gray-400" />
-                                <input
-                                    ref={searchInputRef}
-                                    type="text"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    placeholder="Search for services, articles, and more..."
-                                    className="w-full pl-10 pr-12 py-3 bg-slate-800/50 border border-slate-700/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setSearchOpen(false)}
-                                    className="absolute right-3 p-1 text-gray-400 hover:text-white transition-colors"
-                                >
-                                    <X className="w-5 h-5" />
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            {/* Services Modal */}
-            <div
-                className={`absolute left-0 right-0 transition-all duration-300 ${servicesModalOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-                onMouseEnter={handleServicesMouseEnter}
-                onMouseLeave={handleServicesMouseLeave}
-            >
-                <div className="bg-slate-800/95 backdrop-blur-md shadow-2xl border border-slate-700/50 rounded-b-lg">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {services.map((service, index) => (
-                                <Link
-                                    key={index}
-                                    href={service.href}
-                                    className="group p-5 rounded-xl bg-slate-700/20 hover:bg-slate-700/40 transition-all duration-300 border border-slate-600/20 hover:border-blue-500/30 transform hover:scale-105 hover:-translate-y-1"
-                                >
-                                    <div className="flex items-start space-x-4">
-                                        <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${service.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
-                                            {service.icon}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-white font-semibold text-base group-hover:text-blue-300 transition-colors duration-300">{service.name}</h3>
-                                            <p className="text-gray-400 text-sm mt-2">{service.description}</p>
-                                            <div className="flex items-center mt-3 text-blue-400 text-sm group-hover:text-blue-300 font-medium">
-                                                <span>Learn more</span>
-                                                <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                        <div className="mt-8 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-white font-semibold text-lg mb-2">Need help choosing?</h3>
-                                <p className="text-gray-400 text-sm">Our team is here to guide you to the perfect solution for your business.</p>
-                            </div>
-                            <Link href="/contact" className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                                Get Consultation
-                                <ArrowRight className="ml-2 w-4 h-4" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* About Modal */}
-            <div
-                className={`absolute left-0 right-0 transition-all duration-300 ${aboutModalOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-                onMouseEnter={handleAboutMouseEnter}
-                onMouseLeave={handleAboutMouseLeave}
-            >
-                <div className="bg-slate-800/95 backdrop-blur-md shadow-2xl border border-slate-700/50 rounded-b-lg">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {aboutLinks.map((link, index) => (
-                                <Link
-                                    key={index}
-                                    href={link.href}
-                                    className="group p-5 rounded-xl bg-slate-700/20 hover:bg-slate-700/40 transition-all duration-300 border border-slate-600/20 hover:border-blue-500/30 transform hover:scale-105 hover:-translate-y-1"
-                                >
-                                    <div className="flex items-start space-x-4">
-                                        <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-br ${link.color} rounded-xl flex items-center justify-center text-white shadow-lg`}>
-                                            {link.icon}
-                                        </div>
-                                        <div>
-                                            <h3 className="text-white font-semibold text-base group-hover:text-blue-300 transition-colors duration-300">{link.name}</h3>
-                                            <p className="text-gray-400 text-sm mt-2">{link.description}</p>
-                                            <div className="flex items-center mt-3 text-blue-400 text-sm group-hover:text-blue-300 font-medium">
-                                                <span>Learn more</span>
-                                                <ChevronRight className="w-4 h-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
-                        <div className="mt-8 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-white font-semibold text-lg mb-2">Join our community</h3>
-                                <p className="text-gray-400 text-sm">Connect with us and stay updated on the latest trends and innovations.</p>
-                            </div>
-                            <div className="flex space-x-3">
-                                <Link href="/newsletter" className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
-                                    Subscribe
-                                    <Sparkles className="ml-2 w-4 h-4" />
-                                </Link>
-                                <Link href="/community" className="inline-flex items-center px-5 py-2.5 bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-600 transition-all duration-300 transform hover:scale-105">
-                                    Join Community
-                                    <Users className="ml-2 w-4 h-4" />
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Mobile menu */}
-            <div
-                className={`md:hidden transition-all duration-500 ease-in-out ${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"
-                    }`}
-            >
-                <div
-                    className={`px-2 pt-2 pb-3 space-y-1 sm:px-3 ${scrolled
-                        ? "bg-slate-900/95 backdrop-blur-xl"
-                        : "bg-slate-800/95 backdrop-blur-md"
-                        }`}
+                <button
+                  type="button"
+                  onClick={() => setSearchOpen(false)}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+                  aria-label="Close search"
                 >
-                    {/* Mobile Search */}
-                    <div className="px-4 py-3">
-                        <div className="relative">
-                            <Search className="absolute left-3 w-5 h-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search..."
-                                className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    {navLinks.map((link) => (
-                        <div key={link.name}>
-                            <Link
-                                href={link.href}
-                                className={`block text-gray-300 hover:text-white px-4 py-3 rounded-md text-sm font-medium transition-all duration-300 ${mounted && pathname === link.href ? "text-white" : ""
-                                    }`}
-                            >
-                                {link.name}
-                            </Link>
-
-                            {/* Show Services dropdown under mobile */}
-                            {link.name === "Services" && (
-                                <div className="pl-6 space-y-1">
-                                    {services.map((service, index) => (
-                                        <Link
-                                            key={index}
-                                            href={service.href}
-                                            className="flex items-center text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
-                                        >
-                                            <div className={`w-8 h-8 bg-gradient-to-br ${service.color} rounded-lg flex items-center justify-center text-white mr-3`}>
-                                                {service.icon}
-                                            </div>
-                                            <div>
-                                                <div className="font-medium">{service.name}</div>
-                                                <div className="text-xs text-gray-500">{service.description}</div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Show About dropdown under mobile */}
-                            {link.name === "About" && (
-                                <div className="pl-6 space-y-1">
-                                    {aboutLinks.map((link, index) => (
-                                        <Link
-                                            key={index}
-                                            href={link.href}
-                                            className="flex items-center text-gray-400 hover:text-white text-sm py-2 px-4 rounded-md hover:bg-slate-700/30 transition-all"
-                                        >
-                                            <div className={`w-8 h-8 bg-gradient-to-br ${link.color} rounded-lg flex items-center justify-center text-white mr-3`}>
-                                                {link.icon}
-                                            </div>
-                                            <div>
-                                                <div className="font-medium">{link.name}</div>
-                                                <div className="text-xs text-gray-500">{link.description}</div>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-
-                    {/* Mobile CTA Button */}
-                    <div className="px-4 py-3">
-                        <Link href="/contact" className="relative overflow-hidden group block">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-70 group-hover:opacity-100 transition duration-300"></div>
-                            <button className=" cursor-pointerrelative w-full bg-slate-800 border border-slate-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25 group-hover:border-transparent">
-                                <span className="relative z-10 flex items-center justify-center">
-                                    Let's Talk
-                                    <ArrowRight className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-                                </span>
-                            </button>
-                        </Link>
-                    </div>
-                </div>
+                  <X className="h-6 w-6" />
+                </button>
+              </form>
             </div>
-        </nav>
-    );
+          </div>
+        </div>
+
+        {/* ── Services Mega Menu ── */}
+        <div
+          className={`absolute left-0 right-0 top-[76px] z-50 transition-all duration-300 ${
+            servicesModalOpen
+              ? "visible opacity-100 translate-y-0"
+              : "invisible opacity-0 -translate-y-2"
+          }`}
+          onMouseEnter={handleServicesMouseEnter}
+          onMouseLeave={handleServicesMouseLeave}
+        >
+          <div className="relative overflow-hidden bg-[#020617] border-t border-white/5 border-b border-white/10 shadow-2xl">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(249,115,22,0.18),transparent_30%),radial-gradient(circle_at_85%_55%,rgba(30,58,138,0.30),transparent_35%)]" />
+            <div className="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:56px_56px]" />
+
+            <div className="relative mx-auto max-w-[1720px] px-6 md:px-12 lg:px-20 py-12">
+              <div className="mb-8 flex items-center gap-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#F97316]/30 bg-[#F97316]/10 px-3 py-1.5 text-xs font-semibold tracking-widest text-[#F97316]">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  SERVICES
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+                  Services
+                </h2>
+                <Link
+                  href="/services"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F97316] text-white shadow-[0_0_25px_rgba(249,115,22,0.50)] hover:bg-orange-500 transition-all duration-300 hover:scale-105"
+                >
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+
+              <div className="mb-6 flex items-center gap-4">
+                <span className="h-2 w-2 rounded-full bg-[#F97316] shadow-[0_0_12px_rgba(249,115,22,0.8)]" />
+                <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#F97316]">
+                  Capabilities
+                </p>
+                <span className="h-px flex-1 bg-gradient-to-r from-[#F97316]/50 to-transparent" />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {services.map((service) => {
+                  const isOrange = service.accent === "orange";
+                  return (
+                    <Link
+                      key={service.name}
+                      href={service.href}
+                      className={`group relative overflow-hidden rounded-2xl border bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 ${
+                        isOrange
+                          ? "border-[#F97316]/30 hover:border-[#F97316]/80 hover:shadow-[0_20px_60px_rgba(249,115,22,0.14)]"
+                          : "border-[#1E3A8A]/60 hover:border-blue-500 hover:shadow-[0_20px_60px_rgba(30,58,138,0.22)]"
+                      }`}
+                    >
+                      <div
+                        className={`absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+                          isOrange
+                            ? "bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.15),transparent_40%)]"
+                            : "bg-[radial-gradient(circle_at_20%_20%,rgba(30,58,138,0.30),transparent_40%)]"
+                        }`}
+                      />
+                      <div className="relative flex items-center gap-5">
+                        <div
+                          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border ${
+                            isOrange
+                              ? "border-[#F97316]/70 bg-[#F97316]/15 text-[#F97316]"
+                              : "border-blue-500/70 bg-[#1E3A8A]/40 text-blue-300"
+                          }`}
+                        >
+                          <span className="[&>svg]:h-6 [&>svg]:w-6">
+                            {service.icon}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold tracking-tight text-white">
+                            {service.name}
+                          </h3>
+                          <p className="mt-1 text-sm leading-6 text-white/55">
+                            {service.description}
+                          </p>
+                        </div>
+                        <div
+                          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1 md:flex ${
+                            isOrange
+                              ? "border-[#F97316]/70 text-[#F97316]"
+                              : "border-blue-500/70 text-blue-300"
+                          }`}
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              <div className="mt-8 flex flex-col items-start justify-between gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl md:flex-row md:items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-white">
+                    Need help choosing?
+                  </h3>
+                  <p className="mt-1 text-sm text-white/55">
+                    Our team is here to guide you to the perfect solution for your business.
+                  </p>
+                </div>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-3 rounded-full bg-[#F97316] px-6 py-3 text-sm font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-all duration-300 hover:scale-105 hover:bg-orange-500 whitespace-nowrap"
+                >
+                  Get Consultation
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── About Mega Menu — Redesigned ── */}
+        <div
+          className={`absolute left-0 right-0 top-[76px] z-50 transition-all duration-300 ${
+            aboutModalOpen
+              ? "visible opacity-100 translate-y-0"
+              : "invisible opacity-0 -translate-y-2"
+          }`}
+          onMouseEnter={handleAboutMouseEnter}
+          onMouseLeave={handleAboutMouseLeave}
+        >
+          {/* Dark panel matching Services mega menu aesthetic */}
+          <div className="relative overflow-hidden bg-[#020617] border-t border-white/5 border-b border-white/10 shadow-2xl">
+            {/* Background radial gradients */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(30,58,138,0.30),transparent_30%),radial-gradient(circle_at_15%_65%,rgba(249,115,22,0.14),transparent_35%)]" />
+            {/* Subtle grid */}
+            <div className="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:56px_56px]" />
+
+            <div className="relative mx-auto max-w-[1720px] px-6 md:px-12 lg:px-20 py-12">
+
+              {/* Header row */}
+              <div className="mb-8 flex items-center gap-4">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#F97316]/30 bg-[#F97316]/10 px-3 py-1.5 text-xs font-semibold tracking-widest text-[#F97316]">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  COMPANY
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+                  About
+                </h2>
+                <Link
+                  href="/about-us"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#F97316] text-white shadow-[0_0_25px_rgba(249,115,22,0.50)] hover:bg-orange-500 transition-all duration-300 hover:scale-105"
+                >
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </div>
+
+              {/* Section label */}
+              <div className="mb-6 flex items-center gap-4">
+                <span className="h-2 w-2 rounded-full bg-[#F97316] shadow-[0_0_12px_rgba(249,115,22,0.8)]" />
+                <p className="text-xs font-bold uppercase tracking-[0.35em] text-[#F97316]">
+                  Company
+                </p>
+                <span className="h-px flex-1 bg-gradient-to-r from-[#F97316]/50 to-transparent" />
+              </div>
+
+              {/* About Cards — 2-column grid */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {aboutLinks.map((link) => {
+                  const isOrange = link.accent === "orange";
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={`group relative overflow-hidden rounded-2xl border bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 ${
+                        isOrange
+                          ? "border-[#F97316]/30 hover:border-[#F97316]/80 hover:shadow-[0_20px_60px_rgba(249,115,22,0.14)]"
+                          : "border-[#1E3A8A]/60 hover:border-blue-500 hover:shadow-[0_20px_60px_rgba(30,58,138,0.22)]"
+                      }`}
+                    >
+                      {/* Hover radial glow */}
+                      <div
+                        className={`absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 ${
+                          isOrange
+                            ? "bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.15),transparent_40%)]"
+                            : "bg-[radial-gradient(circle_at_20%_20%,rgba(30,58,138,0.30),transparent_40%)]"
+                        }`}
+                      />
+
+                      <div className="relative flex items-center gap-5">
+                        {/* Icon box */}
+                        <div
+                          className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border ${
+                            isOrange
+                              ? "border-[#F97316]/70 bg-[#F97316]/15 text-[#F97316]"
+                              : "border-blue-500/70 bg-[#1E3A8A]/40 text-blue-300"
+                          }`}
+                        >
+                          <span className="[&>svg]:h-6 [&>svg]:w-6">
+                            {link.icon}
+                          </span>
+                        </div>
+
+                        {/* Text */}
+                        <div className="flex-1">
+                          <h3 className="text-lg font-bold tracking-tight text-white">
+                            {link.name}
+                          </h3>
+                          <p className="mt-1 text-sm leading-6 text-white/55">
+                            {link.description}
+                          </p>
+                        </div>
+
+                        {/* Arrow */}
+                        <div
+                          className={`hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300 group-hover:translate-x-1 md:flex ${
+                            isOrange
+                              ? "border-[#F97316]/70 text-[#F97316]"
+                              : "border-blue-500/70 text-blue-300"
+                          }`}
+                        >
+                          <ArrowRight className="h-4 w-4" />
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Connect section */}
+              <div className="mt-8 flex items-center gap-4">
+                <span className="h-2 w-2 rounded-full bg-[#1E3A8A] shadow-[0_0_12px_rgba(30,58,138,0.8)]" />
+                <p className="text-xs font-bold uppercase tracking-[0.35em] text-blue-400">
+                  Connect
+                </p>
+                <span className="h-px flex-1 bg-gradient-to-r from-blue-500/50 to-transparent" />
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                <Link
+                  href="/newsletter"
+                  className="group relative overflow-hidden rounded-2xl border border-[#1E3A8A]/60 bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-500 hover:shadow-[0_20px_60px_rgba(30,58,138,0.22)]"
+                >
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_20%_20%,rgba(30,58,138,0.30),transparent_40%)]" />
+                  <div className="relative flex items-center gap-5">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-blue-500/70 bg-[#1E3A8A]/40 text-blue-300">
+                      <span className="[&>svg]:h-6 [&>svg]:w-6">
+                        <Sparkles className="w-5 h-5" />
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold tracking-tight text-white">Subscribe</h3>
+                      <p className="mt-1 text-sm leading-6 text-white/55">Stay updated with our latest news</p>
+                    </div>
+                    <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-500/70 text-blue-300 transition-all duration-300 group-hover:translate-x-1 md:flex">
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/community"
+                  className="group relative overflow-hidden rounded-2xl border border-[#F97316]/30 bg-white/[0.03] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-[#F97316]/80 hover:shadow-[0_20px_60px_rgba(249,115,22,0.14)]"
+                >
+                  <div className="absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_20%_20%,rgba(249,115,22,0.15),transparent_40%)]" />
+                  <div className="relative flex items-center gap-5">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-[#F97316]/70 bg-[#F97316]/15 text-[#F97316]">
+                      <span className="[&>svg]:h-6 [&>svg]:w-6">
+                        <Users className="w-5 h-5" />
+                      </span>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold tracking-tight text-white">Join Community</h3>
+                      <p className="mt-1 text-sm leading-6 text-white/55">Connect with us and stay in touch</p>
+                    </div>
+                    <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#F97316]/70 text-[#F97316] transition-all duration-300 group-hover:translate-x-1 md:flex">
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </div>
+                </Link>
+              </div>
+
+              {/* Bottom CTA */}
+              <div className="mt-8 flex flex-col items-start justify-between gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl md:flex-row md:items-center">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Join our community</h3>
+                  <p className="mt-1 text-sm text-white/55">
+                    Connect with us and stay updated on the latest trends and innovations.
+                  </p>
+                </div>
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center gap-3 rounded-full bg-[#F97316] px-6 py-3 text-sm font-bold text-white shadow-[0_0_25px_rgba(249,115,22,0.35)] transition-all duration-300 hover:scale-105 hover:bg-orange-500 whitespace-nowrap"
+                >
+                  Get in Touch
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Menu — unchanged */}
+        <div
+          className={`md:hidden overflow-hidden bg-black/55 backdrop-blur-2xl border-t border-white/10 transition-all duration-500 ${
+            isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <div className="px-6 py-6 space-y-5">
+            <div className="relative">
+              <Search className="absolute left-0 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-transparent border-b border-white/20 py-3 pl-8 pr-4 text-white placeholder:text-white/45 outline-none"
+              />
+            </div>
+
+            {navLinks.map((link) => (
+              <div key={link.name} className="border-b border-white/10 pb-4">
+                <Link
+                  href={link.href}
+                  className={`block text-xl font-semibold ${
+                    mounted && pathname === link.href
+                      ? "text-white"
+                      : "text-white/85"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+
+                {link.name === "Services" && (
+                  <div className="mt-4 space-y-4 pl-4">
+                    {services.map((service, index) => {
+                      const isOrange = service.accent === "orange";
+                      return (
+                        <Link
+                          key={index}
+                          href={service.href}
+                          className="flex items-start gap-3 text-white/75"
+                        >
+                          <span
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                              isOrange
+                                ? "border-[#F97316]/70 bg-[#F97316]/15 text-[#F97316]"
+                                : "border-blue-500/70 bg-[#1E3A8A]/40 text-blue-300"
+                            }`}
+                          >
+                            <span className="[&>svg]:h-4 [&>svg]:w-4">
+                              {service.icon}
+                            </span>
+                          </span>
+                          <span>
+                            <span className="block text-sm font-medium text-white">
+                              {service.name}
+                            </span>
+                            <span className="block text-xs text-white/45">
+                              {service.description}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {link.name === "About" && (
+                  <div className="mt-4 space-y-4 pl-4">
+                    {aboutLinks.map((link, index) => {
+                      const isOrange = link.accent === "orange";
+                      return (
+                        <Link
+                          key={index}
+                          href={link.href}
+                          className="flex items-start gap-3 text-white/75"
+                        >
+                          <span
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                              isOrange
+                                ? "border-[#F97316]/70 bg-[#F97316]/15 text-[#F97316]"
+                                : "border-blue-500/70 bg-[#1E3A8A]/40 text-blue-300"
+                            }`}
+                          >
+                            <span className="[&>svg]:h-4 [&>svg]:w-4">
+                              {link.icon}
+                            </span>
+                          </span>
+                          <span>
+                            <span className="block text-sm font-medium text-white">
+                              {link.name}
+                            </span>
+                            <span className="block text-xs text-white/45">
+                              {link.description}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            <Link
+              href="/contact"
+              className="flex items-center justify-center gap-2 bg-[#a100ff] px-6 py-3 font-semibold text-white"
+            >
+              Let&apos;s Talk
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
 };
 
 export default Navbar1;
