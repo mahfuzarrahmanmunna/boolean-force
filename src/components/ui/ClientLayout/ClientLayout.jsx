@@ -2,6 +2,7 @@
 
 import Footer from "@/app/components/Footer/Footer";
 import Navbar1 from "@/app/components/Navbar1/Navbar1";
+import SmoothScroll from "@/app/components/SmoothScroll/SmoothScroll";
 import VerticalNavbar4 from "@/app/components/VerticalNavbar4/VerticalNavbar4";
 import { usePathname } from "next/navigation";
 
@@ -20,7 +21,8 @@ export default function ClientLayout({ children }) {
       {!isAnyDashboard && <Navbar1 />}
 
       {/* Vertical navbar for admin dashboard */}
-      {!isDashboard && <VerticalNavbar4 />}
+      <div className="hidden md:flex">{!isDashboard && <VerticalNavbar4 />}</div>
+      {/* <SmoothScroll/> */}
 
       {/* Note: Client and Worker dashboards should have their own vertical navbars in their respective layout files */}
 
