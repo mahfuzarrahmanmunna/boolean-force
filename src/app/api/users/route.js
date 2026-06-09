@@ -1,11 +1,11 @@
 // src/app/api/users/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 
 // GET - Fetch all users
 export async function GET(request) {
-    console.log("GET /api/users called");
+    //console.log("GET /api/users called");
     try {
         // Connect to 'users' collection
         const collection = await dbConnect('users');
@@ -19,7 +19,7 @@ export async function GET(request) {
             _id: item._id.toString()
         }));
 
-        console.log("Fetched users:", serializedData);
+        //console.log("Fetched users:", serializedData);
         return NextResponse.json(serializedData);
     }
     catch (err) {
@@ -40,9 +40,9 @@ export async function GET(request) {
 
 // PUT - Update user profile
 export async function PUT(request) {
-    console.log("PUT /api/users called");
+    //console.log("PUT /api/users called");
     try {
-        const session = await getServerSession();
+        const session = await auth();
 
         if (!session) {
             return NextResponse.json(
@@ -52,7 +52,7 @@ export async function PUT(request) {
         }
 
         const data = await request.json();
-        console.log("Update data:", data);
+        //console.log("Update data:", data);
 
         // Connect to 'users' collection
         const collection = await dbConnect('users');

@@ -1,4 +1,4 @@
-// app/api/workers/[id]/permissions/route.js
+// app/api/projects/[id]/permissions/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -61,7 +61,7 @@ export async function PUT(request, { params }) {
             data: updatedWorker
         });
     } catch (err) {
-        console.error(`Error in PUT /api/workers/${params.id}/permissions:`, err);
+        console.error(`Error in PUT /api/projects/${params.id}/permissions:`, err);
         return NextResponse.json(
             { success: false, error: "An internal server error occurred.", details: err.message },
             { status: 500 }

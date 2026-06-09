@@ -54,6 +54,9 @@ const Navbar1 = () => {
 
       lastScroll = currentScroll;
     };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);

@@ -18,7 +18,7 @@ export default function BlogPost({ params }) {
     const handleCommentSubmit = (e) => {
         e.preventDefault();
         // In a real application, you would submit this to your backend
-        console.log("New comment:", newComment);
+        //console.log("New comment:", newComment);
         // Reset form
         setNewComment({ name: "", email: "", content: "" });
     };

@@ -4,48 +4,53 @@ import nodemailer from "nodemailer";
 
 // Create a transporter object using SMTP transport
 const createTransporter = () => {
-    // Check if Gmail credentials are available
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-        console.error("Gmail credentials are not set in environment variables. Email sending will be skipped.");
-        return null; // Return null instead of throwing an error
-    }
+  // Check if Gmail credentials are available
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    console.error(
+      "Gmail credentials are not set in environment variables. Email sending will be skipped.",
+    );
+    return null; // Return null instead of throwing an error
+  }
 
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASS,
-        },
-    });
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    },
+  });
 };
 
 export async function POST(request) {
-    try {
-        const { to, subject, message, fromName, fromEmail } = await request.json();
+  try {
+    const { to, subject, message, fromName, fromEmail } = await request.json();
 
-        // Validate required fields
-        if (!to || !subject || !message) {
-            return NextResponse.json(
-                { success: false, error: "Missing required fields: to, subject, message" },
-                { status: 400 }
-            );
-        }
+    // Validate required fields
+    if (!to || !subject || !message) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required fields: to, subject, message",
+        },
+        { status: 400 },
+      );
+    }
 
-        // Create transporter
-        const transporter = createTransporter();
-        if (!transporter) {
-            return NextResponse.json(
-                { success: false, error: "Email service is not configured properly" },
-                { status: 500 }
-            );
-        }
+    // Create transporter
+    const transporter = createTransporter();
+    if (!transporter) {
+      return NextResponse.json(
+        { success: false, error: "Email service is not configured properly" },
+        { status: 500 },
+      );
+    }
 
-        // Prepare email options
-        const mailOptions = {
-            from: `${fromName || process.env.GMAIL_USER} <${process.env.GMAIL_USER}>`,
-            to: to,
-            subject: subject,
-            html: `
+    // Prepare email options
+    const mailOptions = {
+      from: `${fromName || process.env.GMAIL_USER} <${process.env.GMAIL_USER}>`,
+      to: to,
+      subject: subject,
+      html: `
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>
@@ -114,37 +119,36 @@ export async function POST(request) {
                             <p>Dear Valued Customer,</p>
                             
                             <div class="message-box">
-                                ${message.replace(/\n/g, '<br>')}
+                                ${message.replace(/\n/g, "<br>")}
                             </div>
                             
                             <p>If you have any questions or need further assistance, please don't hesitate to contact us.</p>
                         </div>
                         
                         <div class="footer">
-                            <p>Best regards,<br>${fromName || 'The BooleanForce Team'}</p>
+                            <p>Best regards,<br>${fromName || "The BooleanForce Team"}</p>
                             <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
-                            <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | ${fromEmail || process.env.GMAIL_USER}</p>
+                            <p>House - SA- 23,(2nd floor) Adarsha Nagar Road,Madda Badda,Dhaka 1212 | 01817886592 | ${fromEmail || process.env.GMAIL_USER}</p>
                         </div>
                     </div>
                 </body>
                 </html>
             `,
-        };
+    };
 
-        // Send email
-        await transporter.sendMail(mailOptions);
-        console.log("Reply email sent successfully to:", to);
+    // Send email
+    await transporter.sendMail(mailOptions);
+    //console.log("Reply email sent successfully to:", to);
 
-        return NextResponse.json({
-            success: true,
-            message: "Email sent successfully",
-        });
-
-    } catch (error) {
-        console.error("Error sending reply email:", error);
-        return NextResponse.json(
-            { success: false, error: "Failed to send email" },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json({
+      success: true,
+      message: "Email sent successfully",
+    });
+  } catch (error) {
+    console.error("Error sending reply email:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to send email" },
+      { status: 500 },
+    );
+  }
 }

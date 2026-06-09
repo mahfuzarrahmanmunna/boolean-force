@@ -343,7 +343,7 @@
 //                                                 value={formData.phone}
 //                                                 onChange={handleChange}
 //                                                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-//                                                 placeholder="+1 (555) 123-4567"
+//                                                 placeholder="01817886592"
 //                                             />
 //                                         </div>
 
@@ -417,7 +417,7 @@
 //                                             </div>
 //                                             <div className="ml-4">
 //                                                 <h3 className="text-lg font-semibold text-white">Office Address</h3>
-//                                                 <p className="text-gray-300 mt-1">123 Tech Street, Silicon Valley, CA 94025</p>
+//                                                 <p className="text-gray-300 mt-1">House - SA- 23,(2nd floor) Adarsha Nagar Road,Madda Badda,Dhaka 1212</p>
 //                                             </div>
 //                                         </div>
 
@@ -429,7 +429,7 @@
 //                                             </div>
 //                                             <div className="ml-4">
 //                                                 <h3 className="text-lg font-semibold text-white">Phone</h3>
-//                                                 <p className="text-gray-300 mt-1">+1 (555) 123-4567</p>
+//                                                 <p className="text-gray-300 mt-1">01817886592</p>
 //                                             </div>
 //                                         </div>
 
@@ -441,7 +441,7 @@
 //                                             </div>
 //                                             <div className="ml-4">
 //                                                 <h3 className="text-lg font-semibold text-white">Email</h3>
-//                                                 <p className="text-gray-300 mt-1">info@BooleanForce.com</p>
+//                                                 <p className="text-gray-300 mt-1">consult@booleanforce.com</p>
 //                                             </div>
 //                                         </div>
 

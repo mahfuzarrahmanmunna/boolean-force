@@ -4,7 +4,7 @@
 //     const url = request.nextUrl.clone();
 //     const hostname = request.headers.get("host") || "";
 
-//     console.log("🔥 Hostname:", hostname, "Path:", url.pathname);
+//     //console.log("🔥 Hostname:", hostname, "Path:", url.pathname);
 
 //     // ✅ Check if the request is for the admin subdomain
 //     const isAdminSubdomain = hostname.startsWith("admin.");

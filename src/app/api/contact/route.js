@@ -4,44 +4,47 @@ import nodemailer from "nodemailer";
 
 // Create a transporter object using SMTP transport
 const createTransporter = () => {
-    // Check if Gmail credentials are available
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
-        console.error("Gmail credentials are not set in environment variables. Email sending will be skipped.");
-        return null; // Return null instead of throwing an error
-    }
+  // Check if Gmail credentials are available
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_PASS) {
+    console.error(
+      "Gmail credentials are not set in environment variables. Email sending will be skipped.",
+    );
+    return null; // Return null instead of throwing an error
+  }
 
-    return nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-            user: process.env.GMAIL_USER,
-            pass: process.env.GMAIL_PASS,
-        },
-    });
+  return nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_PASS,
+    },
+  });
 };
 
 // Format services for display
 const formatServices = (services) => {
-    const serviceNames = {
-        'pos': 'POS Systems',
-        'brand': 'Brand Visual Identity',
-        'erp': 'ERP Software Solutions',
-        'web': 'Web Development',
-        'mobile': 'Mobile App Development',
-        'cloud': 'Cloud Solutions'
-    };
+  const serviceNames = {
+    pos: "POS Systems",
+    brand: "Brand Visual Identity",
+    erp: "ERP Software Solutions",
+    web: "Web Development",
+    mobile: "Mobile App Development",
+    cloud: "Cloud Solutions",
+  };
 
-    return services.map(id => serviceNames[id] || id).join(', ');
+  return services.map((id) => serviceNames[id] || id).join(", ");
 };
 
 // Send notification email to admin
 const sendAdminEmail = async (formData, transporter) => {
-    const { name, email, phone, company, services, budget, timeline, message } = formData;
+  const { name, email, phone, company, services, budget, timeline, message } =
+    formData;
 
-    const mailOptions = {
-        from: process.env.GMAIL_USER,
-        to: process.env.GMAIL_USER,
-        subject: `New Contact Form Submission: ${name}`,
-        html: `
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: process.env.GMAIL_USER,
+    subject: `New Contact Form Submission: ${name}`,
+    html: `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -168,49 +171,73 @@ const sendAdminEmail = async (formData, transporter) => {
                                     <span class="info-label">Email:</span>
                                     <span class="info-value">${email}</span>
                                 </div>
-                                ${phone ? `
+                                ${
+                                  phone
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Phone:</span>
                                     <span class="info-value">${phone}</span>
                                 </div>
-                                ` : ''}
-                                ${company ? `
+                                `
+                                    : ""
+                                }
+                                ${
+                                  company
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Company:</span>
                                     <span class="info-value">${company}</span>
                                 </div>
-                                ` : ''}
+                                `
+                                    : ""
+                                }
                             </div>
                         </div>
                         
-                        ${services && services.length > 0 ? `
+                        ${
+                          services && services.length > 0
+                            ? `
                         <div class="section">
                             <div class="section-title">Services Interested In</div>
                             <div>
-                                ${services.map(service => `<span class="badge">${formatServices([service])}</span>`).join('')}
+                                ${services.map((service) => `<span class="badge">${formatServices([service])}</span>`).join("")}
                             </div>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
                         
-                        ${budget || timeline ? `
+                        ${
+                          budget || timeline
+                            ? `
                         <div class="section">
                             <div class="section-title">Project Details</div>
                             <div class="info-grid">
-                                ${budget ? `
+                                ${
+                                  budget
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Budget:</span>
                                     <span class="info-value">${budget}</span>
                                 </div>
-                                ` : ''}
-                                ${timeline ? `
+                                `
+                                    : ""
+                                }
+                                ${
+                                  timeline
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Timeline:</span>
                                     <span class="info-value">${timeline}</span>
                                 </div>
-                                ` : ''}
+                                `
+                                    : ""
+                                }
                             </div>
                         </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
                         
                         <div class="section">
                             <div class="section-title">Message</div>
@@ -228,20 +255,20 @@ const sendAdminEmail = async (formData, transporter) => {
             </body>
             </html>
         `,
-    };
+  };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
 
 // Send confirmation email to user
 const sendUserEmail = async (formData, transporter) => {
-    const { name, email, services, budget, timeline, message } = formData;
+  const { name, email, services, budget, timeline, message } = formData;
 
-    const mailOptions = {
-        from: process.env.GMAIL_USER,
-        to: email,
-        subject: 'Thank you for contacting BooleanForce',
-        html: `
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: email,
+    subject: "Thank you for contacting BooleanForce",
+    html: `
             <!DOCTYPE html>
             <html lang="en">
             <head>
@@ -383,28 +410,40 @@ const sendUserEmail = async (formData, transporter) => {
                         <div class="section">
                             <div class="section-title">Your Inquiry Summary</div>
                             
-                            ${services && services.length > 0 ? `
+                            ${
+                              services && services.length > 0
+                                ? `
                             <div class="info-item">
                                 <span class="info-label">Services:</span>
                                 <div>
-                                    ${services.map(service => `<span class="badge">${formatServices([service])}</span>`).join('')}
+                                    ${services.map((service) => `<span class="badge">${formatServices([service])}</span>`).join("")}
                                 </div>
                             </div>
-                            ` : ''}
+                            `
+                                : ""
+                            }
                             
                             <div class="info-grid">
-                                ${budget ? `
+                                ${
+                                  budget
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Budget:</span>
                                     <span class="info-value">${budget}</span>
                                 </div>
-                                ` : ''}
-                                ${timeline ? `
+                                `
+                                    : ""
+                                }
+                                ${
+                                  timeline
+                                    ? `
                                 <div class="info-item">
                                     <span class="info-label">Timeline:</span>
                                     <span class="info-value">${timeline}</span>
                                 </div>
-                                ` : ''}
+                                `
+                                    : ""
+                                }
                             </div>
                             
                             <div class="info-item">
@@ -441,68 +480,78 @@ const sendUserEmail = async (formData, transporter) => {
                     <div class="footer">
                         <p>Best regards,<br>The BooleanForce Team</p>
                         <p>© ${new Date().getFullYear()} BooleanForce. All rights reserved.</p>
-                        <p>123 Tech Street, Silicon Valley, CA 94025 | +1 (555) 123-4567 | info@BooleanForce.com</p>
+                        <p>House - SA- 23,(2nd floor) Adarsha Nagar Road,Madda Badda,Dhaka 1212 | 01817886592 | consult@booleanforce.com</p>
                     </div>
                 </div>
             </body>
             </html>
         `,
-    };
+  };
 
-    await transporter.sendMail(mailOptions);
+  await transporter.sendMail(mailOptions);
 };
 
 export async function GET() {
-    try {
-        const collection = await dbConnect('contacts');
-        const data = await collection.find({}).toArray();
-        return NextResponse.json(data);
-    }
-    catch (err) {
-        console.error("BooleanForce: Error in GET /api/contact:", err);
-        return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-    }
+  try {
+    const collection = await dbConnect("contacts");
+    const data = await collection.find({}).toArray();
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error("BooleanForce: Error in GET /api/contact:", err);
+    return NextResponse.json(
+      { success: false, error: err.message },
+      { status: 500 },
+    );
+  }
 }
 
 export async function POST(request) {
-    try {
-        const postData = await request.json();
-        console.log("Received form data:", postData);
+  try {
+    const postData = await request.json();
+    //console.log("Received form data:", postData);
 
-        // Validate required fields
-        if (!postData.name || !postData.email || !postData.message) {
-            return NextResponse.json({ success: false, error: "Missing required fields." }, { status: 400 });
-        }
-
-        // Save to database
-        const collection = await dbConnect('contacts');
-        const result = await collection.insertOne(postData);
-        console.log("Data saved to database:", result);
-
-        // Send emails
-        const transporter = createTransporter();
-        if (transporter) {
-            try {
-                // Send notification to admin
-                await sendAdminEmail(postData, transporter);
-                console.log("Admin email sent successfully");
-
-                // Send confirmation to user
-                await sendUserEmail(postData, transporter);
-                console.log("User confirmation email sent successfully");
-            } catch (emailError) {
-                console.error("Error sending email:", emailError);
-                // The request will still succeed, but we log the error
-            }
-        }
-
-        return NextResponse.json({
-            success: true,
-            message: "Your message has been sent successfully!",
-        });
-
-    } catch (err) {
-        console.error("BooleanForce: Error in POST /api/contact:", err);
-        return NextResponse.json({ success: false, error: "Something went wrong. Please try again later." }, { status: 500 });
+    // Validate required fields
+    if (!postData.name || !postData.email || !postData.message) {
+      return NextResponse.json(
+        { success: false, error: "Missing required fields." },
+        { status: 400 },
+      );
     }
+
+    // Save to database
+    const collection = await dbConnect("contacts");
+    const result = await collection.insertOne(postData);
+    //console.log("Data saved to database:", result);
+
+    // Send emails
+    const transporter = createTransporter();
+    if (transporter) {
+      try {
+        // Send notification to admin
+        await sendAdminEmail(postData, transporter);
+        //console.log("Admin email sent successfully");
+
+        // Send confirmation to user
+        await sendUserEmail(postData, transporter);
+        //console.log("User confirmation email sent successfully");
+      } catch (emailError) {
+        console.error("Error sending email:", emailError);
+        // The request will still succeed, but we log the error
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: "Your message has been sent successfully!",
+    });
+  } catch (err) {
+    console.error("BooleanForce: Error in POST /api/contact:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Something went wrong. Please try again later.",
+      },
+      { status: 500 },
+    );
+  }
 }

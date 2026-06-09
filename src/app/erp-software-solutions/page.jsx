@@ -72,16 +72,16 @@ export default function ERPSoftwareSolutions() {
                 }
 
                 const data = await res.json();
-                console.log('API Response:', data); // Debug log
+                //console.log('API Response:', data); // Debug log
 
                 // Filter the data to get only the ERP Software Solutions
                 const erpService = data.find(service => service.name === 'ERP Software Solutions');
-                console.log('ERP Service from API:', erpService); // Debug log
+                //console.log('ERP Service from API:', erpService); // Debug log
 
                 if (erpService) {
                     // Process the data to convert icon strings to JSX elements
                     const processedData = processApiData(erpService);
-                    console.log('Processed Data:', processedData); // Debug log
+                    //console.log('Processed Data:', processedData); // Debug log
                     setErpData(processedData);
                 } else {
                     setError('ERP Software Solutions service not found');
@@ -123,6 +123,6 @@ export default function ERPSoftwareSolutions() {
         );
     }
 
-    console.log('Final erpData:', erpData); // Debug log
+    //console.log('Final erpData:', erpData); // Debug log
     return <ServiceTemplates serviceData={erpData} />;
 }

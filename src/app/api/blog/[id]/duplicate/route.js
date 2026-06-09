@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // POST - Duplicate a blog post
 export async function POST(request, { params }) {
-    console.log("POST /api/blog/[id]/duplicate called with params:", params);
+    //console.log("POST /api/blog/[id]/duplicate called with params:", params);
     try {
         const { id } = await params;
 

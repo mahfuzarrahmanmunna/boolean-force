@@ -63,7 +63,7 @@ const ClientPage = () => {
                 const currentUserId = sessionData.user.id;
 
                 // Fetch all tasks
-                const tasksResponse = await fetch('/api/work');
+                const tasksResponse = await fetch('/api/projects');
                 if (!tasksResponse.ok) {
                     throw new Error('Failed to fetch tasks');
                 }

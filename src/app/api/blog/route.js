@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch all blog posts with pagination and filtering
 export async function GET(request) {
-    console.log("GET /api/blog called");
+    //console.log("GET /api/blog called");
     try {
         const { searchParams } = new URL(request.url);
         const page = parseInt(searchParams.get('page')) || 1;
@@ -96,10 +96,10 @@ export async function GET(request) {
 
 // POST - Add a new blog post
 export async function POST(request) {
-    console.log("POST /api/blog called");
+    //console.log("POST /api/blog called");
     try {
         const postData = await request.json();
-        console.log("Adding new blog post:", postData);
+        //console.log("Adding new blog post:", postData);
 
         // Add timestamps
         postData.createdAt = new Date();

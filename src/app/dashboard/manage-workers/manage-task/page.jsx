@@ -219,15 +219,15 @@ export default function ManageTasks() {
         //     description: message,
         //     variant: type === 'success' ? "default" : "destructive",
         // });
-        console.log(`${type}: ${message}`);
+        //console.log(`${type}: ${message}`);
     };
 
     // Fetch tasks from API on component mount
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                // Change from '/api/work' to '/api/work'
-                const response = await fetch('/api/work');
+                // Change from '/api/projects' to '/api/projects'
+                const response = await fetch('/api/projects');
                 if (!response.ok) throw new Error('Failed to fetch tasks');
                 const tasksData = await response.json();
                 setTasks(tasksData);
@@ -246,11 +246,11 @@ export default function ManageTasks() {
     const handleTaskSubmit = async (data) => {
         setIsLoading(true);
         try {
-            // Fixed the typo: changed from '/api/works' to '/api/work'
-            const url = editingTask ? `/api/work/${editingTask._id}` : '/api/work';
+            // Fixed the typo: changed from '/api/projectss' to '/api/projects'
+            const url = editingTask ? `/api/projects/${editingTask._id}` : '/api/projects';
             const method = editingTask ? 'PUT' : 'POST';
             
-            console.log(`Submitting ${method} request to ${url}`, data);
+            //console.log(`Submitting ${method} request to ${url}`, data);
             
             const response = await fetch(url, {
                 method,
@@ -274,7 +274,7 @@ export default function ManageTasks() {
             }
     
             const result = await response.json();
-            console.log('Server response:', result);
+            //console.log('Server response:', result);
             
             if (editingTask) {
                 // Update the task in the local state
@@ -302,9 +302,9 @@ export default function ManageTasks() {
         if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
             setIsLoading(true);
             try {
-                console.log(`Deleting task with ID: ${taskId}`);
-                // Fixed the typo: changed from '/api/tasks' to '/api/work'
-                const response = await fetch(`/api/work/${taskId}`, {
+                //console.log(`Deleting task with ID: ${taskId}`);
+                // Fixed the typo: changed from '/api/tasks' to '/api/projects'
+                const response = await fetch(`/api/projects/${taskId}`, {
                     method: 'DELETE',
                 });
 
@@ -343,9 +343,9 @@ export default function ManageTasks() {
 
         setIsLoading(true);
         try {
-            console.log(`Performing ${action} on tasks:`, selectedTasks);
-            // Fixed the typo: changed from '/api/tasks/bulk' to '/api/work/bulk'
-            const response = await fetch('/api/work/bulk', {
+            //console.log(`Performing ${action} on tasks:`, selectedTasks);
+            // Fixed the typo: changed from '/api/tasks/bulk' to '/api/projects/bulk'
+            const response = await fetch('/api/projects/bulk', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ taskIds: selectedTasks, action }),
@@ -367,7 +367,7 @@ export default function ManageTasks() {
             }
 
             const result = await response.json();
-            console.log('Server response:', result);
+            //console.log('Server response:', result);
             
             if (result.success && result.data) {
                 setTasks(result.data);

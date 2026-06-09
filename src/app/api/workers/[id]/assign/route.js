@@ -1,4 +1,4 @@
-// app/api/workers/[id]/assign/route.js
+// app/api/projects/[id]/assign/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -8,7 +8,7 @@ export async function POST(request, { params }) {
         // Unwrap the params promise
         const { id } = await params;
 
-        console.log(`Assigning work to worker: ${id}`);
+        //console.log(`Assigning work to worker: ${id}`);
 
         // 1. Validate worker ID from URL
         if (!ObjectId.isValid(id)) {
@@ -20,7 +20,7 @@ export async function POST(request, { params }) {
         }
 
         const { taskIds } = await request.json();
-        console.log('Task IDs to assign:', taskIds);
+        //console.log('Task IDs to assign:', taskIds);
 
         // 2. Validate incoming payload
         if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
@@ -134,7 +134,7 @@ export async function POST(request, { params }) {
             assignedTo: task.assignedTo ? task.assignedTo.toString() : null
         }));
 
-        console.log('Tasks assigned successfully');
+        //console.log('Tasks assigned successfully');
         return NextResponse.json({
             success: true,
             message: "Work assigned successfully!",
@@ -142,7 +142,7 @@ export async function POST(request, { params }) {
         });
     }
     catch (err) {
-        console.error(`Error in POST /api/workers/${params.id}/assign:`, err);
+        console.error(`Error in POST /api/projects/${params.id}/assign:`, err);
         return NextResponse.json(
             { success: false, error: "An internal server error occurred.", details: err.message },
             { status: 500 }

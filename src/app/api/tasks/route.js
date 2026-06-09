@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch all tasks
 export async function GET(request) {
-    console.log("GET /api/tasks called");
+    //console.log("GET /api/tasks called");
     try {
         // Get the collection
         const collection = await dbConnect('tasks');
@@ -39,14 +39,14 @@ export async function GET(request) {
             query.assignee = { $regex: assignee, $options: 'i' };
         }
         
-        console.log("Query:", JSON.stringify(query));
+        //console.log("Query:", JSON.stringify(query));
         
         // Find tasks based on query
         const data = await collection.find(query).toArray();
         
         // Check if data is valid
         if (!data) {
-            console.log("No data found");
+            //console.log("No data found");
             return NextResponse.json([]);
         }
         
@@ -54,7 +54,7 @@ export async function GET(request) {
         const serializedData = data.map(item => {
             // Check if item exists and has _id
             if (!item || !item._id) {
-                console.log("Invalid item:", item);
+                //console.log("Invalid item:", item);
                 return null;
             }
             
@@ -64,7 +64,7 @@ export async function GET(request) {
             };
         }).filter(Boolean); // Filter out null values
         
-        console.log("Fetched tasks:", serializedData);
+        //console.log("Fetched tasks:", serializedData);
         return NextResponse.json(serializedData);
     }
     catch (err) {
@@ -79,7 +79,7 @@ export async function GET(request) {
 
 // POST - Create a new task
 export async function POST(request) {
-    console.log("POST /api/tasks called");
+    //console.log("POST /api/tasks called");
     try {
         // Get the collection
         const collection = await dbConnect('tasks');

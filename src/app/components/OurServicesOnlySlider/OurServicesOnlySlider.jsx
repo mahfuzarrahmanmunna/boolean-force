@@ -516,9 +516,101 @@ const OurServicesOnlySlider = () => {
                         </button>
                     </div>
                 </div>
+
+                <ul className="space-y-4 mb-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {services[currentServiceIndex].features.map(
+                    (feature, idx) => (
+                      <motion.li
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: idx * 0.05 }}
+                        className="flex items-center text-slate-300 text-sm"
+                      >
+                        <div
+                          className="w-1.5 h-1.5 rounded-full mr-3 flex-shrink-0"
+                          style={{
+                            backgroundColor:
+                              services[currentServiceIndex].color,
+                            boxShadow: `0 0 10px ${services[currentServiceIndex].color}`,
+                          }}
+                        ></div>
+                        {feature}
+                      </motion.li>
+                    ),
+                  )}
+                </ul>
+
+                {/* Dynamic Link Button */}
+                <Link
+                  href={`/${services[currentServiceIndex].slug}`}
+                  className="group inline-flex items-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95"
+                  style={{
+                    background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`,
+                    boxShadow: `0 10px 30px -10px ${services[currentServiceIndex].color}40`,
+                  }}
+                >
+                  View Details
+                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Navigation controls */}
+          <div className="flex justify-between items-center mt-12">
+            {/* Previous button */}
+            <button
+              onClick={handlePrev}
+              className="p-4 rounded-full border border-white/10 hover:bg-white/5 hover:border-white/30 transition-all duration-300 group"
+            >
+              <ChevronLeft className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
+            </button>
+
+            {/* Dots indicator */}
+            <div className="flex items-center gap-3">
+              {services.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleDotClick(index)}
+                  className={`h-1 rounded-full transition-all duration-300 ${index === currentServiceIndex ? "w-12" : "w-4 bg-white/20 hover:bg-white/40"}`}
+                  style={{
+                    backgroundColor:
+                      index === currentServiceIndex
+                        ? services[currentServiceIndex].color
+                        : "",
+                  }}
+                />
+              ))}
             </div>
-        </section>
-    );
+
+            {/* Next button */}
+            <button
+              onClick={handleNext}
+              className="p-4 rounded-full border border-white/10 hover:bg-white/5 hover:border-white/30 transition-all duration-300 group"
+            >
+              <ChevronRight className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
+            </button>
+          </div>
+
+          {/* Play/Pause button */}
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={togglePlayPause}
+              className="p-3 rounded-full text-slate-500 hover:text-white transition-colors hover:bg-white/5"
+              title={isPlaying ? "Pause Slider" : "Play Slider"}
+            >
+              {isPlaying ? (
+                <Pause className="w-5 h-5" />
+              ) : (
+                <Play className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
  
 export default OurServicesOnlySlider;
