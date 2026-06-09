@@ -1,39 +1,32 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Play,
-  Pause,
-  ArrowRight,
-  Code,
-  Terminal,
-} from "lucide-react";
-import Link from "next/link";
+import { motion } from "framer-motion";
+import { Play, Pause, ArrowRight } from "lucide-react";
 
-// Define your brand colors as constants
-const PRIMARY_COLOR = "#3B85FE";
-const SECONDARY_COLOR = "#A9DBDC";
-const ACCENT_COLOR = "#6366F1";
-const DARK_BG = "#0F172A";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+
+// Brand colors
+const PRIMARY_COLOR = "#F97316"; // orange
+const SECONDARY_COLOR = "#1E3A8A"; // deep blue
+const ACCENT_COLOR = "#FB923C"; // lighter orange accent
+const DARK_BG = "#0A0A0A";
 const LIGHT_TEXT = "#F1F5F9";
 
 const OurServicesOnlySlider = () => {
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
-  const intervalRef = useRef(null);
-  const sliderRef = useRef(null);
+  const swiperRef = useRef(null);
 
-  // Updated Services Array with specific images for each service
   const services = [
     {
       id: 1,
-      title: "Brand Visual Identity = (Design + Emotion)",
+      title: "Brand Visual Identity",
       description:
-        "Your brand deserves logic and love. We shape visual identities that connect emotionally and communicate clearly. In addition, we always ensure that your design meets precision.",
+        "Create a powerful brand presence that resonates with your audience and drives recognition.",
       code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
       features: [
         "Logo Design & Branding",
@@ -43,16 +36,15 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Our brand identity services help you establish a memorable presence in your market. We create cohesive visual systems that communicate your values and resonate with your target audience.",
-      slug: "brand-visual-identity",
-      icon: <Code className="w-5 h-5" />,
+      image: "https://picsum.photos/seed/brandidentity/1200/800.jpg",
+      icon: "🎨",
       color: PRIMARY_COLOR,
-      image: "https://i.ibb.co.com/BMqCvf2/brand1.png", // Specific Brand Image
     },
     {
       id: 2,
-      title: "Web Development = (Speed × Functionality)",
+      title: "Website Development",
       description:
-        "We build responsive, high-performing websites that speak your brand’s language. Because in our code, performance is always TRUE",
+        "Build responsive, SEO-optimized websites that convert visitors into customers.",
       code: "IF (Responsive AND SEO) THEN (Conversions++)",
       features: [
         "Custom Web Development",
@@ -62,16 +54,15 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "We develop high-performance websites that not only look stunning but also deliver exceptional user experiences and drive business growth through conversion-focused design.",
-      slug: "website-development",
-      icon: <Terminal className="w-5 h-5" />,
+      image: "https://picsum.photos/seed/webdevelopment/1200/800.jpg",
+      icon: "💻",
       color: SECONDARY_COLOR,
-      image: "https://i.ibb.co.com/cs66DMT/web.png", // Specific Web Image
     },
     {
       id: 3,
-      title: "ERP Software Solutions = (Automation + Control)",
+      title: "ERP Software Solutions",
       description:
-        "We create intelligent ERP systems that streamline your workflow and give you full command.Because we believe that when operations are optimized, efficiency = TRUE.",
+        "Streamline your business operations with custom ERP systems tailored to your needs.",
       code: "WHILE (Process != Automated) { Optimize() }",
       features: [
         "Custom ERP Development",
@@ -81,16 +72,15 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Our ERP solutions integrate all aspects of your business operations into a unified system, improving efficiency, data accuracy, and decision-making capabilities.",
-      slug: "erp-software-solutions",
-      icon: <Code className="w-5 h-5" />,
+      image: "https://picsum.photos/seed/erpsolutions/1200/800.jpg",
+      icon: "⚙️",
       color: ACCENT_COLOR,
-      image: "https://i.ibb.co.com/QFsXBTH0/erp.png", // Specific ERP Image
     },
     {
       id: 4,
-      title: "POS Systems = (Ease + Efficiency)",
+      title: "POS System",
       description:
-        "We provide modern point-of-sale systems tailored for your business logic. Because smoothtransactions = Happy Customers.",
+        "Modern point-of-sale solutions that enhance customer experience and boost sales.",
       code: "IF (POS == Modern) THEN (Sales = MAX)",
       features: [
         "Custom POS Development",
@@ -100,289 +90,516 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Transform your retail operations with our cutting-edge POS systems that streamline transactions, manage inventory, and provide valuable insights into your business performance.",
-      slug: "pos-systems",
-      icon: <Terminal className="w-5 h-5" />,
+      image: "https://picsum.photos/seed/possystem/1200/800.jpg",
+      icon: "🛒",
       color: PRIMARY_COLOR,
-      image: "https://i.ibb.co.com/4RYw8mHD/pos.webp", // Specific POS Image
-    },
-    {
-      id: 5,
-      title: "AI Chat Bots = (Intelligence = Conversion)",
-      description:
-        "We build smart, conversational interfaces that understand user intent and automate engagement.Because when AI handles the noise, your team can focus on the signal.",
-      code: "IF (AI == Intelligent) THEN (Engagement = MAX)",
-      features: [
-        "Custom AI Chat Bot Development",
-        "Natural Language Processing",
-        "Automated Customer Support",
-        "Integration with Existing Systems",
-      ],
-      detail:
-        "Our AI chatbots are designed to understand and respond to customer queries intelligently, providing seamless support and enhancing user engagement.",
-      slug: "ai-chat-bots",
-      icon: <Code className="w-5 h-5" />,
-      color: ACCENT_COLOR,
-      image: "https://i.ibb.co.com/TB4cL8nR/ai.png", // Specific AI Image
     },
   ];
-
-  // Auto-play functionality
-  useEffect(() => {
-    if (isPlaying && !isHovered) {
-      intervalRef.current = setInterval(() => {
-        setCurrentServiceIndex((prevIndex) =>
-          prevIndex === services.length - 1 ? 0 : prevIndex + 1,
-        );
-      }, 5000);
-    } else {
-      clearInterval(intervalRef.current);
-    }
-
-    return () => clearInterval(intervalRef.current);
-  }, [isPlaying, isHovered, services.length]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (!swiperRef.current) return;
       if (e.key === "ArrowRight") {
-        setCurrentServiceIndex((prevIndex) =>
-          prevIndex === services.length - 1 ? 0 : prevIndex + 1,
-        );
+        swiperRef.current.slideNext();
       } else if (e.key === "ArrowLeft") {
-        setCurrentServiceIndex((prevIndex) =>
-          prevIndex === 0 ? services.length - 1 : prevIndex - 1,
-        );
+        swiperRef.current.slidePrev();
       } else if (e.key === " ") {
         e.preventDefault();
-        setIsPlaying(!isPlaying);
+        togglePlayPause();
       }
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, services.length]);
-
-  const handleDotClick = (index) => {
-    setCurrentServiceIndex(index);
-  };
-
-  const handlePrev = () => {
-    setCurrentServiceIndex((prevIndex) =>
-      prevIndex === 0 ? services.length - 1 : prevIndex - 1,
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentServiceIndex((prevIndex) =>
-      prevIndex === services.length - 1 ? 0 : prevIndex + 1,
-    );
-  };
+  }, [isPlaying]);
 
   const togglePlayPause = () => {
-    setIsPlaying(!isPlaying);
+    if (!swiperRef.current) return;
+    if (isPlaying) {
+      swiperRef.current.autoplay.stop();
+    } else {
+      swiperRef.current.autoplay.start();
+    }
+    setIsPlaying((prev) => !prev);
   };
+
+  const handlePrev = () => swiperRef.current?.slidePrev();
+  const handleNext = () => swiperRef.current?.slideNext();
+
+  const currentService = services[currentServiceIndex];
 
   return (
     <section
-      ref={sliderRef}
-      className="relative min-h-screen overflow-hidden flex items-center justify-center bg-slate-950"
+      className="relative min-h-screen overflow-hidden flex flex-col justify-center"
+      style={{ backgroundColor: DARK_BG }}
     >
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black pointer-events-none"></div>
+      <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+ 
+                .services-section * {
+                    font-family: 'DM Sans', sans-serif;
+                }
+                .services-section h2,
+                .services-section h3 {
+                    font-family: 'Syne', sans-serif;
+                }
+ 
+                /* Swiper overrides — peek layout */
+                .services-swiper {
+                    overflow: visible !important;
+                    width: 100%;
+                }
+ 
+                /* Each slide: image (left, ~42%) + content (right) side by side */
+                .services-swiper .swiper-slide {
+                    /* Show roughly 85% of current + peek ~15% of next */
+                    width: 85vw;
+                    max-width: 1080px;
+                    min-width: 320px;
+                    height: auto;
+                    transition: opacity 0.45s ease, transform 0.45s ease;
+                    opacity: 0.3;
+                    transform: scale(0.97);
+                    pointer-events: none;
+                }
+                .services-swiper .swiper-slide-active {
+                    opacity: 1;
+                    transform: scale(1);
+                    pointer-events: auto;
+                }
+                .services-swiper .swiper-slide-next {
+                    opacity: 0.5;
+                }
+ 
+                @media (max-width: 768px) {
+                    .services-swiper .swiper-slide {
+                        width: 92vw;
+                    }
+                }
+ 
+                /* Divider line accent */
+                .slide-divider {
+                    width: 3px;
+                    background: linear-gradient(to bottom, transparent, #F97316, transparent);
+                    align-self: stretch;
+                    flex-shrink: 0;
+                }
+ 
+                /* "Read more" button */
+                .read-more-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0px;
+                    font-family: 'Syne', sans-serif;
+                    font-weight: 600;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.02em;
+                    color: ${LIGHT_TEXT};
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    padding: 0;
+                    transition: gap 0.3s ease;
+                }
+                .read-more-btn:hover {
+                    gap: 6px;
+                }
+                .read-more-btn .arrow-box {
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    margin-left: 12px;
+                    background-color: ${PRIMARY_COLOR};
+                    transition: background-color 0.3s ease, transform 0.3s ease;
+                    flex-shrink: 0;
+                }
+                .read-more-btn:hover .arrow-box {
+                    background-color: ${SECONDARY_COLOR};
+                    transform: translateX(3px);
+                }
+ 
+                /* nav buttons */
+                .nav-btn {
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.06);
+                    color: ${LIGHT_TEXT};
+                    cursor: pointer;
+                    transition: background 0.25s, border-color 0.25s, transform 0.2s;
+                }
+                .nav-btn:hover {
+                    background: ${PRIMARY_COLOR};
+                    border-color: ${PRIMARY_COLOR};
+                    transform: scale(1.08);
+                }
+ 
+                .pause-btn {
+                    width: 44px;
+                    height: 44px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    border: 1px solid rgba(255,255,255,0.12);
+                    background: rgba(255,255,255,0.06);
+                    color: ${LIGHT_TEXT};
+                    cursor: pointer;
+                    transition: background 0.25s, border-color 0.25s, transform 0.2s;
+                }
+                .pause-btn:hover {
+                    background: rgba(255,255,255,0.14);
+                    transform: scale(1.08);
+                }
+ 
+                /* orange underline on section title */
+                .section-title-wrap {
+                    position: relative;
+                    display: inline-block;
+                }
+                .section-title-wrap::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -6px;
+                    left: 0;
+                    width: 56px;
+                    height: 3px;
+                    background: ${PRIMARY_COLOR};
+                    border-radius: 2px;
+                }
+            `}</style>
 
-      {/* Main content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-12">
-        {/* Section header */}
+      <div className="services-section relative z-10 w-full mx-auto py-16">
+        {/* Section header — left-aligned like the screenshot */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="mb-12 px-6 text-center"
+          style={{ paddingLeft: "35vw", paddingRight: "35vw" }}
         >
-          <h2
-            className="text-4xl md:text-5xl font-bold mb-4 font-mono tracking-tight"
-            style={{ color: LIGHT_TEXT }}
-          >
-            Our Services
-          </h2>
-          <div
-            className="w-24 h-1 mx-auto rounded-full shadow-[0_0_15px_rgba(59,133,254,0.5)]"
-            style={{ backgroundColor: PRIMARY_COLOR }}
-          ></div>
+          {/* <p
+                        className="text-xs font-semibold tracking-widest uppercase mb-3"
+                        style={{ color: PRIMARY_COLOR, fontFamily: 'Syne, sans-serif' }}
+                    >
+                        What We Offer
+                    </p> */}
+          <div className="section-title-wrap">
+            <h2
+              className="text-4xl md:text-5xl font-bold"
+              style={{
+                color: LIGHT_TEXT,
+                fontFamily: "Syne, sans-serif",
+                lineHeight: 1.1,
+              }}
+            >
+              Our Services
+            </h2>
+          </div>
         </motion.div>
 
-        {/* Slider container */}
-        <div
-          className="relative"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          {/* Slider content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentServiceIndex}
-              initial={{ opacity: 0, x: 50, scale: 0.98 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -50, scale: 0.98 }}
-              transition={{ duration: 0.5, ease: [0.25, 0.8, 0.25, 1] }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
-            >
-              {/* Service Image (Dynamic) */}
-              <div className="relative order-2 lg:order-1">
-                <div className="relative overflow-hidden rounded-2xl shadow-2xl group border border-white/10 bg-slate-900">
-                  {/* Dynamic Image Source based on current slide */}
-                  <img
-                    src={services[currentServiceIndex].image}
-                    alt={services[currentServiceIndex].title}
-                    className="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
+        {/* Swiper — left-anchored, peek on right */}
+        <div className="relative w-full" style={{ paddingLeft: "0vw" }}>
+          <Swiper
+            modules={[Autoplay, Navigation]}
+            slidesPerView="auto"
+            centeredSlides={false}
+            spaceBetween={28}
+            loop={true}
+            speed={1000} // 1 second transition
+            autoplay={
+              isPlaying ? { delay: 7000, disableOnInteraction: false } : false
+            }
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+            }}
+            onSlideChange={(swiper) => setCurrentServiceIndex(swiper.realIndex)}
+            className="services-swiper"
+          >
+            {services.map((service, index) => (
+              <SwiperSlide key={service.id}>
+                {/* Card: horizontal split — image left, content right */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    height: "400px",
+                    borderRadius: "0px",
+                    overflow: "hidden",
+                    // background: '#111111',
+                    // border: '1px solid rgba(255,255,255,0.07)',
+                  }}
+                >
+                  {/* IMAGE — left side, fixed ~42% */}
                   <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-40 transition-opacity duration-500 mix-blend-overlay"
-                    style={{ background: services[currentServiceIndex].color }}
-                  ></div>
-                  {/* Floating Label on Image */}
-                  <div className="absolute top-6 right-6 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-sm font-medium text-white flex items-center gap-2">
-                    {services[currentServiceIndex].icon}
-                    <span>Service {currentServiceIndex + 1}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Service content */}
-              <div className="order-1 lg:order-2">
-                <div className="mb-8">
-                  <span
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-6 border"
                     style={{
-                      backgroundColor: `${services[currentServiceIndex].color}10`,
-                      borderColor: `${services[currentServiceIndex].color}30`,
-                      color: services[currentServiceIndex].color,
+                      width: "52%",
+                      flexShrink: 0,
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    Active Module
-                  </span>
-                  <h3
-                    className="text-3xl md:text-5xl font-bold mb-6 leading-tight"
-                    style={{ color: LIGHT_TEXT }}
-                  >
-                    {services[currentServiceIndex].title}
-                  </h3>
-                </div>
-
-                <p
-                  className="text-lg mb-8 leading-relaxed text-slate-400 border-l-2 pl-4"
-                  style={{ borderColor: services[currentServiceIndex].color }}
-                >
-                  {services[currentServiceIndex].description}
-                </p>
-
-                {/* Professional Code Block */}
-                <div className="rounded-xl p-5 mb-8 font-mono text-sm border border-white/10 bg-slate-950/50 backdrop-blur-sm shadow-inner overflow-hidden">
-                  <div className="flex gap-2 mb-3 opacity-50">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        display: "block",
+                      }}
+                    />
+                    {/* subtle color tint overlay */}
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background: `linear-gradient(160deg, ${service.color}22 0%, transparent 60%)`,
+                      }}
+                    />
                   </div>
-                  <code>
-                    <span className="text-purple-400">const</span>{" "}
-                    <span className="text-blue-400">logic</span> = {"{"}
-                    <br />
-                    <span className="pl-4 text-green-400">
-                      {services[currentServiceIndex].code}
+
+                  {/* Thin vertical divider */}
+                  <div className="slide-divider" />
+
+                  {/* CONTENT — right side */}
+                  <div
+                    style={{
+                      flex: 1,
+                      padding: "44px 40px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      gap: "0",
+                      overflowY: "hidden",
+                    }}
+                  >
+                    {/* Label */}
+                    <span
+                      style={{
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.14em",
+                        textTransform: "uppercase",
+                        color: service.color,
+
+                        marginBottom: "14px",
+                        display: "block",
+                      }}
+                    >
+                      Service {index + 1} / {services.length}
                     </span>
-                    <br />
-                    {"}"}
-                  </code>
-                </div>
 
-                <ul className="space-y-4 mb-10 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {services[currentServiceIndex].features.map(
-                    (feature, idx) => (
-                      <motion.li
-                        key={idx}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: idx * 0.05 }}
-                        className="flex items-center text-slate-300 text-sm"
-                      >
-                        <div
-                          className="w-1.5 h-1.5 rounded-full mr-3 flex-shrink-0"
+                    {/* Title */}
+                    <h3
+                      style={{
+                        // fontFamily: 'Poppins, sans-serif',
+                        fontWeight: 700,
+                        // fontSize: 'clamp(1.4rem, 2vw, 2rem)',
+                        fontSize: "2rem",
+                        color: LIGHT_TEXT,
+                        lineHeight: 1.15,
+                        marginBottom: "14px",
+                      }}
+                    >
+                      {service.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p
+                      style={{
+                        fontSize: "0.93rem",
+                        lineHeight: 1.7,
+                        color: "rgba(241,245,249,0.72)",
+                        marginBottom: "20px",
+                        maxWidth: "420px",
+                      }}
+                    >
+                      {service.description}
+                    </p>
+
+                    {/* Code snippet */}
+                    <div
+                      style={{
+                        background: "rgba(0,0,0,0.45)",
+                        border: `1px solid ${service.color}35`,
+                        borderLeft: `3px solid ${service.color}`,
+                        borderRadius: "4px",
+                        padding: "10px 14px",
+                        fontSize: "0.72rem",
+                        color: "#1E3A8A",
+                        marginBottom: "20px",
+                        letterSpacing: "0.01em",
+                      }}
+                    >
+                      {service.code}
+                    </div>
+
+                    {/* Features list */}
+                    <ul
+                      style={{
+                        listStyle: "none",
+                        padding: 0,
+                        margin: "0 0 26px",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "8px",
+                      }}
+                    >
+                      {service.features.map((feature, idx) => (
+                        <li
+                          key={idx}
                           style={{
-                            backgroundColor:
-                              services[currentServiceIndex].color,
-                            boxShadow: `0 0 10px ${services[currentServiceIndex].color}`,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
                           }}
-                        ></div>
-                        {feature}
-                      </motion.li>
-                    ),
-                  )}
-                </ul>
+                        >
+                          <span
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              borderRadius: "50%",
+                              background: service.color,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 20 20"
+                              fill="white"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.875rem",
+                              color: "rgba(241,245,249,0.78)",
+                            }}
+                          >
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
 
-                {/* Dynamic Link Button */}
-                <Link
-                  href={`/${services[currentServiceIndex].slug}`}
-                  className="group inline-flex items-center px-8 py-4 rounded-xl text-white font-semibold transition-all duration-300 hover:shadow-2xl hover:scale-105 active:scale-95"
-                  style={{
-                    background: `linear-gradient(135deg, ${services[currentServiceIndex].color}, ${services[currentServiceIndex].color}80)`,
-                    boxShadow: `0 10px 30px -10px ${services[currentServiceIndex].color}40`,
-                  }}
-                >
-                  View Details
-                  <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                    {/* Read more — matches screenshot style */}
+                    <button className="read-more-btn">
+                      Learn More
+                      <span className="arrow-box">
+                        <ArrowRight size={16} color="white" />
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        </div>
 
-          {/* Navigation controls */}
-          <div className="flex justify-between items-center mt-12">
-            {/* Previous button */}
+        {/* Controls bar */}
+        <div
+          className="flex justify-between items-center mt-8"
+          style={{ paddingLeft: "8vw", paddingRight: "8vw" }}
+        >
+          {/* Play / Pause */}
+          <button
+            className="pause-btn"
+            onClick={togglePlayPause}
+            aria-label={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+          </button>
+
+          {/* Fraction + arrow nav */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <button
+              className="nav-btn"
               onClick={handlePrev}
-              className="p-4 rounded-full border border-white/10 hover:bg-white/5 hover:border-white/30 transition-all duration-300 group"
+              aria-label="Previous slide"
             >
-              <ChevronLeft className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
+              <svg
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
             </button>
 
-            {/* Dots indicator */}
-            <div className="flex items-center gap-3">
-              {services.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDotClick(index)}
-                  className={`h-1 rounded-full transition-all duration-300 ${index === currentServiceIndex ? "w-12" : "w-4 bg-white/20 hover:bg-white/40"}`}
-                  style={{
-                    backgroundColor:
-                      index === currentServiceIndex
-                        ? services[currentServiceIndex].color
-                        : "",
-                  }}
-                />
-              ))}
+            <div
+              style={{
+                minWidth: "64px",
+                height: "44px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                border: "1px solid rgba(255,255,255,0.12)",
+                borderRadius: "4px",
+                background: "rgba(255,255,255,0.06)",
+
+                fontWeight: 700,
+                fontSize: "0.95rem",
+                color: LIGHT_TEXT,
+                letterSpacing: "0.06em",
+                userSelect: "none",
+              }}
+            >
+              <motion.span
+                key={`cur-${currentServiceIndex}`}
+                initial={{ opacity: 0, y: -6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{ color: currentService.color }}
+              >
+                {currentServiceIndex + 1}
+              </motion.span>
+              <span style={{ opacity: 0.4, margin: "0 4px" }}>/</span>
+              <span style={{ opacity: 0.65 }}>{services.length}</span>
             </div>
 
-            {/* Next button */}
             <button
+              className="nav-btn"
               onClick={handleNext}
-              className="p-4 rounded-full border border-white/10 hover:bg-white/5 hover:border-white/30 transition-all duration-300 group"
+              aria-label="Next slide"
             >
-              <ChevronRight className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
-            </button>
-          </div>
-
-          {/* Play/Pause button */}
-          <div className="flex justify-center mt-8">
-            <button
-              onClick={togglePlayPause}
-              className="p-3 rounded-full text-slate-500 hover:text-white transition-colors hover:bg-white/5"
-              title={isPlaying ? "Pause Slider" : "Play Slider"}
-            >
-              {isPlaying ? (
-                <Pause className="w-5 h-5" />
-              ) : (
-                <Play className="w-5 h-5" />
-              )}
+              <svg
+                width="18"
+                height="18"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
             </button>
           </div>
         </div>
