@@ -20,9 +20,6 @@ const ACCENT_COLOR = "#6366F1";
 const DARK_BG = "#0F172A";
 const LIGHT_TEXT = "#F1F5F9";
 
-// The Shared Image URL for all services
-const SHARED_IMAGE_URL = "https://i.ibb.co.com/cs66DMT/web.png";
-
 const OurServicesOnlySlider = () => {
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -30,6 +27,7 @@ const OurServicesOnlySlider = () => {
   const intervalRef = useRef(null);
   const sliderRef = useRef(null);
 
+  // Updated Services Array with specific images for each service
   const services = [
     {
       id: 1,
@@ -45,10 +43,10 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Our brand identity services help you establish a memorable presence in your market. We create cohesive visual systems that communicate your values and resonate with your target audience.",
-      // Image is ignored in render, using SHARED_IMAGE_URL instead
       slug: "brand-visual-identity",
       icon: <Code className="w-5 h-5" />,
       color: PRIMARY_COLOR,
+      image: "https://i.ibb.co.com/BMqCvf2/brand1.png", // Specific Brand Image
     },
     {
       id: 2,
@@ -67,6 +65,7 @@ const OurServicesOnlySlider = () => {
       slug: "website-development",
       icon: <Terminal className="w-5 h-5" />,
       color: SECONDARY_COLOR,
+      image: "https://i.ibb.co.com/cs66DMT/web.png", // Specific Web Image
     },
     {
       id: 3,
@@ -85,6 +84,7 @@ const OurServicesOnlySlider = () => {
       slug: "erp-software-solutions",
       icon: <Code className="w-5 h-5" />,
       color: ACCENT_COLOR,
+      image: "https://i.ibb.co.com/QFsXBTH0/erp.png", // Specific ERP Image
     },
     {
       id: 4,
@@ -103,6 +103,7 @@ const OurServicesOnlySlider = () => {
       slug: "pos-systems",
       icon: <Terminal className="w-5 h-5" />,
       color: PRIMARY_COLOR,
+      image: "https://i.ibb.co.com/4RYw8mHD/pos.webp", // Specific POS Image
     },
     {
       id: 5,
@@ -121,6 +122,7 @@ const OurServicesOnlySlider = () => {
       slug: "ai-chat-bots",
       icon: <Code className="w-5 h-5" />,
       color: ACCENT_COLOR,
+      image: "https://i.ibb.co.com/TB4cL8nR/ai.png", // Specific AI Image
     },
   ];
 
@@ -225,13 +227,13 @@ const OurServicesOnlySlider = () => {
               transition={{ duration: 0.5, ease: [0.25, 0.8, 0.25, 1] }}
               className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
             >
-              {/* Service image (SHARED) */}
+              {/* Service Image (Dynamic) */}
               <div className="relative order-2 lg:order-1">
                 <div className="relative overflow-hidden rounded-2xl shadow-2xl group border border-white/10 bg-slate-900">
-                  {/* Using the shared image */}
+                  {/* Dynamic Image Source based on current slide */}
                   <img
-                    src={SHARED_IMAGE_URL}
-                    alt="Professional Service"
+                    src={services[currentServiceIndex].image}
+                    alt={services[currentServiceIndex].title}
                     className="w-full h-[400px] object-cover transition-transform duration-700 group-hover:scale-105"
                   />
                   <div
