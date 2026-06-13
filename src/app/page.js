@@ -1,5 +1,5 @@
 // app/page.jsx
-"use client"
+"use client";
 
 import { usePathname } from "next/navigation";
 import BooleanForceBanner from "./components/BooleanForceBanner/BooleanForceBanner";
@@ -17,20 +17,23 @@ import Banner from "./components/banner/Banner";
 import PricingCart from "./components/PricingCart/PricingCart";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
+import HeroSection from "./components/HeroSection/HeroSection";
+import WhyUs from "./components/WhyUs";
 
 export default function Home() {
   const { data: session, status } = useSession();
 
-  useEffect(() => {
-    console.log("Home Component - Session status:", status);
-    console.log("Home Component - Session data:", session);
-  }, [session, status]);
+  // useEffect(() => {
+  //   //console.log("Home Component - Session status:", status);
+  //   //console.log("Home Component - Session data:", session);
+  // }, [session, status]);
 
   return (
     <div className="min-h-screen my-12">
       {/* <TechBanner /> */}
 
       <BooleanForceBanner />
+      {/* <HeroSection /> */}
       <BooleanLogicDemo />
       {/* <BooleanLogicSplit /> */}
       {/* <OurServices />
@@ -41,6 +44,7 @@ export default function Home() {
       {/* <PricingCard /> */}
       <PricingCart />
       <Partnership />
+     
     </div>
   );
 }

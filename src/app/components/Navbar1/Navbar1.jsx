@@ -176,7 +176,7 @@ const Navbar1 = () => {
 
   return (
     <nav
-      className={`relative w-full z-50 text-white transition-all duration-300
+      className={`fixed top-0 w-full z-50 text-white transition-all duration-300
         bg-black/35 backdrop-blur-2xl 
         shadow-[0_8px_40px_rgba(0,0,0,0.25)]
        ${navHidden ? "-translate-y-full" : "translate-y-0"}`}
@@ -203,8 +203,8 @@ const Navbar1 = () => {
                   link.name === "Services"
                     ? servicesModalOpen
                     : link.name === "About"
-                    ? aboutModalOpen
-                    : false;
+                      ? aboutModalOpen
+                      : false;
 
                 return (
                   <div
@@ -214,15 +214,15 @@ const Navbar1 = () => {
                       link.name === "Services"
                         ? handleServicesMouseEnter
                         : link.name === "About"
-                        ? handleAboutMouseEnter
-                        : undefined
+                          ? handleAboutMouseEnter
+                          : undefined
                     }
                     onMouseLeave={
                       link.name === "Services"
                         ? handleServicesMouseLeave
                         : link.name === "About"
-                        ? handleAboutMouseLeave
-                        : undefined
+                          ? handleAboutMouseLeave
+                          : undefined
                     }
                   >
                     <Link
@@ -411,7 +411,8 @@ const Navbar1 = () => {
                     Need help choosing?
                   </h3>
                   <p className="mt-1 text-sm text-white/55">
-                    Our team is here to guide you to the perfect solution for your business.
+                    Our team is here to guide you to the perfect solution for
+                    your business.
                   </p>
                 </div>
                 <Link
@@ -444,7 +445,6 @@ const Navbar1 = () => {
             <div className="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:56px_56px]" />
 
             <div className="relative mx-auto max-w-[1720px] px-6 md:px-12 lg:px-20 py-12">
-
               {/* Header row */}
               <div className="mb-8 flex items-center gap-4">
                 <div className="inline-flex items-center gap-2 rounded-full border border-[#F97316]/30 bg-[#F97316]/10 px-3 py-1.5 text-xs font-semibold tracking-widest text-[#F97316]">
@@ -556,8 +556,12 @@ const Navbar1 = () => {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold tracking-tight text-white">Subscribe</h3>
-                      <p className="mt-1 text-sm leading-6 text-white/55">Stay updated with our latest news</p>
+                      <h3 className="text-lg font-bold tracking-tight text-white">
+                        Subscribe
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-white/55">
+                        Stay updated with our latest news
+                      </p>
                     </div>
                     <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-blue-500/70 text-blue-300 transition-all duration-300 group-hover:translate-x-1 md:flex">
                       <ArrowRight className="h-4 w-4" />
@@ -577,8 +581,12 @@ const Navbar1 = () => {
                       </span>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold tracking-tight text-white">Join Community</h3>
-                      <p className="mt-1 text-sm leading-6 text-white/55">Connect with us and stay in touch</p>
+                      <h3 className="text-lg font-bold tracking-tight text-white">
+                        Join Community
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-white/55">
+                        Connect with us and stay in touch
+                      </p>
                     </div>
                     <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#F97316]/70 text-[#F97316] transition-all duration-300 group-hover:translate-x-1 md:flex">
                       <ArrowRight className="h-4 w-4" />
@@ -590,9 +598,12 @@ const Navbar1 = () => {
               {/* Bottom CTA */}
               <div className="mt-8 flex flex-col items-start justify-between gap-5 rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl md:flex-row md:items-center">
                 <div>
-                  <h3 className="text-lg font-bold text-white">Join our community</h3>
+                  <h3 className="text-lg font-bold text-white">
+                    Join our community
+                  </h3>
                   <p className="mt-1 text-sm text-white/55">
-                    Connect with us and stay updated on the latest trends and innovations.
+                    Connect with us and stay updated on the latest trends and
+                    innovations.
                   </p>
                 </div>
                 <Link
@@ -603,7 +614,6 @@ const Navbar1 = () => {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
-
             </div>
           </div>
         </div>

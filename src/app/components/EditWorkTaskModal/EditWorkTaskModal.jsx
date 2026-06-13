@@ -433,21 +433,49 @@ export default function EditWorkTaskModal({
   const workForm = useForm({
     resolver: zodResolver(workFormSchema),
     defaultValues: {
-      title: taskToEdit?.title || "",
-      description: taskToEdit?.description || "",
-      status: taskToEdit?.status || "planning",
-      priority: taskToEdit?.priority || "medium",
-      category: taskToEdit?.category || "other",
-      budget: taskToEdit?.budget || "",
-      startDate: taskToEdit?.startDate || "",
-      endDate: taskToEdit?.endDate || "",
-      dueDate: taskToEdit?.dueDate || "",
-      estimatedHours: taskToEdit?.estimatedHours || "",
-      tags: taskToEdit?.tags ? taskToEdit.tags.join(", ") : "",
-      directions: taskToEdit?.directions || "",
-      progress: taskToEdit?.progress || 0,
+      title: "",
+      description: "",
+      status: "planning",
+      priority: "medium",
+      category: "other",
+      budget: "",
+      startDate: "",
+      endDate: "",
+      dueDate: "",
+      estimatedHours: "",
+      tags: "",
+      directions: "",
+      progress: 0,
     },
   });
+
+  // Update form when taskToEdit changes
+  useEffect(() => {
+    if (taskToEdit) {
+      // Reset form with task data
+      workForm.reset({
+        title: taskToEdit.title || "",
+        description: taskToEdit.description || "",
+        status: taskToEdit.status || "planning",
+        priority: taskToEdit.priority || "medium",
+        category: taskToEdit.category || "other",
+        budget: taskToEdit.budget || "",
+        startDate: taskToEdit.startDate || "",
+        endDate: taskToEdit.endDate || "",
+        dueDate: taskToEdit.dueDate || "",
+        estimatedHours: taskToEdit.estimatedHours || "",
+        tags: taskToEdit.tags ? taskToEdit.tags.join(", ") : "",
+        directions: taskToEdit.directions || "",
+        progress: taskToEdit.progress || 0,
+      });
+
+      // Set selected teams
+      setSelectedTeamsForTask(taskToEdit.assignedTeams || []);
+
+      // Set existing files
+      setFiles(taskToEdit.files || []);
+    }
+  }, [taskToEdit, workForm]);
 
   // Filter teams for task assignment based on search term
   const filteredTeamsForTask = useMemo(() => {
@@ -514,7 +542,7 @@ export default function EditWorkTaskModal({
       });
 
       // Update work task with file upload
-      const response = await fetch(`/api/work/${taskToEdit._id}`, {
+      const response = await fetch(`/api/projects/${taskToEdit._id}`, {
         method: "PUT",
         body: formData, // Don't set Content-Type header when using FormData
       });
@@ -603,7 +631,7 @@ export default function EditWorkTaskModal({
         if (successfulTeamIds.length > 0) {
           try {
             // Fetch the updated task to get the latest assignedTo information
-            const updatedTaskResponse = await fetch(`/api/work/${updatedWork._id}`);
+            const updatedTaskResponse = await fetch(`/api/projects/${updatedWork._id}`);
             if (updatedTaskResponse.ok) {
               const updatedTaskData = await updatedTaskResponse.json();
               if (updatedTaskData.data) {

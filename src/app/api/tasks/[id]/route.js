@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // GET - Fetch a specific task
 export async function GET(request, { params }) {
-    console.log(`GET /api/tasks/${params.id} called`);
+    //console.log(`GET /api/tasks/${params.id} called`);
     try {
         // Validate the ID format
         if (!ObjectId.isValid(params.id)) {
@@ -52,7 +52,7 @@ export async function GET(request, { params }) {
 
 // PUT - Update a task
 export async function PUT(request, { params }) {
-    console.log(`PUT /api/tasks/${params.id} called`);
+    //console.log(`PUT /api/tasks/${params.id} called`);
     try {
         // Validate the ID format
         if (!ObjectId.isValid(params.id)) {
@@ -118,7 +118,7 @@ export async function PUT(request, { params }) {
 
 // DELETE - Delete a task
 export async function DELETE(request, { params }) {
-    console.log(`DELETE /api/tasks/${params.id} called`);
+    //console.log(`DELETE /api/tasks/${params.id} called`);
     try {
         // Validate the ID format
         if (!ObjectId.isValid(params.id)) {

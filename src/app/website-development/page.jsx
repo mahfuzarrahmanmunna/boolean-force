@@ -71,16 +71,16 @@ export default function WebsiteDevelopment() {
                 }
 
                 const data = await res.json();
-                console.log('API Response:', data); // Debug log
+                //console.log('API Response:', data); // Debug log
 
                 // Filter the data to get only the Website Development
                 const webService = data.find(service => service.name === 'Website Development');
-                console.log('Website Service from API:', webService); // Debug log
+                //console.log('Website Service from API:', webService); // Debug log
 
                 if (webService) {
                     // Process the data to convert icon strings to JSX elements
                     const processedData = processApiData(webService);
-                    console.log('Processed Data:', processedData); // Debug log
+                    //console.log('Processed Data:', processedData); // Debug log
                     setWebData(processedData);
                 } else {
                     setError('Website Development service not found');
@@ -122,6 +122,6 @@ export default function WebsiteDevelopment() {
         );
     }
 
-    console.log('Final webData:', webData); // Debug log
+    //console.log('Final webData:', webData); // Debug log
     return <ServiceTemplates serviceData={webData} />;
 }

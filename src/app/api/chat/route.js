@@ -65,10 +65,20 @@ export async function POST(request) {
         }
 
         // Check if OpenRouter API key is configured
-        if (!process.env.OPENROUTER_API_KEY) {
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        if (!apiKey) {
             console.error('OpenRouter API key is not configured');
             return NextResponse.json(
                 { error: 'AI service is not properly configured. Please contact support.' },
+                { status: 500 }
+            );
+        }
+
+        // Validate API key format (OpenRouter keys typically start with 'sk-or-v1-')
+        if (!apiKey.startsWith('sk-or-v1-') && !apiKey.startsWith('sk-or-')) {
+            console.error('OpenRouter API key format appears to be invalid');
+            return NextResponse.json(
+                { error: 'AI service configuration error. Please contact support.' },
                 { status: 500 }
             );
         }
@@ -79,7 +89,7 @@ export async function POST(request) {
             ...messages
         ];
 
-        console.log('Sending request to OpenRouter with messages:', apiMessages);
+        //console.log('Sending request to OpenRouter with messages:', apiMessages);
 
         // Try each model until one works
         let lastError = null;
@@ -88,7 +98,7 @@ export async function POST(request) {
 
         for (const model of AVAILABLE_MODELS) {
             try {
-                console.log(`Trying model: ${model}`);
+                //console.log(`Trying model: ${model}`);
 
                 const response = await axios.post(
                     'https://openrouter.ai/api/v1/chat/completions',
@@ -100,8 +110,8 @@ export async function POST(request) {
                     },
                     {
                         headers: {
-                            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                            'HTTP-Referer': process.env.NEXTAUTH_URL || 'https://boolean-force.vercel.app',
+                            'Authorization': `Bearer ${apiKey}`,
+                            'HTTP-Referer': process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://boolean-force.vercel.app',
                             'X-Title': 'Booleanforce Expert Chatbot',
                             'Content-Type': 'application/json',
                         },
@@ -114,25 +124,75 @@ export async function POST(request) {
                 successfulModel = model;
 
                 if (botReply) {
-                    console.log(`Successfully used model: ${model}`);
+                    //console.log(`Successfully used model: ${model}`);
                     break;
                 }
             } catch (error) {
-                console.error(`Error with model ${model}:`, error.response?.data || error.message);
+                const errorData = error.response?.data || {};
+                const errorMessage = errorData.error?.message || error.message;
+                const errorCode = error.response?.status || error.code;
+                
+                console.error(`Error with model ${model}:`, {
+                    message: errorMessage,
+                    code: errorCode,
+                    status: error.response?.status,
+                    data: errorData
+                });
+                
                 lastError = error;
-                // Continue to the next model
+                
+                // If it's a 401 error, it's likely an authentication issue - don't try other models
+                if (error.response?.status === 401) {
+                    console.error('Authentication failed - API key may be invalid or expired');
+                    break; // Stop trying other models if auth fails
+                }
+                
+                // Continue to the next model for other errors
             }
         }
 
         if (!botReply) {
-            console.error('All models failed. Last error:', lastError?.response?.data || lastError?.message);
+            const lastErrorData = lastError?.response?.data || {};
+            const lastErrorMessage = lastErrorData.error?.message || lastError?.message;
+            const lastErrorStatus = lastError?.response?.status;
+            
+            console.error('All models failed. Last error:', {
+                message: lastErrorMessage,
+                status: lastErrorStatus,
+                data: lastErrorData
+            });
+            
+            // Provide more specific error messages
+            if (lastErrorStatus === 401) {
+                return NextResponse.json(
+                    { 
+                        error: 'AI service authentication failed. The API key may be invalid or expired. Please contact support.',
+                        details: 'Authentication error (401)'
+                    },
+                    { status: 500 }
+                );
+            }
+            
+            if (lastErrorStatus === 429) {
+                return NextResponse.json(
+                    { 
+                        error: 'AI service is currently rate-limited. Please try again in a moment.',
+                        details: 'Rate limit exceeded (429)'
+                    },
+                    { status: 429 }
+                );
+            }
+            
             return NextResponse.json(
-                { error: 'All AI models are currently unavailable. Please try again later.' },
+                { 
+                    error: 'All AI models are currently unavailable. Please try again later.',
+                    details: lastErrorMessage || 'Unknown error'
+                },
                 { status: 500 }
             );
         }
 
-        console.log('Received response from OpenRouter using model:', successfulModel);
+        //console.log('Received response from OpenRouter using model:', successfulModel);
 
         // Return the successful response
         return NextResponse.json({

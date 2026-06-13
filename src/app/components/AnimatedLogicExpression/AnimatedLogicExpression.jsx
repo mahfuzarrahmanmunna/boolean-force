@@ -28,8 +28,8 @@ const AnimatedLogicExpression = () => {
             {/* Content */}
             <div className="relative z-10 bg-black/30 backdrop-blur-sm rounded-lg p-6 border border-blue-900/30">
                 <code className="text-lg md:text-xl font-mono text-white">
-                    IF (Business Goals) AND (Expert Solutions) THEN (Success = TRUE)
-                </code>
+We simplify complexity and engineer systems that turn your boldest ideas into high-performance
+realities.                </code>
             </div>
 
             {/* Custom styles for animation */}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "title": "Nebula Finance",
+    "category": "FinTech Platform",
+    "description": "A decentralized finance dashboard handling over $50M in monthly transactions with real-time analytics and AI-driven fraud detection.",
+    "image": "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "technologies": ["React", "Solidity", "Next.js", "Tailwind"],
+    "stats": {
+      "users": "2.5M+",
+      "growth": "+140% YoY",
+      "uptime": "99.99%"
+    },
+    "color": "from-blue-500 to-cyan-400",
+    "links": {
+      "github": "#",
+      "live": "#"
+    }
+  },
+  {
+    "id": "2",
+    "title": "AeroSpace Logistics",
+    "category": "Supply Chain SaaS",
+    "description": "Enterprise-grade logistics optimization software for drone delivery fleets, utilizing GPS triangulation and weather API integration.",
+    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "technologies": ["Vue.js", "Node.js", "Mapbox", "AWS"],
+    "stats": {
+      "clients": "120+",
+      "shipments": "500k/day",
+      "efficiency": "+35%"
+    },
+    "color": "from-purple-500 to-pink-500",
+    "links": {
+      "github": "#",
+      "live": "#"
+    }
+  },
+  {
+    "id": "3",
+    "title": "Vitality Health",
+    "category": "HealthTech",
+    "description": "HIPAA-compliant patient management system connecting wearables data directly to physician dashboards for remote monitoring.",
+    "image": "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "technologies": ["Python", "Django", "React Native", "PostgreSQL"],
+    "stats": {
+      "patients": "50k+",
+      "doctors": "1,200+",
+      "data_points": "1B+"
+    },
+    "color": "from-green-400 to-emerald-600",
+    "links": {
+      "github": "#",
+      "live": "#"
+    }
+  },
+  {
+    "id": "4",
+    "title": "Quantum Retail",
+    "category": "E-Commerce",
+    "description": "AI-powered inventory prediction engine that reduced stockouts by 60% for major fashion retailers using predictive modeling.",
+    "image": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "technologies": ["TypeScript", "TensorFlow", "GraphQL", "Redis"],
+    "stats": {
+      "revenue": "+$20M",
+      "accuracy": "98.5%",
+      "retailers": "40+"
+    },
+    "color": "from-orange-400 to-red-500",
+    "links": {
+      "github": "#",
+      "live": "#"
+    }
+  }
+]

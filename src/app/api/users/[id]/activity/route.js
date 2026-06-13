@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 
 export async function GET(request, { params }) {
-    console.log(`GET /api/users/${params.id}/activity called`);
+    //console.log(`GET /api/users/${params.id}/activity called`);
     try {
         // Validate the user ID
         if (!ObjectId.isValid(params.id)) {
@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
 
         // If activity collection doesn't exist, return empty array
         if (!collection) {
-            console.log("Activity collection not found, returning empty array");
+            //console.log("Activity collection not found, returning empty array");
             return NextResponse.json([]);
         }
 
@@ -42,7 +42,7 @@ export async function GET(request, { params }) {
             };
         }).filter(Boolean);
 
-        console.log(`Found ${serializedActivities.length} activities for user ${params.id}`);
+        //console.log(`Found ${serializedActivities.length} activities for user ${params.id}`);
         return NextResponse.json(serializedActivities);
     }
     catch (err) {

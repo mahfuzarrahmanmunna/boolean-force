@@ -12,7 +12,7 @@ const OurServices2 = () => {
         {
             id: 1,
             icon: <Zap className="w-6 h-6" />,
-            title: "Brand Visual Identity",
+            title: "Brand Visual Identity123",
             description: "Create a powerful brand presence that resonates with your audience and drives recognition.",
             code: "IF (Brand != NULL) THEN (Recognition = TRUE)",
             features: [

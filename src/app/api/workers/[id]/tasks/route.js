@@ -1,4 +1,4 @@
-// app/api/workers/[id]/tasks/route.js
+// app/api/projects/[id]/tasks/route.js
 import { dbConnect } from "@/lib/dbConnect";
 import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
     // Await params object before accessing its properties
     const { id } = await params;
 
-    console.log(`GET /api/workers/${id}/tasks called`);
+    //console.log(`GET /api/projects/${id}/tasks called`);
     try {
         // Validate worker ID
         if (!ObjectId.isValid(id)) {
@@ -40,11 +40,11 @@ export async function GET(request, { params }) {
             };
         }).filter(Boolean);
 
-        console.log(`Found ${serializedTasks.length} tasks for worker ${id}`);
+        //console.log(`Found ${serializedTasks.length} tasks for worker ${id}`);
         return NextResponse.json(serializedTasks);
     }
     catch (err) {
-        console.error(`Error in GET /api/workers/${id}/tasks:`, err);
+        console.error(`Error in GET /api/projects/${id}/tasks:`, err);
         return NextResponse.json({
             success: false,
             error: "Something went wrong while fetching worker tasks. Please try again later.",

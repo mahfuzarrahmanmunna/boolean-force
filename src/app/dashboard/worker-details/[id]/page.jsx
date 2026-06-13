@@ -374,8 +374,8 @@ export default function WorkerDetails() {
             setIsLoading(true);
             try {
                 const [workerResponse, workResponse] = await Promise.all([
-                    fetch(`/api/workers/${workerId}`),
-                    fetch('/api/work')
+                    fetch(`/api/projects/${workerId}`),
+                    fetch('/api/projects')
                 ]);
 
                 if (!workerResponse.ok) throw new Error('Failed to fetch worker');
@@ -421,7 +421,7 @@ export default function WorkerDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/workers/${workerId}`, {
+            const response = await fetch(`/api/projects/${workerId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(editForm),
@@ -452,7 +452,7 @@ export default function WorkerDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/workers/${workerId}`, {
+            const response = await fetch(`/api/projects/${workerId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
@@ -485,7 +485,7 @@ export default function WorkerDetails() {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`/api/work/${workId}`, {
+            const response = await fetch(`/api/projects/${workId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),

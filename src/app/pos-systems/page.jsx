@@ -73,16 +73,16 @@ export default function POSSystems() {
                 }
 
                 const data = await res.json();
-                console.log('API Response:', data); // Debug log
+                //console.log('API Response:', data); // Debug log
 
                 // Filter the data to get only the POS system
                 const posSystem = data.find(service => service.name === 'POS Systems');
-                console.log('POS System from API:', posSystem); // Debug log
+                //console.log('POS System from API:', posSystem); // Debug log
 
                 if (posSystem) {
                     // Process the data to convert icon strings to JSX elements
                     const processedData = processApiData(posSystem);
-                    console.log('Processed Data:', processedData); // Debug log
+                    //console.log('Processed Data:', processedData); // Debug log
                     setPosData(processedData);
                 } else {
                     setError('POS Systems service not found');
@@ -124,6 +124,6 @@ export default function POSSystems() {
         );
     }
 
-    console.log('Final postData:', postData); // Debug log
+    //console.log('Final postData:', postData); // Debug log
     return <ServiceTemplates serviceData={postData} />;
 }

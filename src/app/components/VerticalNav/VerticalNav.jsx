@@ -116,7 +116,7 @@ const DesktopNav = ({
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         // Handle search functionality
-        console.log("Searching for:", searchQuery);
+        //console.log("Searching for:", searchQuery);
         setSearchOpen(false);
         setSearchQuery('');
     };

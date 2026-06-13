@@ -1,13 +1,13 @@
 // src/app/api/user/upload-profile-image/route.js
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
+import { auth } from "@/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { dbConnect } from "@/lib/dbConnect";
 
 export async function POST(request) {
     try {
-        const session = await getServerSession();
+        const session = await auth();
 
         if (!session) {
             return NextResponse.json(

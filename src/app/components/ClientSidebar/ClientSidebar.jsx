@@ -1,7 +1,7 @@
 import React from 'react';
 
 const ClientSidebar = () => {
-    // console.log(open);
+    // //console.log(open);
     return (
         <div>
 

@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 
 // POST - Perform bulk actions on tasks
 export async function POST(request) {
-    console.log("POST /api/tasks/bulk called");
+    //console.log("POST /api/tasks/bulk called");
     try {
         // Get the action and task IDs from the request body
         const { taskIds, action } = await request.json();
