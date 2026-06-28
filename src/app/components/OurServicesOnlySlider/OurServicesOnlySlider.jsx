@@ -36,7 +36,7 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Our brand identity services help you establish a memorable presence in your market. We create cohesive visual systems that communicate your values and resonate with your target audience.",
-      image: "https://picsum.photos/seed/brandidentity/1200/800.jpg",
+      image: "uploads/74d2debc-62cf-4ce2-ab80-7e68bb3bcd85_8bff4523-181f-4f1e-b8df-7cbf3c1c6aaf.png",
       icon: "🎨",
       color: PRIMARY_COLOR,
     },
@@ -54,7 +54,7 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "We develop high-performance websites that not only look stunning but also deliver exceptional user experiences and drive business growth through conversion-focused design.",
-      image: "https://picsum.photos/seed/webdevelopment/1200/800.jpg",
+      image: "uploads/Tech-innovation-224.jpg",
       icon: "💻",
       color: SECONDARY_COLOR,
     },
@@ -72,7 +72,7 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Our ERP solutions integrate all aspects of your business operations into a unified system, improving efficiency, data accuracy, and decision-making capabilities.",
-      image: "https://picsum.photos/seed/erpsolutions/1200/800.jpg",
+      image: "uploads/digital-network-display-interaction-with-stylus-technology-interface-free-photo.jpg",
       icon: "⚙️",
       color: ACCENT_COLOR,
     },
@@ -90,7 +90,7 @@ const OurServicesOnlySlider = () => {
       ],
       detail:
         "Transform your retail operations with our cutting-edge POS systems that streamline transactions, manage inventory, and provide valuable insights into your business performance.",
-      image: "https://picsum.photos/seed/possystem/1200/800.jpg",
+      image: "uploads/EXPERT-UX-optimized.webp",
       icon: "🛒",
       color: PRIMARY_COLOR,
     },

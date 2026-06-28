@@ -185,7 +185,7 @@ function HeroSection() {
         {/* Main Heading - Logic Expression styled with gradient */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 font-mono tracking-tight leading-tight">
           <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-lg">
-            IF (Business == Ambition)
+            IF (Business = Ambition)
           </span>
           <br />
           <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-lg">
