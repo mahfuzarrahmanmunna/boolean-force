@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -58,37 +59,77 @@ function AnimatedLogicExpression() {
     cursor: "#F97316",
   };
 
+  // Flatten each line into a single string + a per-character color map,
+  // so we can reveal it character-by-character (typewriter effect)
+  // while still coloring each character correctly.
+  const lineData = lines.map((line) => {
+    let text = "";
+    const colors = [];
+    line.forEach((tok) => {
+      if (tok.type === "cursor") return;
+      const color = tokenColors[tok.type];
+      for (let i = 0; i < tok.text.length; i++) {
+        text += tok.text[i];
+        colors.push(color);
+      }
+    });
+    return { text, colors };
+  });
+
+  const lineLengths = lineData.map((l) => l.text.length);
+  const totalChars = lineLengths.reduce((sum, n) => sum + n, 0);
+
+  const [visibleChars, setVisibleChars] = useState(0);
+
+  useEffect(() => {
+    let timer;
+
+    if (visibleChars < totalChars) {
+      // typing speed per character
+      timer = setTimeout(() => {
+        setVisibleChars((prev) => prev + 1);
+      }, 28);
+    } else {
+      // pause at the end, then restart the typewriter loop
+      timer = setTimeout(() => {
+        setVisibleChars(0);
+      }, 1600);
+    }
+
+    return () => clearTimeout(timer);
+  }, [visibleChars, totalChars]);
+
+  let charsBeforeCurrentLine = 0;
+
   return (
-    <div
-      style={{
-        fontFamily: "'Courier New', Courier, monospace",
-        fontSize: "13px",
-        lineHeight: "1.9",
-      }}
-    >
-      {lines.map((line, li) => (
-        <div key={li} style={{ whiteSpace: "nowrap" }}>
-          {line.map((tok, ti) =>
-            tok.type === "cursor" ? (
-              <span
-                key={ti}
-                style={{
-                  display: "inline-block",
-                  width: "2px",
-                  height: "14px",
-                  background: "#F97316",
-                  verticalAlign: "middle",
-                  animation: "bfBlink 1s step-end infinite",
-                }}
-              />
-            ) : (
-              <span key={ti} style={{ color: tokenColors[tok.type] }}>
-                {tok.text}
+    <div className="bf-code-text font-mono text-[13px] leading-[1.9]">
+      {lineData.map((line, li) => {
+        const lineStart = charsBeforeCurrentLine;
+        const lineEnd = lineStart + lineLengths[li];
+        const visibleInThisLine = Math.max(
+          0,
+          Math.min(visibleChars - lineStart, lineLengths[li])
+        );
+        const showCursor = visibleChars >= lineStart && visibleChars <= lineEnd;
+
+        charsBeforeCurrentLine += lineLengths[li];
+
+        return (
+          <div key={li} className="whitespace-nowrap">
+            {line.text.slice(0, visibleInThisLine).split("").map((ch, ci) => (
+              <span key={ci} style={{ color: line.colors[ci] }}>
+                {ch}
               </span>
-            )
-          )}
-        </div>
-      ))}
+            ))}
+            {showCursor && (
+              <span
+                className="inline-block w-[2px] h-[14px] bg-[#F97316] align-middle bf-blink"
+                style={{ marginLeft: "1px" }}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -105,13 +146,17 @@ function ParticleCanvas({ paused }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
     let raf;
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
       canvas.height = canvas.offsetHeight;
     };
+
     resize();
     window.addEventListener("resize", resize);
 
@@ -126,6 +171,7 @@ function ParticleCanvas({ paused }) {
 
     const draw = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       particles.forEach((p) => {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
@@ -141,11 +187,14 @@ function ParticleCanvas({ paused }) {
           p.y = canvas.height + 4;
           p.x = Math.random() * canvas.width;
         }
+
         if (p.x < 0) p.x = canvas.width;
         if (p.x > canvas.width) p.x = 0;
       });
+
       raf = requestAnimationFrame(draw);
     };
+
     draw();
 
     return () => {
@@ -157,14 +206,7 @@ function ParticleCanvas({ paused }) {
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 1,
-      }}
+      className="absolute inset-0 w-full h-full pointer-events-none z-[1]"
     />
   );
 }
@@ -194,9 +236,14 @@ function BooleanForceBanner() {
           to   { opacity: 1; transform: translateY(0); }
         }
 
+        .bf-blink {
+          animation: bfBlink 1s step-end infinite;
+        }
+
         .bf-fadein {
           animation: bfFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) both;
         }
+
         .bf-fadein-d1 { animation-delay: 0.1s; }
         .bf-fadein-d2 { animation-delay: 0.25s; }
         .bf-fadein-d3 { animation-delay: 0.4s; }
@@ -205,110 +252,180 @@ function BooleanForceBanner() {
         .bf-cta-btn:hover .bf-arrow-box {
           background: #1E3A8A !important;
         }
+
         .bf-cta-btn:hover {
           opacity: 0.9;
         }
 
-        .bf-pause-btn {
-          position: absolute;
-          bottom: 16px;
-          left: 48px;
-          z-index: 3;
-          background: none;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          gap: 3px;
-          opacity: 0.4;
-          padding: 0;
-          transition: opacity 0.2s;
-        }
-        .bf-pause-btn:hover {
-          opacity: 0.75;
+        .bf-banner {
+          width: 100%;
+          max-width: 100%;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
-        @media (max-width: 680px) {
+        .bf-hero-row {
+          min-height: 100svh;
+          padding-top: 0 !important;
+        }
+
+        .bf-left-col,
+        .bf-right-col {
+          min-width: 0;
+        }
+
+        .bf-headline {
+          overflow-wrap: anywhere;
+        }
+
+        .bf-copy {
+          width: 100%;
+        }
+
+        .bf-logic-box {
+          -webkit-overflow-scrolling: touch;
+        }
+
+        @media (max-width: 1024px) {
+          .bf-hero-row {
+            padding-left: 36px !important;
+            padding-right: 36px !important;
+            gap: 36px !important;
+          }
+
+          .bf-right-col {
+            padding-left: 32px !important;
+          }
+
+          .bf-logic-strip {
+            padding-left: 36px !important;
+            padding-right: 36px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
           .bf-hero-row {
             flex-direction: column !important;
-            padding: 76px 24px 36px !important;
-            gap: 24px !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            min-height: auto !important;
+            padding: 0 28px 64px !important;
+            gap: 30px !important;
           }
+
+          .bf-left-col,
+          .bf-right-col {
+            width: 100% !important;
+            flex: none !important;
+          }
+
           .bf-right-col {
             padding-left: 0 !important;
             border-left: none !important;
             border-top: 1px solid rgba(255,255,255,0.12) !important;
-            padding-top: 28px !important;
+            padding-top: 26px !important;
+            align-self: stretch !important;
           }
+
+          .bf-headline {
+            font-size: clamp(30px, 9vw, 44px) !important;
+            line-height: 1.08 !important;
+            letter-spacing: -0.35px !important;
+          }
+
+          .bf-copy {
+            max-width: 100% !important;
+          }
+
+          .bf-pause-btn {
+            left: 28px !important;
+            bottom: 22px !important;
+          }
+
           .bf-logic-strip {
-            padding: 16px 24px 20px !important;
+            padding: 18px 28px 22px !important;
+          }
+
+          .bf-logic-box {
+            padding: 16px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .bf-hero-row {
+            padding: 0 18px 58px !important;
+            gap: 24px !important;
+          }
+
+          .bf-headline {
+            font-size: clamp(25px, 8.2vw, 34px) !important;
+            line-height: 1.12 !important;
+          }
+
+          .bf-right-col {
+            padding-top: 22px !important;
+          }
+
+          .bf-pause-btn {
+            left: 18px !important;
+            bottom: 18px !important;
+          }
+
+          .bf-logic-strip {
+            padding: 14px 18px 18px !important;
+          }
+
+          .bf-logic-box {
+            padding: 14px !important;
+          }
+
+          .bf-code-text {
+            font-size: 11px !important;
+            line-height: 1.8 !important;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .bf-hero-row {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+          }
+
+          .bf-headline {
+            font-size: 24px !important;
+          }
+
+          .bf-code-text {
+            font-size: 10px !important;
           }
         }
       `}</style>
 
-      <div
-        style={{
-          background: "#080808",
-          fontFamily: "'Inter', sans-serif",
-          borderRadius: "0px",
-          overflow: "hidden",
-          width: "100%",
-          boxSizing: "border-box",
-          margin: 0,
-          padding: 0,
-        }}
-      >
+      <div className="bf-banner bg-[#080808] font-['Inter',sans-serif] rounded-none overflow-hidden w-full box-border m-0 p-0">
         {/* ── Hero Row ── */}
-        <div
-          className="bf-hero-row"
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            minHeight: "100vh",
-            /*
-              padding-top 76px = exact navbar height → content starts flush below navbar
-              No more pt-20 in ClientLayout means this is the ONLY offset applied.
-            */
-            padding: "0px 48px 56px",
-            gap: "48px",
-            boxSizing: "border-box",
-            overflow: "hidden",
-          }}
-        >
+        <div className="bf-hero-row relative flex items-center min-h-screen px-12 pt-0 pb-14 gap-12 box-border overflow-hidden">
           {/* Navy glow */}
           <div
+            className="absolute inset-0 pointer-events-none z-0"
             style={{
-              position: "absolute",
-              inset: 0,
               background:
                 "radial-gradient(ellipse 55% 90% at 30% 50%, rgba(30,58,138,0.1) 0%, transparent 70%)",
-              pointerEvents: "none",
-              zIndex: 0,
             }}
           />
 
           <ParticleCanvas paused={paused} />
 
           {/* LEFT — headline */}
-          <div style={{ flex: "1.45", position: "relative", zIndex: 2 }}>
+          <div className="bf-left-col flex-[1.45] relative z-[2]">
             {isLoaded && (
               <h1
-                className="bf-fadein bf-fadein-d1"
-                style={{
-                  margin: 0,
-                  fontSize: "clamp(34px, 5.8vw, 52px)",
-                  fontWeight: 500,
-                  lineHeight: 1.0,
-                  letterSpacing: "-0.5px",
-                  color: "#ffffff",
-                  textTransform: "uppercase",
-                }}
+                className="bf-headline bf-fadein bf-fadein-d1 m-0 font-medium leading-none tracking-[-0.5px] text-white uppercase"
+                style={{ fontSize: "clamp(34px, 5.8vw, 52px)" }}
               >
                 IF (Business = Ambition)
                 <br />
                 THEN (Boolean
-                <span style={{ color: "#F97316", fontStyle: "normal", display: "inline" }}>
+                <span className="text-[#F97316] not-italic inline">
                   &gt;
                 </span>
                 Force
@@ -319,50 +436,19 @@ function BooleanForceBanner() {
           </div>
 
           {/* RIGHT — copy + CTA */}
-          <div
-            className="bf-right-col"
-            style={{
-              flex: "1",
-              paddingLeft: "40px",
-              borderLeft: "1px solid rgba(255,255,255,0.12)",
-              position: "relative",
-              zIndex: 2,
-              alignSelf: "center",
-            }}
-          >
+          <div className="bf-right-col flex-1 pl-10 border-l border-white/[0.12] relative z-[2] self-center">
             {isLoaded && (
-              <div
-                className="bf-fadein bf-fadein-d2"
-                style={{
-                  width: "36px",
-                  height: "3px",
-                  background: "#F97316",
-                  marginBottom: "14px",
-                  borderRadius: "2px",
-                }}
-              />
+              <div className="bf-fadein bf-fadein-d2 w-9 h-[3px] bg-[#F97316] mb-[14px] rounded-sm" />
             )}
 
             {isLoaded && (
-              <p
-                className="bf-fadein bf-fadein-d2"
-                style={{ margin: "0 0 12px", fontSize: "17px", fontWeight: 700, color: "#ffffff", lineHeight: 1.3 }}
-              >
+              <p className="bf-fadein bf-fadein-d2 m-0 mb-3 text-[17px] font-bold text-white leading-[1.3]">
                 Shaping tomorrow, today
               </p>
             )}
 
             {isLoaded && (
-              <p
-                className="bf-fadein bf-fadein-d3"
-                style={{
-                  margin: "0 0 28px",
-                  fontSize: "14px",
-                  color: "rgba(255,255,255,0.65)",
-                  lineHeight: 1.75,
-                  maxWidth: "360px",
-                }}
-              >
+              <p className="bf-copy bf-fadein bf-fadein-d3 m-0 mb-7 text-[14px] text-white/65 leading-[1.75] max-w-[360px]">
                 Engineering high-performance identities and software for
                 businesses that refuse to stay small. We turn your variables
                 into constants through precision code and emotive design.
@@ -370,89 +456,45 @@ function BooleanForceBanner() {
             )}
 
             {isLoaded && (
-              <button
-                className="bf-fadein bf-fadein-d4 bf-cta-btn"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#ffffff",
-                  fontFamily: "inherit",
-                }}
-              >
-                Execute Project
-                <span
-                  className="bf-arrow-box"
-                  style={{
-                    width: "28px",
-                    height: "28px",
-                    background: "#F97316",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: "4px",
-                    transition: "background 0.2s",
-                    fontSize: "13px",
-                    fontWeight: 900,
-                    color: "#fff",
-                  }}
-                >
-                  &#62;
-                </span>
-              </button>
-            )}
+  <Link
+    href="/portfolio"
+    className="bf-fadein bf-fadein-d4 bf-cta-btn inline-flex items-center gap-[10px] bg-transparent border-none p-0 cursor-pointer text-[14px] font-semibold text-white font-['Inter',sans-serif] no-underline"
+  >
+    Execute Project
+    <span className="bf-arrow-box w-7 h-7 bg-[#F97316] flex items-center justify-center rounded text-[13px] font-black text-white transition-colors duration-200">
+      &#62;
+    </span>
+  </Link>
+)}
           </div>
 
           {/* Pause / Play */}
           <button
-            className="bf-pause-btn"
+            className="bf-pause-btn absolute bottom-4 left-12 z-[3] bg-transparent border-none cursor-pointer flex items-center gap-[3px] opacity-40 p-0 transition-opacity duration-200 hover:opacity-75"
             onClick={() => setPaused((p) => !p)}
             aria-label={paused ? "Play particles" : "Pause particles"}
           >
             {paused ? (
               <span
+                className="inline-block w-0 h-0"
                 style={{
-                  width: 0,
-                  height: 0,
                   borderTop: "7px solid transparent",
                   borderBottom: "7px solid transparent",
                   borderLeft: "12px solid #fff",
-                  display: "inline-block",
                 }}
               />
             ) : (
               <>
-                <span style={{ width: "3px", height: "14px", background: "#fff", borderRadius: "1px", display: "block" }} />
-                <span style={{ width: "3px", height: "14px", background: "#fff", borderRadius: "1px", display: "block" }} />
+                <span className="block w-[3px] h-[14px] bg-white rounded-[1px]" />
+                <span className="block w-[3px] h-[14px] bg-white rounded-[1px]" />
               </>
             )}
           </button>
         </div>
 
         {/* ── Logic Expression Strip ── */}
-        <div
-          className="bf-logic-strip"
-          style={{
-            borderTop: "1px solid rgba(249,115,22,0.18)",
-            background: "rgba(255,255,255,0.03)",
-            padding: "20px 48px 24px",
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: "10px",
-              padding: "18px 24px",
-              overflowX: "auto",
-            }}
-          >
+        <div className="bf-logic-strip border-t border-[#F97316]/[0.18] bg-white/[0.03] px-12 pt-5 pb-6">
+          <div className="bf-logic-box bg-white/[0.04] border border-white/[0.08] rounded-[10px] p-[18px_24px] overflow-x-auto">
             <AnimatedLogicExpression />
           </div>
         </div>
