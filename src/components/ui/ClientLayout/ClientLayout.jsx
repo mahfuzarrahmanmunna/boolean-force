@@ -22,12 +22,26 @@ export default function ClientLayout({ children }) {
 
       {/* Vertical navbar for admin dashboard */}
       <div className="hidden md:flex">{!isDashboard && <VerticalNavbar4 />}</div>
-      {/* <SmoothScroll/> */}
 
-      {/* Note: Client and Worker dashboards should have their own vertical navbars in their respective layout files */}
+      {/*
+        ── FIX ───────────────────────────────────────────────────────────────
+        REMOVED "pt-20" from <main>.
+        
+        The old code had:  className={`flex-grow ${!isAnyDashboard ? "pt-20" : ""}`}
+        That added 80px padding-top on every non-dashboard page ON TOP OF the
+        76px padding-top already inside BooleanForceBanner's hero row,
+        resulting in ~156px of dead space below the navbar.
 
-      {/* Main content area */}
-      <main className={`flex-grow ${!isAnyDashboard ? "pt-20" : ""}`}>
+        Each page/section is now responsible for its own top spacing to clear
+        the fixed navbar (BooleanForceBanner already does this correctly with
+        padding: "76px 48px 56px" on its hero row).
+
+        If any OTHER page (e.g. /blog, /contact) looks too high after this
+        change, add pt-[76px] to that specific page's top wrapper instead of
+        putting it globally here.
+        ──────────────────────────────────────────────────────────────────────
+      */}
+      <main className="flex-grow">
         {children}
       </main>
 

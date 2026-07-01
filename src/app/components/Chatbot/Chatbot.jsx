@@ -480,7 +480,7 @@ const Chatbot = () => {
       {isOpen && (
         <div
           className={`
-                        fixed flex flex-col overflow-hidden shadow-2xl border transition-all duration-500 ease-[cubic-bezier_0.32_0.72_0_1]
+                        fixed flex flex-col shadow-2xl border transition-all duration-500 ease-[cubic-bezier_0.32_0.72_0_1]
                         ${isMinimized ? "h-14 opacity-0 scale-90 pointer-events-none" : "opacity-100 scale-100"}
                         ${isFullscreen ? "inset-0 rounded-none w-full h-full" : ""}
                         ${
@@ -498,7 +498,7 @@ const Chatbot = () => {
         >
           {/* --- HEADER --- */}
           <div
-            className={`flex-shrink-0 p-4 flex justify-between items-center border-b ${darkMode ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl" : "bg-white/90 border-slate-200 backdrop-blur-xl"}`}
+            className={`relative z-30 flex-shrink-0 p-4 flex justify-between items-center border-b ${darkMode ? "bg-slate-900/90 border-slate-800 backdrop-blur-xl" : "bg-white/90 border-slate-200 backdrop-blur-xl"}`}
           >
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -531,7 +531,7 @@ const Chatbot = () => {
                 {/* Mobile Options Sheet */}
                 {showOptionsMenu && (
                   <div
-                    className={`absolute right-0 z-20 top-12  w-48 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"} rounded-xl shadow-2xl border overflow-hidden`}
+                    className={`absolute right-0 z-[100] top-12 w-48 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"} rounded-xl shadow-2xl border overflow-hidden`}
                   >
                     {[
                       {
@@ -594,10 +594,10 @@ const Chatbot = () => {
                 </button>
                 {showOptionsMenu && (
                   <div
-                    className={`absolute right-0 top-full z-50 mt-2 w-80 ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"} rounded-xl shadow-2xl border overflow-hidden`}
+                    className={`absolute right-0 top-full z-[100] mt-2 w-64 max-w-[calc(100vw-2rem)] ${darkMode ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"} rounded-xl shadow-2xl border overflow-hidden`}
                   >
                     <div
-                      className={`p-4 border-b z-50 ${darkMode ? "border-slate-700" : "border-slate-100"}`}
+                      className={`p-4 border-b ${darkMode ? "border-slate-700" : "border-slate-100"}`}
                     >
                       <h3 className="font-semibold flex items-center">
                         <Settings className="w-4 h-4 mr-2" /> Options
@@ -659,7 +659,7 @@ const Chatbot = () => {
           {/* --- SEARCH & SETTINGS --- */}
           {showSearch && !isMinimized && (
             <div
-              className={`p-3 border-b ${darkMode ? "bg-slate-900/50 border-slate-800" : "bg-white/50 border-slate-200"}`}
+              className={`relative z-10 p-3 border-b ${darkMode ? "bg-slate-900/50 border-slate-800" : "bg-white/50 border-slate-200"}`}
             >
               <div className="relative">
                 <Search
@@ -677,7 +677,7 @@ const Chatbot = () => {
           )}
           {showSettings && !isMinimized && (
             <div
-              className={`p-4 border-b ${darkMode ? "bg-slate-900/50 border-slate-800" : "bg-white/50 border-slate-200"}`}
+              className={`relative z-10 p-4 border-b ${darkMode ? "bg-slate-900/50 border-slate-800" : "bg-white/50 border-slate-200"}`}
             >
               <div className="flex justify-between items-center mb-4">
                 <h4 className="font-semibold">Settings</h4>
@@ -735,7 +735,7 @@ const Chatbot = () => {
           {!isMinimized && (
             <>
               <div
-                className={`flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scroll-smooth pb-24 ${darkMode ? "bg-slate-950/50" : "bg-slate-50/50"}`}
+                className={`relative z-0 flex-1 overflow-y-auto p-4 md:p-6 space-y-6 scroll-smooth pb-24 ${darkMode ? "bg-slate-950/50" : "bg-slate-50/50"}`}
               >
                 {filteredMessages.length === 0 && searchQuery ? (
                   <div className="text-center py-10 text-sm opacity-50">
@@ -918,7 +918,7 @@ const Chatbot = () => {
               {showScrollToBottom && (
                 <button
                   onClick={scrollToBottom}
-                  className="absolute bottom-24 right-4 md:right-6 p-2.5 rounded-full shadow-lg border ${darkMode ? 'bg-slate-800 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'} animate-bounce z-20"
+                  className={`absolute bottom-24 right-4 md:right-6 p-2.5 rounded-full shadow-lg border animate-bounce z-20 ${darkMode ? "bg-slate-800 text-white border-slate-700" : "bg-white text-slate-900 border-slate-200"}`}
                 >
                   <ChevronDown className="w-4 h-4" />
                 </button>
@@ -926,7 +926,7 @@ const Chatbot = () => {
 
               {/* --- INPUT AREA (Sticky Bottom) --- */}
               <div
-                className={`p-3 md:p-4 border-t ${darkMode ? "bg-slate-900/95 border-slate-800 backdrop-blur-xl" : "bg-white/95 border-slate-200 backdrop-blur-xl"}`}
+                className={`relative z-10 p-3 md:p-4 border-t ${darkMode ? "bg-slate-900/95 border-slate-800 backdrop-blur-xl" : "bg-white/95 border-slate-200 backdrop-blur-xl"}`}
               >
                 <div className="flex items-end gap-2 md:gap-3">
                   <button
